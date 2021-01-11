@@ -2,7 +2,7 @@
 <html>
 <body>
 
-<h1>Page de test de \js-bitcoin-cryptolib</h1>
+<h1> test page for js-bitcoin-cryptolib</h1>
 
 
 <button onclick="testfunc()"> <h2> Click me </h2> </button>
@@ -21,7 +21,7 @@ function testBugInt() {
 
 // convert a BigIntbig to hexadecimal string.
 // ex: "79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798""
-function toHexa( bigIntNumber ){
+function hex( bigIntNumber ){
     console.assert( typeof  bigIntNumber == 'bigint' )
     if (bigIntNumber == 0) return '0';
 
@@ -47,16 +47,20 @@ function toHexa( bigIntNumber ){
 
 function testfunc() {
 
+
+
 var EC = new EllipticCurveSecp256k1();
 
- var p  = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F");
- var gx = BigInt("0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798");
- var gy = BigInt("0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8"); 
-var x2 = BigInt("0x4");
- c = new Corps( p );
- var rr = c.mult( gx, gy )
+x = EC.Corps.exp( BigInt(2),  BigInt(9));
+  document.getElementById("resultat").innerHTML = x;
+//  return;
 
-  document.getElementById("resultat").innerHTML = toHexa( EC.G.x ); //testBugInt();
+
+ var G2 = EC.pointDoubling(  EC.G )
+
+ var G2s =  hex( G2.x ) + "<BR>" +   hex( G2.y ) 
+
+  document.getElementById("resultat").innerHTML = G2s;
 }
 </script>
 
