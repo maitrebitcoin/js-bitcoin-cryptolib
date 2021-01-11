@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>Page de test de \js-bitcoin-cryptolib</h1>
+
+
+<button onclick="testfunc()"> <h2> Click me </h2> </button>
+
+<p id="resultat"></p>
+
+<script>
+
+function testBugInt() {
+    var p = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F");
+    return p.toString();
+}
+
+// constructor
+function Corps( N ) {
+    console.assert( typeof  N == 'BigInt' )
+    this.N = N
+
+    // Addition modulo N
+    this.add = function ( a,b )  {
+        r = (a + b ) % this.N;
+        return r;
+    }
+
+}
+
+
+function testfunc() {
+ var p = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F");
+var x1 = BigInt("0x2");
+var x2 = BigInt("0x4");
+ c = new Corps( p );
+ var rr = c.add( x1, x2 )
+
+  document.getElementById("resultat").innerHTML = rr.toString(); //testBugInt();
+}
+</script>
+
+</body>
+</html>
