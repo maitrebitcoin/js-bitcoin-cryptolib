@@ -16,28 +16,56 @@ function testBugInt() {
     return p.toString();
 }
 
-// constructor
-function Corps( N ) {
-    console.assert( typeof  N == 'BigInt' )
-    this.N = N
+// convert a BigIntbig to hexadecimal string.
+// ex: "79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798""
+function toHexa( bigIntNumber ){
+    console.assert( typeof  bigIntNumber == 'bigint' )
+    if (bigIntNumber == 0) return '0';
 
-    // Addition modulo N
-    this.add = function ( a,b )  {
-        r = (a + b ) % this.N;
-        return r;
+    var hResult = ''
+    while (bigIntNumber > 0)
+    {
+        // low 4 bits
+        var n = parseInt( bigIntNumber % BigInt(16) );
+        // kex caracters 0-1 or A-F
+        var hc 
+        if (n>=10)
+            hc = String.fromCharCode(55+n) // 65 = 'A', 55 = 65-10
+        else
+            hc = String.fromCharCode(48+n) // 48 = '0'
+        // next 4 bytes
+        hResult = hc + hResult
+        bigIntNumber = bigIntNumber /BigInt(16);
     }
-
+    console.assert( hResult != '');
+    return hResult
 }
 
+// constructor
+function Corps( N ) {
+    console.assert( typeof  N == 'bigint' )
+    this.N = N
+}
+// Addition modulo N
+Corps.prototype.add = function ( a,b )  {
+     r = (a + b ) % this.N;
+     return r;
+}
+// Multiplication modulo N
+Corps.prototype.mult = function ( a,b )  {
+     r = (a * b ) % this.N;
+     return r;
+}
 
 function testfunc() {
- var p = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F");
-var x1 = BigInt("0x2");
+ var p  = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F");
+ var gx = BigInt("0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798");
+ var gy = BigInt("0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8"); 
 var x2 = BigInt("0x4");
  c = new Corps( p );
- var rr = c.add( x1, x2 )
+ var rr = c.mult( gx, gy )
 
-  document.getElementById("resultat").innerHTML = rr.toString(); //testBugInt();
+  document.getElementById("resultat").innerHTML = toHexa(p); //testBugInt();
 }
 </script>
 
