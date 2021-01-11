@@ -9,6 +9,9 @@
 
 <p id="resultat"></p>
 
+<script src='Corps.js'></script>
+
+
 <script>
 
 function testBugInt() {
@@ -41,21 +44,6 @@ function toHexa( bigIntNumber ){
     return hResult
 }
 
-// constructor
-function Corps( N ) {
-    console.assert( typeof  N == 'bigint' )
-    this.N = N
-}
-// Addition modulo N
-Corps.prototype.add = function ( a,b )  {
-     r = (a + b ) % this.N;
-     return r;
-}
-// Multiplication modulo N
-Corps.prototype.mult = function ( a,b )  {
-     r = (a * b ) % this.N;
-     return r;
-}
 
 function testfunc() {
  var p  = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F");
