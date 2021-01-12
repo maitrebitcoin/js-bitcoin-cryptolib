@@ -6,9 +6,9 @@ function ECPoint(x,y) {
     this.y = y;
 }
 // check if 2 points are equals 
-ECPoint.prototype.equal = function ( pointA, pointB )  {
-    return    pointA.x == pointB.x 
-           && pointA.y == pointB.y;
+ECPoint.prototype.equal = function ( pointB )  {
+    return    this.x == pointB.x 
+           && this.y == pointB.y;
 }
 
 // constructor
@@ -85,7 +85,7 @@ EllipticCurveSecp256k1.prototype.pointAdding = function ( pointA, pointB )  {
     var ry           =  this.Corps.mult(lambda, this.Corps.sub(pointA.x, rx) )
         ry           =  this.Corps.sub( ry, pointA.y )
 
-    var pointRes = ECPoint( rx, ry);
+    var pointRes = new ECPoint( rx, ry);
     console.assert( this.pointOnCurve(pointRes) );    
     return pointRes;    
 }

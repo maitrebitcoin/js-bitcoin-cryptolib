@@ -51,16 +51,17 @@ function testfunc() {
 
 var EC = new EllipticCurveSecp256k1();
 
-x = EC.Corps.exp( BigInt(2),  BigInt(9));
-  document.getElementById("resultat").innerHTML = x;
+//x = EC.Corps.exp( BigInt(2),  BigInt(9));
+//  document.getElementById("resultat").innerHTML = x;
 //  return;
 
 
  var G2 = EC.pointDoubling(  EC.G )
+ var G3 = EC.pointAdding( G2,   EC.G )
 
- var G2s =  hex( G2.x ) + "<BR>" +   hex( G2.y ) 
+ var sDump =  hex( G3.x ) + "<BR>" +   hex( G3.y ) 
 
-  document.getElementById("resultat").innerHTML = G2s;
+  document.getElementById("resultat").innerHTML = sDump;
 }
 </script>
 
