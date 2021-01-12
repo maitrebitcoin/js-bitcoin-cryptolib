@@ -7,7 +7,9 @@
 
 <button onclick="testfunc()"> <h2> Click me </h2> </button>
 
-<p id="resultat"></p>
+<font face = "consolas" size ="4">
+    <p  id="resultat"></p>
+</font>
 
 <script src='GField.js'></script>
 <script src='EllipticCurveSecp256k1.js'></script>
@@ -64,9 +66,9 @@ var EC = new EllipticCurveSecp256k1();
 
  var G3_bis = EC.pointScalarMult( EC.G,   BigInt(3)  )
 
- var sDump =    hex( priv.value )
+ var sDump =   priv.toString()
               + "<hr>"
-              + hex( pub.x ) + "<BR>" +   hex( pub.y ) 
+              + pub.toString()
 
   document.getElementById("resultat").innerHTML = sDump;
 }

@@ -4,10 +4,28 @@
 // https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm
 
 class ECDSA { 
+    // represent a private key for ECDSA
     static PrivateKey = class { 
         constructor( bigint ) {
+            console.assert( typeof bigint == 'bigint' )
             this.value = bigint;
         }
+        toString() {
+            return hex(this.value)
+        }
+    };
+
+    // represent a public key for ECDSA
+    static PublicKey = class { 
+        constructor( point ) {
+            console.assert( typeof point == 'object' )           
+            console.assert(  point.x )       
+            console.assert(  point.y )               
+            this.value = point;          
+        }
+        toString() {
+            return hex(this.value.x) + '\n<br>' + hex(this.value.y)
+        }        
     };
 
 
@@ -43,7 +61,9 @@ newPrivateKey(  ) {
  * @returns {ECPoint}
  */
 publicKeyFormPrivateKey( privateKey ) {
-    return this.ec.pointScalarMult( this.ec.G, privateKey.value );
+    var point = this.ec.pointScalarMult( this.ec.G, privateKey.value );
+    var publicKey = new ECDSA.PublicKey(point);
+    return publicKey;
 }
 
 
