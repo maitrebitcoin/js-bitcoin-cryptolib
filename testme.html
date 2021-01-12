@@ -11,6 +11,7 @@
 
 <script src='GField.js'></script>
 <script src='EllipticCurveSecp256k1.js'></script>
+<script src='ECDSA.js'></script>
 
 <script>
 
@@ -47,7 +48,9 @@ function hex( bigIntNumber ){
 
 function testfunc() {
 
-
+var ecdsa = new ECDSA();
+var priv = ecdsa.newPrivateKey();
+var pub  = ecdsa.publicKeyFormPrivateKey(priv);
 
 var EC = new EllipticCurveSecp256k1();
 
@@ -61,9 +64,9 @@ var EC = new EllipticCurveSecp256k1();
 
  var G3_bis = EC.pointScalarMult( EC.G,   BigInt(3)  )
 
- var sDump =    hex( G3.x ) + "<BR>" +   hex( G3.y ) 
+ var sDump =    hex( priv.value )
               + "<hr>"
-              + hex( G3_bis.x ) + "<BR>" +   hex( G3_bis.y ) 
+              + hex( pub.x ) + "<BR>" +   hex( pub.y ) 
 
   document.getElementById("resultat").innerHTML = sDump;
 }
