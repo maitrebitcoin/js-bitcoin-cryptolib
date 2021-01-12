@@ -1,7 +1,10 @@
+// Galois Field on N/nN
 // operations mobulo N
 
+class GFied { 
+
 // constructor
-function Corps( N ) {
+constructor( N ) {
     console.assert( typeof  N == 'bigint' )
     this.N      = N
     // optim for inversion
@@ -9,11 +12,11 @@ function Corps( N ) {
 }
 
 // Addition modulo N
-Corps.prototype.add = function ( x,y )  {
+add( x,y )  {
      return ( x + y ) % this.N;
 }
 // Substraction modulo N
-Corps.prototype.sub = function ( x,y )  {
+sub( x,y )  {
      var res = ( x - y ) % this.N;
      // the result must be positive
      if (res<0) 
@@ -22,20 +25,20 @@ Corps.prototype.sub = function ( x,y )  {
 }
 
 // Multiplication modulo N
-Corps.prototype.mult = function ( x,y )  {
+mult ( x,y )  {
     return ( x * y ) % this.N;
 }
 // square modulo N : x^2
-Corps.prototype.square = function ( x )  {
+square( x )  {
     return ( x * x ) % this.N;
 }
 // cube modulo N : x^3
-Corps.prototype.cube = function ( x )  {
+cube ( x )  {
     return ( x * x * x ) % this.N;
 }
 
 // exponentiation  : x ^ y
-Corps.prototype.exp = function ( x,y )  {
+exp( x,y )  {
      var r = BigInt(1)
      var xPow2N = x
      while (y>0) {
@@ -53,10 +56,13 @@ Corps.prototype.exp = function ( x,y )  {
 
 // Inversion : 1/x.
 // return y such a x*y = 1
-Corps.prototype.inversion = function ( x )  {
+inversion ( x )  {
     console.assert( x != 0 );
-    // euler formula
+    // euler formula : 1/x = x ^ (n-2)
     var invx = this.exp( x, this.NMinus2 );
     console.assert( this.mult(x, invx) == BigInt(1) )
     return invx  ;
 }
+
+
+}//class GFied

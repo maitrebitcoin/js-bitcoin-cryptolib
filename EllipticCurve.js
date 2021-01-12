@@ -11,8 +11,10 @@ ECPoint.prototype.equal = function ( pointB )  {
            && this.y == pointB.y;
 }
 
+class EllipticCurveSecp256k1 {    
+
 // constructor
-function EllipticCurveSecp256k1(  ) {
+constructor() {
     // Secp256k1 parameters :
 
     // G	elliptic curve base point, a point on the curve that generates a subgroup of large prime order P
@@ -24,47 +26,47 @@ function EllipticCurveSecp256k1(  ) {
     this.b = BigInt("7")
     // Modulo for point addition
     this.N = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F");
-    this.Corps = new Corps( this.N );
+    this.field = new GFied( this.N );
   
     console.assert( this.pointOnCurve(this.G) );  
 }
 
 // check if a point is on the curve
 //  y^{2}=x^{3}+ax+b
-EllipticCurveSecp256k1.prototype.pointOnCurve = function ( pointA )  {
-    var Y2 =  this.Corps.square( pointA.y );
-    var X3 =  this.Corps.cube(   pointA.x );
+pointOnCurve( pointA )  {
+    var Y2 =  this.field.square( pointA.y );
+    var X3 =  this.field.cube(   pointA.x );
     // simplication furmula a == 0
-    return Y2 ==  this.Corps.add(X3,  this.b );
+    return Y2 ==  this.field.add(X3,  this.b );
 }
 
-// Point doubking
-EllipticCurveSecp256k1.prototype.pointDoubling = function ( pointA )  {
+// 1 Point doubking
+pointDoubling( pointA )  {
     // formulas can be found here: 
     // https://en.wikipedia.org/wiki/Elliptic_curve_point_multiplication
 
     // lambda = (3* A.x^2 + a ) / (2 * A.y )
-    var lambdaN      = this.Corps.square( pointA.x );
-        lambdaN      = this.Corps.mult( BigInt(3), lambdaN );
-    var lambdaD      = this.Corps.mult( BigInt(2), pointA.y );
-    var invlambdaD   = this.Corps.inversion( lambdaD );
-    var lambda       = this.Corps.mult(lambdaN, invlambdaD ); 
+    var lambdaN      = this.field.square( pointA.x );
+        lambdaN      = this.field.mult( BigInt(3), lambdaN );
+    var lambdaD      = this.field.mult( BigInt(2), pointA.y );
+    var invlambdaD   = this.field.inversion( lambdaD );
+    var lambda       = this.field.mult(lambdaN, invlambdaD ); 
 
     // rx = L^2 - A.x - A.x
-    var lambdaSquare =  this.Corps.square(lambda)
-    var rx           =  this.Corps.sub(lambdaSquare, pointA.x)
-        rx           =  this.Corps.sub(rx, pointA.x)
+    var lambdaSquare = this.field.square(lambda)
+    var rx           = this.field.sub(lambdaSquare, pointA.x)
+        rx           = this.field.sub(rx, pointA.x)
     // ry = L*( A.X - rx ) - A.Y
-    var ry           =  this.Corps.mult(lambda, this.Corps.sub(pointA.x, rx) )
-        ry           =  this.Corps.sub( ry, pointA.y )
+    var ry           = this.field.mult(lambda, this.field.sub(pointA.x, rx) )
+        ry           = this.field.sub( ry, pointA.y )
 
     var pointRes = new ECPoint( rx, ry);    
     console.assert( this.pointOnCurve(pointRes) );
     return pointRes;
 }
 
-// Point Addition
-EllipticCurveSecp256k1.prototype.pointAdding = function ( pointA, pointB )  {
+// 2 Point Addition
+pointAdding( pointA, pointB )  {
     // if A == B, spécial case
     if (pointA.equal(pointB))
         return this.pointDoubling(pointA, pointB);
@@ -73,19 +75,21 @@ EllipticCurveSecp256k1.prototype.pointAdding = function ( pointA, pointB )  {
     // https://en.wikipedia.org/wiki/Elliptic_curve_point_multiplication
 
     // lambda = (B.y - A.Y ) / (B.x -A.x )
-    var lambdaN      = this.Corps.sub(pointB.y, pointA.y );
-    var lambdaD      = this.Corps.sub(pointB.x, pointA.x );
-    var invlambdaD   = this.Corps.inversion( lambdaD );
-    var lambda       = this.Corps.mult(lambdaN, invlambdaD );
+    var lambdaN      = this.field.sub(pointB.y, pointA.y );
+    var lambdaD      = this.field.sub(pointB.x, pointA.x );
+    var invlambdaD   = this.field.inversion( lambdaD );
+    var lambda       = this.field.mult(lambdaN, invlambdaD );
     // rx = L^2 - A.x - B.x
-    var lambdaSquare =  this.Corps.square(lambda)
-    var rx           =  this.Corps.sub(lambdaSquare, pointA.x)
-        rx           =  this.Corps.sub(rx, pointB.x)
+    var lambdaSquare = this.field.square(lambda)
+    var rx           = this.field.sub(lambdaSquare, pointA.x)
+        rx           = this.field.sub(rx, pointB.x)
     // ry = L*( A.X - rx ) - A.Y
-    var ry           =  this.Corps.mult(lambda, this.Corps.sub(pointA.x, rx) )
-        ry           =  this.Corps.sub( ry, pointA.y )
+    var ry           = this.field.mult(lambda, this.field.sub(pointA.x, rx) )
+        ry           = this.field.sub( ry, pointA.y )
 
     var pointRes = new ECPoint( rx, ry);
     console.assert( this.pointOnCurve(pointRes) );    
     return pointRes;    
 }
+
+}// class EllipticCurveSecp256k1
