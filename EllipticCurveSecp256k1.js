@@ -1,33 +1,43 @@
 // elliptic curve
 
 // point of an elliptic curve
-function ECPoint(x,y) {
+class ECPoint {
+
+constructor(x,y) {
     this.x = x;
     this.y = y;
 }
 // check if 2 points are equals 
-ECPoint.prototype.equal = function ( pointB )  {
+equal( pointB )  {
     return    this.x == pointB.x 
            && this.y == pointB.y;
 }
+// check if a points is 0
+isZero( pointB )  {
+    return    this.x == 0
+           && this.y == 0
+}
+
+}//class ECPoint {
 
 class EllipticCurveSecp256k1 {    
 
-// constructor
+// creation of the curve with the Secp256k1 paramèters
+// see : https://en.bitcoin.it/wiki/Secp256k1
 constructor() {
-    // Secp256k1 parameters :
-
     // G	elliptic curve base point, a point on the curve that generates a subgroup of large prime order P
     //      y^{2}=x^{3}+ax+b
-    var gx = BigInt("0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798");
-    var gy = BigInt("0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8");     
-    this.G = new ECPoint( gx, gy );
+    //var gx = BigInt("0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798");
+    //var gy = BigInt("0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8");     
+    this.G = new ECPoint( 
+             BigInt("0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798"),
+             BigInt("0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8") );
     this.a = BigInt("0")    
     this.b = BigInt("7")
     // Modulo for point addition
     this.N = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F");
     this.field = new GFied( this.N );
-  
+    // G must be on the curve
     console.assert( this.pointOnCurve(this.G) );  
 }
 
@@ -40,10 +50,13 @@ pointOnCurve( pointA )  {
     return Y2 ==  this.field.add(X3,  this.b );
 }
 
-// 1 Point doubking
-pointDoubling( pointA )  {
+// 1 Point doubling
+pointDouble( pointA )  {
     // formulas can be found here: 
     // https://en.wikipedia.org/wiki/Elliptic_curve_point_multiplication
+
+    // 0 + 0 = 0
+    if (pointA.isZero()) return new ECPoint(0, ry);    
 
     // lambda = (3* A.x^2 + a ) / (2 * A.y )
     var lambdaN      = this.field.square( pointA.x );
@@ -66,10 +79,14 @@ pointDoubling( pointA )  {
 }
 
 // 2 Point Addition
-pointAdding( pointA, pointB )  {
+pointAdd( pointA, pointB )  {
+    // A + 0 = A
+    if (pointB.isZero()) return pointA;
+    // B + 0 = A
+    if (pointA.isZero()) return pointB;    
     // if A == B, spécial case
     if (pointA.equal(pointB))
-        return this.pointDoubling(pointA, pointB);
+        return this.pointDouble(pointA, pointB);
 
     // formulas can be found here: 
     // https://en.wikipedia.org/wiki/Elliptic_curve_point_multiplication
@@ -90,6 +107,30 @@ pointAdding( pointA, pointB )  {
     var pointRes = new ECPoint( rx, ry);
     console.assert( this.pointOnCurve(pointRes) );    
     return pointRes;    
+}
+
+// Multiplication of a point by a big integer
+// aka scalar multiplication
+pointScalarMult( point, number ) {
+    var pointResult = new ECPoint(0,0) 
+
+     // G point * 2^N => 2G, 4G, 8G, 16G, etc.. 
+     var G2powN = this.G
+     while (number>0) {
+      
+        // if bit 0 is set
+        var bit1 = number % BigInt(2)
+        if (bit1 == BigInt(1)) {
+            // r = r + G2powN
+            pointResult = this.pointAdd( pointResult, G2powN )
+        }
+        // next bit
+        number = number / BigInt(2)
+        G2powN = this.pointDouble( G2powN )
+     }
+
+     console.assert( this.pointOnCurve(pointResult) );   
+     return pointResult;
 }
 
 }// class EllipticCurveSecp256k1

@@ -39,7 +39,9 @@ cube ( x )  {
 
 // exponentiation  : x ^ y
 exp( x,y )  {
+     // opération result
      var r = BigInt(1)
+     // X^2N
      var xPow2N = x
      while (y>0) {
       

@@ -56,10 +56,14 @@ var EC = new EllipticCurveSecp256k1();
 //  return;
 
 
- var G2 = EC.pointDoubling(  EC.G )
- var G3 = EC.pointAdding( G2,   EC.G )
+ var G2 = EC.pointDouble(  EC.G )
+ var G3 = EC.pointAdd( G2,   EC.G )
 
- var sDump =  hex( G3.x ) + "<BR>" +   hex( G3.y ) 
+ var G3_bis = EC.pointScalarMult( EC.G,   BigInt(3)  )
+
+ var sDump =    hex( G3.x ) + "<BR>" +   hex( G3.y ) 
+              + "<hr>"
+              + hex( G3_bis.x ) + "<BR>" +   hex( G3_bis.y ) 
 
   document.getElementById("resultat").innerHTML = sDump;
 }
