@@ -1,0 +1,12 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Chrome against file:///S:/Source/github/js-bitcoin-cryptolib/testme.html",
+            "url": "file:///S:/Source/github/js-bitcoin-cryptolib/testme.html",
+            "webRoot": "${workspaceRoot}"
+        }
+    ]
+}

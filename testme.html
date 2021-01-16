@@ -2,24 +2,50 @@
 <html>
 <body>
 
-<h1> test page for js-bitcoin-cryptolib</h1>
+<h1> js-bitcoin-cryptolib test page </h1>
 
 
-<button onclick="testfunc()"> <h2> Click me </h2> </button>
+<button onclick="testfunc()"> <h2> Click to test </h2> </button>
 
-<font face = "consolas" size ="4">
-    <p  id="resultat"></p>
-</font>
+<p>
+<p>
+
+<button onclick="testSha()"> <h2> Test sha256 </h2> </button>
+
+
+    <p style="font-family:monospace" id="resultat">
+xxx
+    </p>
+
 
 <script src='GField.js'></script>
 <script src='EllipticCurveSecp256k1.js'></script>
 <script src='ECDSA.js'></script>
+<script src='sha256.js'></script>
 
 <script>
 
-function testBugInt() {
-    var p = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F");
-    return p.toString();
+function strToHex(str) {
+    var hex = '';
+    for(var i=0;i<str.length;i++) {
+        hex += ''+str.charCodeAt(i).toString(16);
+    }
+    return hex;
+}
+
+function testSha() {
+
+    //"" => 
+    // "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""
+
+     var hashSrc ="abc" 
+     var hash  = sha256( hashSrc )
+
+     var sDump =  strToHex(hash);
+     // "ba7816bf 8f01cfea 414140de 5dae2223 b00361a3 96177a9c b410ff61 f20015ad"
+    
+     sDump += "<P>" +  "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      document.getElementById("resultat").innerHTML = sDump;
 }
 
 // convert a BigIntbig to hexadecimal string.
@@ -47,7 +73,6 @@ function hex( bigIntNumber ){
     return hResult
 }
 
-
 function testfunc() {
 
 var ecdsa = new ECDSA();
@@ -55,6 +80,8 @@ var priv = ecdsa.newPrivateKey();
 var pub  = ecdsa.publicKeyFormPrivateKey(priv);
 
 var EC = new EllipticCurveSecp256k1();
+
+
 
 //x = EC.Corps.exp( BigInt(2),  BigInt(9));
 //  document.getElementById("resultat").innerHTML = x;
