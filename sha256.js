@@ -22,26 +22,67 @@ function sha256( buffer  ) {
                             0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
                             0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2 ) 
 
-    // right rotate x if bits bits
+    // right rotate x if bits bits, result forced in unisgned int 32 bits
     function rightrotate(x, bits) {
-        return (x>>>bits) | (x<<(32 - bits));
+        //return (x>>>bits) | (x<<(32 - bits));
+        var temp    = new Uint32Array( [ x  ] )
+        temp[0]  = ( temp[0]>>>bits ) | ( temp[0]<<(32 - bits))
+        return   temp[0];
     };
-    // 32 bits unsigne addition with overlow ignorded
-    function adduint32 (x, y) { 
-        var lsw = (x & 0xFFFF) + (y & 0xFFFF); 
-        var msw = (x >> 16)    + (y >> 16) + (lsw >> 16); 
-        return (msw << 16) | (lsw & 0xFFFF); 
-    }     
+    var dbg_test = rightrotate( 0xfa2a4622	, 6)
+    console.assert( dbg_test == 0x8be8a918	 ) // 2347280664	
 
+    // right shift x if bits bits
+    function rightshift(x, bits) {
+        return (x>>>bits) 
+    };    
+    // safe 32 bits addition with overflow ignored
+    function adduint32 (x, y) { 
+        var temp    = new Uint32Array( [ x, y ] )
+        temp[0] += temp[1];
+        return temp[0]
+       //var lsw = (x & 0xFFFF) + (y & 0xFFFF); 
+       //var msw = (x >> 16)    + (y >> 16) + (lsw >> 16); 
+       //return (msw << 16) | (lsw & 0xFFFF); 
+    }    
+    // force type x to unsigned
+    function force_type_uint32 (x) { 
+        var temp    = new Uint32Array( [ x ] )
+        return temp[0];
+    }
+    // convert a int into a big endian buffer of 8 bytes representing a 64 bits int.
+    function intTobigEndian64Buffer(x) {
+        var buf = "\x00".repeat(4)
+        buf +=   String.fromCharCode((x>>24) & 0xFF)
+        buf +=   String.fromCharCode((x>>16) & 0xFF)
+        buf +=   String.fromCharCode((x>> 8) & 0xFF)     
+        buf +=   String.fromCharCode( x      & 0xFF)                   
+     
+        return buf
+    }
+    // convert a buffer into int assuming the buffer in ins big endian
+    function bigEndianBufferToInt( buf, pos ) {
+        var nRes = (buf.charCodeAt(pos)  <<24)
+                 | (buf.charCodeAt(pos+1)<<16)
+                 | (buf.charCodeAt(pos+2)<<8)
+                 | (buf.charCodeAt(pos+3))
+        return nRes  
+    }
+
+
+    // message length in bits
+    var L  = buffer.length * 8
     // Pre-processing (Padding):
     // begin with the original message of length L bits
     // append a single '1' bit
-    // append K '0' bits, where K is the minimum number >= 0 such that L + 1 + K + 64 is a multiple of 512
     buffer += '\x80' // Append 1 bit plus zero padding
+    // append K '0' bits, where K is the minimum number >= 0 such that L + 1 + K + 64 is a multiple of 512
+    var n0Padding = 64 - (buffer.length + 8) % 64;
+    if (n0Padding == 64) n0Padding = 0;
+    buffer += '\x00'.repeat(n0Padding)
     //append L as a 64-bit big-endian integer, making the total post-processed length a multiple of 64 bytest (512 bits)
-    while(  buffer.length % 64 != 0 ) {
-        buffer += '\x00'
-    }
+    buffer +=  intTobigEndian64Buffer(L)
+    console.assert( buffer.length % 64 == 0)
   
     // Process the message in successive 64 bytes chunks:   
     var nbBlock = buffer.length / 64;
@@ -53,20 +94,18 @@ function sha256( buffer  ) {
         // (The initial values in w[0..63] don't matter, so many implementations zero them here)
         var buf64 = new ArrayBuffer( 64 );
         var w = new Uint32Array(buf64);
-        // same view but with byptes
-        var b = new Uint8Array(buf64);
 
         // copy chunk into first 16 words w[0..15] of the message schedule array
         for (var i = 0; i < 16; i++) {
-            b = blockI.charCodeAt(i)
+            w[i] = bigEndianBufferToInt(blockI, i*4)
         }
         // Extend the first 16 words into the remaining 48 words w[16..63] of the message schedule array:
         for (var i = 16; i< 64; i++) {
             //var s0 = (w[i-15] rightrotate  7) xor (w[i-15] rightrotate 18) xor (w[i-15] rightshift  3)
-            var s0 = rightrotate(w[i-15], 7) ^ rightrotate(w[i-15],18) ^ rightrotate(w[i-15], 3)
-            var s1 = rightrotate(w[i- 2],17) ^ rightrotate(w[i- 2],19) ^ rightrotate(w[i- 2],10)
+            var s0 = rightrotate(w[i-15], 7) ^ rightrotate(w[i-15],18) ^ rightshift(w[i-15], 3)
+            var s1 = rightrotate(w[i- 2],17) ^ rightrotate(w[i- 2],19) ^ rightshift(w[i- 2],10)
             // set rsult
-            w[i] = w[i-16] + s0 + w[i-7] + s1
+            w[i] = adduint32(w[i-16], adduint32( s0 , adduint32( w[i-7] , adduint32( s1)))) //  w[i-16] + s0 + w[i-7] + s1
         }
     
         //Initialize working variables to current hash value:
@@ -82,12 +121,16 @@ function sha256( buffer  ) {
          //   Compression function main loop:
         for (var i = 0; i < 64; i++) {
             var S1     = rightrotate(e, 6) ^ rightrotate(e,11) ^ rightrotate(e,25)
+            S1= force_type_uint32(S1)
             var ch     = (e & f) ^ ((~e) & g)
-            var temp1  = h + S1 + ch + K[i] + w[i]
+            var temp1  = adduint32(h, adduint32( S1, adduint32(ch , adduint32( K[i] , w[i] )))) // = h + S1 + ch + k[i] + w[i]
             var S0     = rightrotate(a, 2) ^ rightrotate(a,13) ^ rightrotate(a,22)
             var maj    = (a & b) ^ (a & c) ^ (b & c)
-            var temp2  = S0 + maj
+            var temp2  = adduint32(S0 , maj)
     
+            if (i>=15)
+                console.log("I : " + i+ " - e = " + e + " S1=" + S1 )
+
             h = g
             g = f
             f = e
@@ -99,14 +142,14 @@ function sha256( buffer  ) {
         }// main loop
 
         //Add the compressed chunk to the current hash value:
-        H[0] = H[0] + a
-        H[1] = H[1] + b
-        H[2] = H[2] + c
-        H[3] = H[3] + d
-        H[4] = H[4] + e
-        H[5] = H[5] + f
-        H[6] = H[6] + g
-        H[7] = H[7] + h
+        H[0] = adduint32(H[0] , a)
+        H[1] = adduint32(H[1] , b)
+        H[2] = adduint32(H[2] , c)
+        H[3] = adduint32(H[3] , d)
+        H[4] = adduint32(H[4] , e)  
+        H[5] = adduint32(H[5] , f)
+        H[6] = adduint32(H[6] , g)
+        H[7] = adduint32(H[7] , h)
 
     } //    for (var ibloc=i;ibloc<nbBlock;ibloc++) 
 
@@ -116,6 +159,7 @@ function sha256( buffer  ) {
     for (var i = 0; i < 32; i++) { 
         digest += String.fromCharCode(b2[i]);
     }
+    console.assert( digest.length == 32)
     return digest;
 
 }//function sha256( buffer  )

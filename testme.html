@@ -15,6 +15,7 @@
 
     <p style="font-family:monospace" id="resultat">
 xxx
+
     </p>
 
 
@@ -27,9 +28,14 @@ xxx
 
 function strToHex(str) {
     var hex = '';
-    for(var i=0;i<str.length;i++) {
-        hex += ''+str.charCodeAt(i).toString(16);
+    for(var i=0; i<str.length; i++) {
+        var c =  str.charCodeAt(i)
+        if (c<16)
+            hex += "0"+c.toString(16);
+        else
+            hex += c.toString(16);
     }
+    console.assert( hex.length == str.length*2 )
     return hex;
 }
 
@@ -44,7 +50,7 @@ function testSha() {
      var sDump =  strToHex(hash);
      // "ba7816bf 8f01cfea 414140de 5dae2223 b00361a3 96177a9c b410ff61 f20015ad"
     
-     sDump += "<P>" +  "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+     sDump += "<P>sould be :<P>" +  "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
       document.getElementById("resultat").innerHTML = sDump;
 }
 
