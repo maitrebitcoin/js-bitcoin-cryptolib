@@ -5,10 +5,10 @@
 /**
  * hash a buffer using the sha2 algoritmh
  * 
- * @param {binary string} buffer
+ * @param   {binary string} buffer
  * @returns {binary string}
  */
-function sha256( buffer  ) {
+function sha256( buffer ) {
     // sha2 constants :
     //  (first 32 bits of the fractional parts of the square roots of the first 8 primes 2..19):
     var H    = new Uint32Array( [ 0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19 ] );     
@@ -24,14 +24,10 @@ function sha256( buffer  ) {
 
     // right rotate x if bits bits, result forced in unisgned int 32 bits
     function rightrotate(x, bits) {
-        //return (x>>>bits) | (x<<(32 - bits));
         var temp    = new Uint32Array( [ x  ] )
         temp[0]  = ( temp[0]>>>bits ) | ( temp[0]<<(32 - bits))
         return   temp[0];
     };
-    var dbg_test = rightrotate( 0xfa2a4622	, 6)
-    console.assert( dbg_test == 0x8be8a918	 ) // 2347280664	
-
     // right shift x if bits bits
     function rightshift(x, bits) {
         return (x>>>bits) 
@@ -41,15 +37,7 @@ function sha256( buffer  ) {
         var temp    = new Uint32Array( [ x, y ] )
         temp[0] += temp[1];
         return temp[0]
-       //var lsw = (x & 0xFFFF) + (y & 0xFFFF); 
-       //var msw = (x >> 16)    + (y >> 16) + (lsw >> 16); 
-       //return (msw << 16) | (lsw & 0xFFFF); 
     }    
-    // force type x to unsigned
-    function force_type_uint32 (x) { 
-        var temp    = new Uint32Array( [ x ] )
-        return temp[0];
-    }
     // convert a int into a big endian buffer of 4 bytes representing a 32 bits int.
     function intTobigEndia32Buffer(x) {
         var buf =    String.fromCharCode((x>>24) & 0xFF)
@@ -62,8 +50,7 @@ function sha256( buffer  ) {
     // convert a int into a big endian buffer of 8 bytes representing a 64 bits int.
     function intTobigEndian64Buffer(x) {
         return "\x00".repeat(4) + intTobigEndia32Buffer(x)
-     }   
-
+    }   
     // convert a buffer into int assuming the buffer in ins big endian
     function bigEndianBufferToInt( buf, pos ) {
         var nRes = (buf.charCodeAt(pos)  <<24)
@@ -72,7 +59,6 @@ function sha256( buffer  ) {
                  | (buf.charCodeAt(pos+3))
         return nRes  
     }
-
 
     // message length in bits
     var L  = buffer.length * 8
@@ -125,7 +111,6 @@ function sha256( buffer  ) {
          //   Compression function main loop:
         for (var i = 0; i < 64; i++) {
             var S1     = rightrotate(e, 6) ^ rightrotate(e,11) ^ rightrotate(e,25)
-            S1= force_type_uint32(S1)
             var ch     = (e & f) ^ ((~e) & g)
             var temp1  = adduint32(h, adduint32( S1, adduint32(ch , adduint32( K[i] , w[i] )))) // = h + S1 + ch + k[i] + w[i]
             var S0     = rightrotate(a, 2) ^ rightrotate(a,13) ^ rightrotate(a,22)
