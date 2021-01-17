@@ -50,16 +50,20 @@ function sha256( buffer  ) {
         var temp    = new Uint32Array( [ x ] )
         return temp[0];
     }
-    // convert a int into a big endian buffer of 8 bytes representing a 64 bits int.
-    function intTobigEndian64Buffer(x) {
-        var buf = "\x00".repeat(4)
-        buf +=   String.fromCharCode((x>>24) & 0xFF)
-        buf +=   String.fromCharCode((x>>16) & 0xFF)
-        buf +=   String.fromCharCode((x>> 8) & 0xFF)     
-        buf +=   String.fromCharCode( x      & 0xFF)                   
+    // convert a int into a big endian buffer of 4 bytes representing a 32 bits int.
+    function intTobigEndia32Buffer(x) {
+        var buf =    String.fromCharCode((x>>24) & 0xFF)
+            buf +=   String.fromCharCode((x>>16) & 0xFF)
+            buf +=   String.fromCharCode((x>> 8) & 0xFF)     
+            buf +=   String.fromCharCode( x      & 0xFF)                   
      
         return buf
-    }
+    }    
+    // convert a int into a big endian buffer of 8 bytes representing a 64 bits int.
+    function intTobigEndian64Buffer(x) {
+        return "\x00".repeat(4) + intTobigEndia32Buffer(x)
+     }   
+
     // convert a buffer into int assuming the buffer in ins big endian
     function bigEndianBufferToInt( buf, pos ) {
         var nRes = (buf.charCodeAt(pos)  <<24)
@@ -92,8 +96,8 @@ function sha256( buffer  ) {
 
         // create a 64-entry message schedule array w[0..63] of 32-bit words
         // (The initial values in w[0..63] don't matter, so many implementations zero them here)
-        var buf64 = new ArrayBuffer( 64 );
-        var w = new Uint32Array(buf64);
+        //var buf64 = new ArrayBuffer( 64 );
+        var w = new Uint32Array(64);
 
         // copy chunk into first 16 words w[0..15] of the message schedule array
         for (var i = 0; i < 16; i++) {
@@ -154,10 +158,10 @@ function sha256( buffer  ) {
     } //    for (var ibloc=i;ibloc<nbBlock;ibloc++) 
 
     //result converted to string buffer
-    var b2 = new Uint8Array(H.buffer,0,32);
+    //var b2 = new Uint8Array(H.buffer,0,32);
     var digest = "";
-    for (var i = 0; i < 32; i++) { 
-        digest += String.fromCharCode(b2[i]);
+    for (var i = 0; i < 8; i++) { 
+        digest += intTobigEndia32Buffer( H[i] )
     }
     console.assert( digest.length == 32)
     return digest;
