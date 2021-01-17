@@ -13,7 +13,7 @@
 <button onclick="testSha()"> <h2> Test sha256 </h2> </button>
 
 
-    <p style="font-family:monospace" id="resultat">
+    <p style="font-family:monospace;font-size:160%" id="resultat">
 xxx
 
     </p>
@@ -40,18 +40,45 @@ function strToHex(str) {
 }
 
 function testSha() {
+    // x       : "" 
+    // expeded : "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    function _test_( s, expected  ) 
+    {
+        // calculate hash
+        var hash  = sha256( s )
+        // is it the expected result ?
+        var hashAsHexString =  strToHex(hash);
+        if (hashAsHexString != expected) {
+            var sErr = "sha('" + s+ "') => <br>\n" +  hashAsHexString+' != <br>\n'+expected
+            console.log(sErr)
+            document.getElementById("resultat").innerHTML = "<p>"  +sErr + "<p><font color='red'>FAILED</font>";
+            console.assert(false)
+            throw -1;
+        }
 
-    //"" => 
-    // "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""
+    }
 
-     var hashSrc ="abc" 
-     var hash  = sha256( hashSrc )
+    // test some values 
+    _test_( "",  
+            "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
+    _test_( "abc", 
+            "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad" )
+    _test_( "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq", 
+            "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1" )
+    _test_( "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu", 
+            "cf5b16a778af8380036ce59e7b0492370b249b11e8f07a51afac45037afee9d1" )
 
-     var sDump =  strToHex(hash);
-     // "ba7816bf 8f01cfea 414140de 5dae2223 b00361a3 96177a9c b410ff61 f20015ad"
-    
-     sDump += "<P>sould be :<P>" +  "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
-      document.getElementById("resultat").innerHTML = sDump;
+    _test_( "the times is 10pm", 
+            "ca0c2c84bbbdd964fd76b106be83620eaeaabee5958d597ccecab41afd249605" )          
+    _test_( "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 
+            "9537c5fdf120482f7d58d25e9ed583f52c02b4e304ea814db1633ad565aed7e9" )          
+
+
+    _test_( "a".repeat(1000000),  // 1 million a
+            "cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0" )
+
+    // OK
+    document.getElementById("resultat").innerHTML = "<font color='green'>PASSED</font>";
 }
 
 // convert a BigIntbig to hexadecimal string.
