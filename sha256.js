@@ -22,7 +22,7 @@ function sha256( buffer ) {
                             0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
                             0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2 ) 
 
-    // right rotate x if bits bits, result forced in unisgned int 32 bits
+    // right rotate x if bits bits, result forced in unsigned int 32 bits
     function rightrotate(x, bits) {
         var temp    = new Uint32Array( [ x  ] )
         temp[0]  = ( temp[0]>>>bits ) | ( temp[0]<<(32 - bits))
@@ -91,10 +91,9 @@ function sha256( buffer ) {
         }
         // Extend the first 16 words into the remaining 48 words w[16..63] of the message schedule array:
         for (var i = 16; i< 64; i++) {
-            //var s0 = (w[i-15] rightrotate  7) xor (w[i-15] rightrotate 18) xor (w[i-15] rightshift  3)
             var s0 = rightrotate(w[i-15], 7) ^ rightrotate(w[i-15],18) ^ rightshift(w[i-15], 3)
             var s1 = rightrotate(w[i- 2],17) ^ rightrotate(w[i- 2],19) ^ rightshift(w[i- 2],10)
-            // set rsult
+            // set result
             w[i] = adduint32(w[i-16], adduint32( s0 , adduint32( w[i-7] , adduint32( s1)))) //  w[i-16] + s0 + w[i-7] + s1
         }
     
@@ -116,10 +115,7 @@ function sha256( buffer ) {
             var S0     = rightrotate(a, 2) ^ rightrotate(a,13) ^ rightrotate(a,22)
             var maj    = (a & b) ^ (a & c) ^ (b & c)
             var temp2  = adduint32(S0 , maj)
-    
-            if (i>=15)
-                console.log("I : " + i+ " - e = " + e + " S1=" + S1 )
-
+            
             h = g
             g = f
             f = e
