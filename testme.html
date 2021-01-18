@@ -3,26 +3,26 @@
 <body>
 
 <h1> js-bitcoin-cryptolib test page </h1>
+<p><hr><p>
+
+<button onclick="testSha()">  <h2>  Test sha256 </h2> </button>
+<button onclick="testfunc()"> <h2> Test create key pair </h2> </button>
+<p><p>
 
 
-<button onclick="testfunc()"> <h2> Click to test </h2> </button>
-
-<p>
-<p>
-
-<button onclick="testSha()"> <h2> Test sha256 </h2> </button>
 
 
-    <p style="font-family:monospace;font-size:160%" id="resultat">
+<p style="font-family:monospace;font-size:160%" id="resultat">
 xxx
 
-    </p>
+</p>
 
 
 <script src='GField.js'></script>
 <script src='EllipticCurveSecp256k1.js'></script>
 <script src='ECDSA.js'></script>
 <script src='sha256.js'></script>
+<script src='autotest.js'></script>
 
 <script>
 
@@ -40,45 +40,28 @@ function strToHex(str) {
 }
 
 function testSha() {
-    // x       : "" 
-    // expeded : "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    function _test_( s, expected  ) 
+    
+    // called if a test fails
+    function onTestFail( s, hashAsHexString, expected)
     {
-        // calculate hash
-        var hash  = sha256( s )
-        // is it the expected result ?
-        var hashAsHexString =  strToHex(hash);
-        if (hashAsHexString != expected) {
-            var sErr = "sha('" + s+ "') => <br>\n" +  hashAsHexString+' != <br>\n'+expected
-            console.log(sErr)
-            document.getElementById("resultat").innerHTML = "<p>"  +sErr + "<p><font color='red'>FAILED</font>";
-            console.assert(false)
-            throw -1;
-        }
+        var sErr = "sha('" + s+ "') => <br>\n" +  hashAsHexString+' != <br>\n'+expected
+        console.log(sErr)
 
+        document.getElementById("resultat").innerHTML = "<p>"  +sErr + "<p><font color='red'>FAILED</font>";
+        console.assert(false)
+        // stop the test
+        throw -1;
     }
-
-    // test some values 
-    _test_( "",  
-            "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
-    _test_( "abc", 
-            "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad" )
-    _test_( "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq", 
-            "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1" )
-    _test_( "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu", 
-            "cf5b16a778af8380036ce59e7b0492370b249b11e8f07a51afac45037afee9d1" )
-
-    _test_( "the times is 10pm", 
-            "ca0c2c84bbbdd964fd76b106be83620eaeaabee5958d597ccecab41afd249605" )          
-    _test_( "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 
-            "9537c5fdf120482f7d58d25e9ed583f52c02b4e304ea814db1633ad565aed7e9" )          
-
-
-    _test_( "a".repeat(1000000),  // 1 million a
-            "cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0" )
-
-    // OK
-    document.getElementById("resultat").innerHTML = "<font color='green'>PASSED</font>";
+    // Start...
+    document.getElementById("resultat").innerHTML = "<font color='gray'>Running...</font>";
+    // Run the test async :
+    setTimeout( () => {
+        // Run test
+        autotest_sha256( onTestFail  )
+        // test PASSED OK
+        document.getElementById("resultat").innerHTML = "<font color='green'>PASSED OK</font>";
+        },0
+    )
 }
 
 // convert a BigIntbig to hexadecimal string.
@@ -108,23 +91,9 @@ function hex( bigIntNumber ){
 
 function testfunc() {
 
-var ecdsa = new ECDSA();
-var priv = ecdsa.newPrivateKey();
-var pub  = ecdsa.publicKeyFormPrivateKey(priv);
-
-var EC = new EllipticCurveSecp256k1();
-
-
-
-//x = EC.Corps.exp( BigInt(2),  BigInt(9));
-//  document.getElementById("resultat").innerHTML = x;
-//  return;
-
-
- var G2 = EC.pointDouble(  EC.G )
- var G3 = EC.pointAdd( G2,   EC.G )
-
- var G3_bis = EC.pointScalarMult( EC.G,   BigInt(3)  )
+ var ecdsa = new ECDSA();
+ var priv = ecdsa.newPrivateKey();
+ var pub  = ecdsa.publicKeyFormPrivateKey(priv);
 
  var sDump =   priv.toString()
               + "<hr>"
