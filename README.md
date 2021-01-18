@@ -1,7 +1,6 @@
 # js-bitcoin-cryptolib
-bitcoin crypto lib in javascript with *zero* dependencies
 
-ECDSA secp256k1 in javascript ( Bitcoin digital signature scheme ) en Javascript
+ECDSA secp256k1 ( Bitcoin digital signature scheme ) in javascript 
 
 Does not refer to any external library for security reasons :
 
