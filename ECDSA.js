@@ -47,11 +47,14 @@ class ECDSA {
             console.assert( typeof point == 'object' )           
             console.assert(  point.x )       
             console.assert(  point.y )               
-            this.value = point;          
+            this.point = point;          
         }
         toString() {
-            return hex(this.value.x) + '\n<br>' + hex(this.value.y)
+            return hex(this.point.x) + '\n<br>' + hex(this.point.y)
         }        
+        isZero() {
+            return this.point.isZero();
+        }
     };
     // represent a signature for ECDSA
     static Signature = class { 
@@ -65,6 +68,14 @@ class ECDSA {
             return hex(this.r)+':'+ hex(this.s)
         }
     };
+    // represente a resul to ECDSA verifySignature    
+   static SignatureCheck = class { 
+       constructor( ok, message ) {
+            this.ok      = ok
+            this.message = message
+       }
+     
+   }
 
 
 // constructor
@@ -139,9 +150,49 @@ signMessage( message, privateKey ) {
  */
 verifySignature( message, signature, publicKey ) {
     console.assert( typeof message == 'string' ) 
+    // sanity checks
+    // check public key
+    if (publicKey.isZero()) 
+        return new ECDSA.SignatureCheck(false, 'invalid public key : 0');
+    if (!this.ec.pointOnCurve(publicKey.point))  
+        return new ECDSA.SignatureCheck(false, 'invalid public key : not on curve');
+    var point0  = this.ec.pointScalarMult( this.ec.G,  this.oField.N );
+    if (!point0.isZero)
+        return new ECDSA.SignatureCheck(false, 'invalid public key : P*K is not 0');
+    //  check signature
+    if (signature.r <= 0) 
+        return new ECDSA.SignatureCheck(false, 'invalid signature : r is 0');
+    if (signature.r >= this.oField.N) 
+        return new ECDSA.SignatureCheck(false, 'invalid signature : r is > N');
+    if (signature.s <= 0) 
+        return new ECDSA.SignatureCheck(false, 'invalid signature : s is 0');
+    if (signature.s >= this.oField.N) 
+        return new ECDSA.SignatureCheck(false, 'invalid signature : s is > N');
+
+    // calc message hash
+    var hashbuffer    = sha256(sha256( message ));
+    // convert to 256 Bits integer
+    var h      = bigEndianBufferTo256BitInt(hashbuffer)
+
+    // u1 = h * 1/signature.s 
+    var invS = this.oField.inversion(signature.s);    
+    var u1   = this.oField.mult( h, invS );
+    var u2   = this.oField.mult( signature.r, invS );
+    // calculate u1*G + u2*publicKey
+    var pt1      =  this.ec.pointScalarMult( this.ec.G,       u1 )
+    var pt2      =  this.ec.pointScalarMult( publicKey.point, u2 )
+    var pt1Plus2 =  this.ec.pointAdd(pt1, pt2);
+    
+    // signature is invalid only if final point is 0
+    if (pt1Plus2.isZero())
+        return new ECDSA.SignatureCheck(false, 'invalid signature : point is 0');
+
+    // The signature is valid if r=x mod N, invalid otherwise.
+    if ( signature.r != pt1Plus2.x )
+        return new ECDSA.SignatureCheck(false, 'signature and key does not match');
 
     // OK
-    return true;
+    return new ECDSA.SignatureCheck(true,"OK");
 }
 
 };//class ECDSA

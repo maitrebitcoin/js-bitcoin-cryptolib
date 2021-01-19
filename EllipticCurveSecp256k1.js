@@ -94,6 +94,8 @@ pointAdd( pointA, pointB )  {
     // lambda = (B.y - A.Y ) / (B.x -A.x )
     var lambdaN      = this.field.sub(pointB.y, pointA.y );
     var lambdaD      = this.field.sub(pointB.x, pointA.x );
+    if (lambdaD == 0) // if A = -B
+        return  new ECPoint( BigInt(0), BigInt(0) );
     var invlambdaD   = this.field.inversion( lambdaD );
     var lambda       = this.field.mult(lambdaN, invlambdaD );
     // rx = L^2 - A.x - B.x
@@ -129,7 +131,7 @@ pointScalarMult( point, number ) {
         G2powN = this.pointDouble( G2powN )
      }
 
-     console.assert( this.pointOnCurve(pointResult) );   
+     console.assert( this.pointOnCurve(pointResult) || pointResult.isZero() );   
      return pointResult;
 }
 

@@ -57,20 +57,26 @@ function testSha() {
 
 function testfunc() {
 
- var ecdsa = new ECDSA();
- // create key pair
- var priv = ecdsa.newPrivateKey();
- var pub  = ecdsa.publicKeyFormPrivateKey(priv);
+    var ecdsa = new ECDSA();
+    // create key pair
+    var priv = ecdsa.newPrivateKey();
+    var pub  = ecdsa.publicKeyFormPrivateKey(priv);
 
- var sDump =   priv.toString()
-              + "<hr>"
-              + pub.toString() 
- // sign  a message
- var sMessage = "abdefgh"                
- var signature = ecdsa.signMessage( sMessage, priv )
+    var sDump =   priv.toString()
+                + "<hr>"
+                + pub.toString() 
+    // sign  a message
+    var sMessage = "abdefgh"                
+    var signature = ecdsa.signMessage( sMessage, priv )
         sDump += "<hr>signature = " + signature.toString()
 
-  document.getElementById("resultat").innerHTML = sDump;
+    document.getElementById("resultat").innerHTML = sDump;
+
+    // check signature
+    var res = ecdsa.verifySignature(sMessage, signature, pub )
+    sDump += "<hr>test signature : " + res.message
+
+    document.getElementById("resultat").innerHTML = sDump;
 }
 </script>
 
