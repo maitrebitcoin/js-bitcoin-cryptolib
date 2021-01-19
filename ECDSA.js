@@ -41,7 +41,6 @@ class ECDSA {
             return hex(this.value)
         }
     };
-
     // represent a public key for ECDSA
     static PublicKey = class { 
         constructor( point ) {
@@ -53,6 +52,18 @@ class ECDSA {
         toString() {
             return hex(this.value.x) + '\n<br>' + hex(this.value.y)
         }        
+    };
+    // represent a signature for ECDSA
+    static Signature = class { 
+        constructor( r, s ) {
+            console.assert( typeof r == 'bigint' )
+            console.assert( typeof s == 'bigint' )
+            this.r = r
+            this.s = s
+        }
+        toString() {
+            return hex(this.r)+':'+ hex(this.s)
+        }
     };
 
 
@@ -98,6 +109,7 @@ publicKeyFormPrivateKey( privateKey ) {
  * @returns {ECDSA.Signature}
  */
 signMessage( message, privateKey ) {
+    console.assert( typeof message == 'string' ) 
     // calc message hash
     var hashbuffer    = sha256(sha256( message ));
     // convert to 256 Bits integer
@@ -112,13 +124,24 @@ signMessage( message, privateKey ) {
     var rpk  = this.oField.mult( r,     privateKey.value );
     var h_rpk= this.oField.add(  h,     rpk );
     var s    = this.oField.mult( invK,  h_rpk );
-
-    var signature = {};
-    signature.r = pointR.x
-    signature.s = s
+    // create result
+    var signature = new ECDSA.Signature( pointR.x, s)
     return signature;
 
 }
+/**
+ * check a signature 
+ * 
+ * @param {string} message
+ * @param {ECDSA.Signature} signature
+ * @param {ECDSA.PublicKey} publicKey
+ * @returns {bool}
+ */
+verifySignature( message, signature, publicKey ) {
+    console.assert( typeof message == 'string' ) 
 
+    // OK
+    return true;
+}
 
-};//ECDSA
+};//class ECDSA

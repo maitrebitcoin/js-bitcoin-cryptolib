@@ -68,10 +68,7 @@ function testfunc() {
  // sign  a message
  var sMessage = "abdefgh"                
  var signature = ecdsa.signMessage( sMessage, priv )
-        sDump += "<hr>signature : r= "  +  hex( signature.r )
-              + " s = "
-              +  hex( signature.s )
-            
+        sDump += "<hr>signature = " + signature.toString()
 
   document.getElementById("resultat").innerHTML = sDump;
 }
