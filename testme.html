@@ -5,8 +5,8 @@
 <h1> js-bitcoin-cryptolib test page </h1>
 <p><hr><p>
 
-<button onclick="testSha()">  <h2>  Test sha256 </h2> </button>
-<button onclick="testfunc()"> <h2> Test create key pair </h2> </button>
+<button onclick="testSha()">  <h2> Test sha256 </h2> </button>
+<button onclick="testfunc()"> <h2> Test signature </h2> </button>
 <p><p>
 
 
@@ -23,21 +23,11 @@ xxx
 <script src='ECDSA.js'></script>
 <script src='sha256.js'></script>
 <script src='autotest.js'></script>
+<script src='hex.js'></script>
 
 <script>
 
-function strToHex(str) {
-    var hex = '';
-    for(var i=0; i<str.length; i++) {
-        var c =  str.charCodeAt(i)
-        if (c<16)
-            hex += "0"+c.toString(16);
-        else
-            hex += c.toString(16);
-    }
-    console.assert( hex.length == str.length*2 )
-    return hex;
-}
+
 
 function testSha() {
     
@@ -64,40 +54,24 @@ function testSha() {
     )
 }
 
-// convert a BigIntbig to hexadecimal string.
-// ex: "79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798""
-function hex( bigIntNumber ){
-    console.assert( typeof  bigIntNumber == 'bigint' )
-    if (bigIntNumber == 0) return '0';
-
-    var hResult = ''
-    while (bigIntNumber > 0)
-    {
-        // low 4 bits
-        var n = parseInt( bigIntNumber % BigInt(16) );
-        // kex caracters 0-1 or A-F
-        var hc 
-        if (n>=10)
-            hc = String.fromCharCode(55+n) // 65 = 'A', 55 = 65-10
-        else
-            hc = String.fromCharCode(48+n) // 48 = '0'
-        // next 4 bytes
-        hResult = hc + hResult
-        bigIntNumber = bigIntNumber /BigInt(16);
-    }
-    console.assert( hResult != '');
-    return hResult
-}
 
 function testfunc() {
 
  var ecdsa = new ECDSA();
+ // create key pair
  var priv = ecdsa.newPrivateKey();
  var pub  = ecdsa.publicKeyFormPrivateKey(priv);
 
  var sDump =   priv.toString()
               + "<hr>"
-              + pub.toString()
+              + pub.toString() 
+ // sign  a message
+ var sMessage = "abdefgh"                
+ var signature = ecdsa.signMessage( sMessage, priv )
+        sDump += "<hr>signature : r= "  +  hex( signature.r )
+              + " s = "
+              +  hex( signature.s )
+            
 
   document.getElementById("resultat").innerHTML = sDump;
 }

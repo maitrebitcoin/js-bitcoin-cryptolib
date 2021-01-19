@@ -10,12 +10,23 @@ function getRandomBigInt256() {
     window.crypto.getRandomValues(randArray);
     // conversion to bigint via hexadecimal string
     var bighex = "0x";
-    for (var i=0;i<8;i++)
-    { 
+    for (var i=0;i<8;i++) { 
         bighex += hex( BigInt(randArray[i]) ) ; 
     }
     // conversion to BigInt
     return BigInt(bighex);
+}
+
+// convert a buffer into BigInt assuming the buffer in big endian
+function bigEndianBufferTo256BitInt( buf ) {
+    var result = BigInt(0);
+    const _256 = BigInt(256);
+    // add 32 bytes = 256 buts
+    for (var i=0;i<32;i++) {
+        var nI = BigInt(buf.charCodeAt(i)) 
+        result = result*_256  + nI
+    }
+    return result  
 }
 
 
@@ -78,6 +89,7 @@ publicKeyFormPrivateKey( privateKey ) {
     return publicKey;
 }
 
+ 
 /**
  * sign a message
  * 
@@ -87,8 +99,9 @@ publicKeyFormPrivateKey( privateKey ) {
  */
 signMessage( message, privateKey ) {
     // calc message hash
-    var hash    = sha256( message );
-
+    var hashbuffer    = sha256(sha256( message ));
+    // convert to 256 Bits integer
+    var h      = bigEndianBufferTo256BitInt(hashbuffer)
     // generate random number k
     var k       = getRandomBigInt256()
     // Calculate the random point R = k * G and take its x-coordinate: r = R.x
@@ -96,9 +109,9 @@ signMessage( message, privateKey ) {
     var r       = pointR.x;
     // Calculate the signature proof: s = k^{-1} * (h + r * privKey) mod nk 
     var invK = this.oField.inversion(k);
-    var rpk  = this.oField.mult( r,    privateKey.value );
-    var h_pk = this.ofield.add(  hash, rpk );
-    var s    = this.oield.mult( invK,   h_rpk );
+    var rpk  = this.oField.mult( r,     privateKey.value );
+    var h_rpk= this.oField.add(  h,     rpk );
+    var s    = this.oField.mult( invK,  h_rpk );
 
     var signature = {};
     signature.r = pointR.x
