@@ -6,7 +6,7 @@
 <p><hr><p>
 
 <button onclick="testSha()">  <h2> Test sha256 </h2> </button>
-<button onclick="testfunc()"> <h2> Test signature </h2> </button>
+<button onclick="testEcdsa()"> <h2> Test signature </h2> </button>
 <p><p>
 
 
@@ -55,20 +55,22 @@ function testSha() {
 }
 
 
-function testfunc() {
+function testEcdsa() {
 
     var ecdsa = new ECDSA();
     // create key pair
     var priv = ecdsa.newPrivateKey();
     var pub  = ecdsa.publicKeyFormPrivateKey(priv);
-
-    var sDump =   priv.toString()
-                + "<hr>"
-                + pub.toString() 
+    // show keys
+    var sDump = "private key :<p>" + priv.toString()
+              + "<hr>"
+              + "public key :<p>" + pub.toString() 
     // sign  a message
-    var sMessage = "abdefgh"                
+    var sMessage = "abdefghijlk12345"                
+
+    sDump += "<hr>message :<p><span style='background-color:#b0b0a0;'>" + sMessage + "</span><p>\n"
     var signature = ecdsa.signMessage( sMessage, priv )
-        sDump += "<hr>signature = " + signature.toString()
+        sDump += "<hr>signature : <p><span style='background-color:#b0e0e0;'>" + signature.toString() + "</span>"
 
     document.getElementById("resultat").innerHTML = sDump;
 

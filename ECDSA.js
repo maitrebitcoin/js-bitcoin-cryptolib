@@ -17,13 +17,13 @@ function getRandomBigInt256() {
     return BigInt(bighex);
 }
 
-// convert a buffer into BigInt assuming the buffer in big endian
-function bigEndianBufferTo256BitInt( buf ) {
+// convert a buffer into BigInt assuming the buffer in low endian format
+function lowEndianBufferTo256BitInt( buf ) {
     var result = BigInt(0);
     const _256 = BigInt(256);
     // add 32 bytes = 256 buts
     for (var i=0;i<32;i++) {
-        var nI = BigInt(buf.charCodeAt(i)) 
+        var nI = BigInt(buf.charCodeAt(31-i)) 
         result = result*_256  + nI
     }
     return result  
@@ -98,6 +98,18 @@ newPrivateKey(  ) {
     var privateKey = new ECDSA.PrivateKey( rand256 );
     return privateKey
 }
+/**
+ *  generate a private key from a hexadecimal string.
+ * ex : "0c34cf6a7d24367baa81ef8331c8cb7ffafc0978ff6cf9e5d873de96142bdb86"
+ * @returns {ECDSA.PrivateKey}
+ */
+privateKeyFromHexString( hexString ) {
+    console.assert( typeof hexString == 'string' ) 
+    console.assert( hexString.length == 64 ) 
+    var bigI = BigInt( "0x" + hexString)
+    var privateKey = new ECDSA.PrivateKey( bigI );
+    return privateKey
+}
 
 
 /**
@@ -124,17 +136,19 @@ signMessage( message, privateKey ) {
     // calc message hash
     var hashbuffer    = sha256(sha256( message ));
     // convert to 256 Bits integer
-    var h      = bigEndianBufferTo256BitInt(hashbuffer)
+    var h      = lowEndianBufferTo256BitInt(hashbuffer)
     // generate random number k
-    var k       = getRandomBigInt256()
+    // TOOD : deterministic-ECDSA, the value k is HMAC-derived from h + privKey (see RFC 6979)
+    var k      = getRandomBigInt256()
     // Calculate the random point R = k * G and take its x-coordinate: r = R.x
-    var pointR  = this.ec.pointScalarMult( this.ec.G, k );
-    var r       = pointR.x;
+    var pointR = this.ec.pointScalarMult( this.ec.G, k );
+    var r      = this.oField.modulo( pointR.x );
     // Calculate the signature proof: s = k^{-1} * (h + r * privKey) mod nk 
-    var invK = this.oField.inversion(k);
-    var rpk  = this.oField.mult( r,     privateKey.value );
-    var h_rpk= this.oField.add(  h,     rpk );
-    var s    = this.oField.mult( invK,  h_rpk );
+    var invK   = this.oField.inversion(k);
+    var rpk    = this.oField.mult(   r,     privateKey.value ); // r*privKey
+    var h_rpk  = this.oField.add(    h,     rpk );              // h + r*privKey
+    var s      = this.oField.mult(   invK,  h_rpk );
+    //var minuss = this.oField.negate( s ); //@TODO, use it if < s 
     // create result
     var signature = new ECDSA.Signature( pointR.x, s)
     return signature;
@@ -172,11 +186,11 @@ verifySignature( message, signature, publicKey ) {
     // calc message hash
     var hashbuffer    = sha256(sha256( message ));
     // convert to 256 Bits integer
-    var h      = bigEndianBufferTo256BitInt(hashbuffer)
+    var h      = lowEndianBufferTo256BitInt(hashbuffer)
 
     // u1 = h * 1/signature.s 
     var invS = this.oField.inversion(signature.s);    
-    var u1   = this.oField.mult( h, invS );
+    var u1   = this.oField.mult( h,           invS );
     var u2   = this.oField.mult( signature.r, invS );
     // calculate u1*G + u2*publicKey
     var pt1      =  this.ec.pointScalarMult( this.ec.G,       u1 )

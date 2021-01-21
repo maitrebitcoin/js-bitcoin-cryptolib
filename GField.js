@@ -10,6 +10,10 @@ constructor( N ) {
     // optim for inversion
     this.NMinus2 = this.sub(  N, BigInt(2) )
 }
+// moludo N
+modulo(x){
+    return  x % this.N;
+}
 
 // Addition modulo N
 add( x,y )  {
@@ -21,6 +25,13 @@ sub( x,y )  {
      // the result must be positive
      if (res<0) 
          res += this.N;
+    return res
+}
+// Negation modolo N. -X
+negate(x) {
+    if (x==0) return 0
+    var res = ( this.N - x ) % this.N
+    console.assert(  res+x == this.N )
     return res
 }
 

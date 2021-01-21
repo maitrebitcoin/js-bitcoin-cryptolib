@@ -116,19 +116,19 @@ pointAdd( pointA, pointB )  {
 pointScalarMult( point, number ) {
     var pointResult = new ECPoint(0,0) 
 
-     // G point * 2^N => 2G, 4G, 8G, 16G, etc.. 
-     var G2powN = this.G
+     //  point * 2^N => 2G, 4G, 8G, 16G, etc.. 
+     var point2powN = point
      while (number>0) {
       
         // if bit 0 is set
         var bit1 = number % BigInt(2)
         if (bit1 == BigInt(1)) {
-            // r = r + G2powN
-            pointResult = this.pointAdd( pointResult, G2powN )
+            // r = r + point2powN
+            pointResult = this.pointAdd( pointResult, point2powN )
         }
         // next bit
         number = number / BigInt(2)
-        G2powN = this.pointDouble( G2powN )
+        point2powN = this.pointDouble( point2powN )
      }
 
      console.assert( this.pointOnCurve(pointResult) || pointResult.isZero() );   
