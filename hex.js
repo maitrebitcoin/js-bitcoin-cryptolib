@@ -1,4 +1,5 @@
-// convert a numbers and buffer to hexadecimal string.
+// convert a numbers or a buffer into hexadecimal string.
+// mainly for debug/trace purposes
 
 function hex( x ){
     switch (typeof  x) {
