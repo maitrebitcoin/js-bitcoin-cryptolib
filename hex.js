@@ -1,4 +1,4 @@
-// convert a numbers dans buffer to hexadecimal string.
+// convert a numbers and buffer to hexadecimal string.
 
 function hex( x ){
     switch (typeof  x) {
