@@ -13,8 +13,7 @@
 
 
 <p style="font-family:monospace;font-size:160%" id="resultat">
-xxx
-
+    <!--auto test result here-->
 </p>
 
 
@@ -27,35 +26,50 @@ xxx
 
 <script>
 
+// called if a test fails
+function onTestFail( s, hashAsHexString, expected)
+{
+    var sErr = "sha('" + s+ "') => <br>\n" +  hashAsHexString+' != <br>\n'+expected
+    console.log(sErr)
 
+    document.getElementById("resultat").innerHTML = "<p>"  +sErr + "<p><font color='red'>FAILED</font>";
+    console.assert(false)
+    // stop the test
+    throw -1;
+}
 
 function testSha() {
-    
-    // called if a test fails
-    function onTestFail( s, hashAsHexString, expected)
-    {
-        var sErr = "sha('" + s+ "') => <br>\n" +  hashAsHexString+' != <br>\n'+expected
-        console.log(sErr)
-
-        document.getElementById("resultat").innerHTML = "<p>"  +sErr + "<p><font color='red'>FAILED</font>";
-        console.assert(false)
-        // stop the test
-        throw -1;
-    }
     // Start...
-    document.getElementById("resultat").innerHTML = "<font color='gray'>Running...</font>";
+    document.getElementById("resultat").innerHTML += "<font color='gray'>Running...</font>";
     // Run the test async :
     setTimeout( () => {
-        // Run test
+        
+        // Run tests...
         autotest_sha256( onTestFail  )
         // test PASSED OK
-        document.getElementById("resultat").innerHTML = "<font color='green'>PASSED OK</font>";
+        document.getElementById("resultat").innerHTML += "<p><font color='green'>PASSED OK</font>";
+        },0
+    )
+}
+
+function testEcdsa() {
+    // Start...
+    document.getElementById("resultat").innerHTML += "<font color='gray'>Running...</font>";
+    // Run the test async :
+    setTimeout( () => {
+        
+        // Run tests...
+        autotest_ecdsa(  onTestFail  )
+
+        // test PASSED OK
+        document.getElementById("resultat").innerHTML += "<p><font color='green'>PASSED OK</font>";
         },0
     )
 }
 
 
-function testEcdsa() {
+
+function testEcdsa2() {
 
     var ecdsa = new ECDSA();
     // create key pair

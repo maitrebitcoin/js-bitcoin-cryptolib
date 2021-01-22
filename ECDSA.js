@@ -50,7 +50,7 @@ class ECDSA {
             this.point = point;          
         }
         toString() {
-            return hex(this.point.x) + '\n<br>' + hex(this.point.y)
+            return hex(this.point.x) + ',' + hex(this.point.y)
         }        
         isZero() {
             return this.point.isZero();
