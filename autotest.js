@@ -1,4 +1,5 @@
 // auto tests for the js-bitcoin-cryptolib
+// test for sha2-256 dans ecdsa se
 
 function FAILED(valueTested, result, expected, message ) {
      // error
@@ -67,6 +68,11 @@ function autotest_ecdsa( fonError ) {
     var res = ecdsa.verifySignature(sMessage, signature, pub )
     if (!res.ok) {
         FAILED( valTest, result,expected, res.message)
+    }
+    // alter message, should fail
+    var res = ecdsa.verifySignature(sMessage+".", signature, pub )
+    if (res.ok) {
+        FAILED( valTest, result,expected, "signature should fail")
     }
 
    // SUCESS

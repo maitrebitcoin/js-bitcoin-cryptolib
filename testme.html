@@ -5,18 +5,16 @@
 <h1> js-bitcoin-cryptolib test page </h1>
 <p><hr><p>
 
-<button onclick="testSha()">  <h2> Test sha256 </h2> </button>
-<button onclick="testEcdsa()"> <h2> Test signature </h2> </button>
+<button onclick="testSha()">   <h2> Test sha256 </h2> </button>
+<button onclick="testEcdsa()"> <h2> Test ecdsa  </h2> </button>
+<button onclick="ecdsaSample()"><h2> Ecdsa sample</h2> </button>
 <p><p>
-
-
-
 
 <p style="font-family:monospace;font-size:160%" id="resultat">
     <!--auto test result here-->
 </p>
 
-
+<!----------------------------- javscript code -------------------------------->
 <script src='GField.js'></script>
 <script src='EllipticCurveSecp256k1.js'></script>
 <script src='ECDSA.js'></script>
@@ -69,7 +67,7 @@ function testEcdsa() {
 
 
 
-function testEcdsa2() {
+function ecdsaSample() {
 
     var ecdsa = new ECDSA();
     // create key pair

@@ -3,7 +3,7 @@
 // https://cryptobook.nakov.com/digital-signatures/ecdsa-sign-verify-messages
 // https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm
 
-// generate a 256 bits random number
+// generate cryto secure 256 bits random number
 function getRandomBigInt256() {
     // 256 bits = 8 * 32bits
     var randArray = new Uint32Array(8);
@@ -29,8 +29,17 @@ function lowEndianBufferTo256BitInt( buf ) {
     return result  
 }
 
+// Main class
+// ecdsa with secp256k1 parameters
+// ex usage :
+//    var priv = ecdsa.newPrivateKey();
+//    var pub  = ecdsa.publicKeyFormPrivateKey(priv);
+//    var signature = ecdsa.signMessage( "my message", priv )
+//    var res       = ecdsa.verifySignature( "my message", signature, pub )
+//    if (!res.ok) alert(res.message)
 
 class ECDSA { 
+// ------ types -----
     // represent a private key for ECDSA
     static PrivateKey = class { 
         constructor( bigint ) {
@@ -77,6 +86,7 @@ class ECDSA {
      
    }
 
+// ------ methods -----
 
 // constructor
 constructor(  ) {
@@ -110,8 +120,6 @@ privateKeyFromHexString( hexString ) {
     var privateKey = new ECDSA.PrivateKey( bigI );
     return privateKey
 }
-
-
 /**
  * get the public key associated to a private key
  * @param {ECDSA.PrivateKey} privateKey
@@ -122,8 +130,6 @@ publicKeyFormPrivateKey( privateKey ) {
     var publicKey = new ECDSA.PublicKey(point);
     return publicKey;
 }
-
- 
 /**
  * sign a message
  * 
