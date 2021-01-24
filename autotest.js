@@ -66,9 +66,14 @@ function autotest_sha512( fonError ) {
     // test some values 
     _test_( "",  
             "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e")
-
+    _test_( "abc",  
+            "ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f")
     _test_( "The quick brown fox jumps over the lazy dog",  
             "07e547d9586f6a73f73fbac0435ed76951218fb7d0c8d788a309d785436bbb642e93a252a954f23912547d1e8a3b5ed6e1bfd7097821233fa0538f3db854fee6")
+    _test_( "be688838ca8686e5c90689bf2ab585cef1137c999b48c70b92f67a5c34dc15697b5d11c982ed6d71be1e1e7f7b4e0733884aa97c3f7a339a8ed03577cf74be09",  
+            "89728620891234831636ec22de526c96d1587bd89cb18c6efa820de3ee1c78e7bae59dd0eda0e5b452fbf2d45c7a4b2420e1c2532fa0753076c5b74dfca2c046")
+
+
 
 
     // SUCESS
