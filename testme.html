@@ -6,6 +6,7 @@
 <p><hr><p>
 
 <button onclick="testSha()">   <h2> Test sha256 </h2> </button>
+<button onclick="testSha512()">   <h2> Test sha512 </h2> </button>
 <button onclick="testEcdsa()"> <h2> Test ecdsa  </h2> </button>
 <button onclick="ecdsaSample()"><h2> Ecdsa sample</h2> </button>
 <p><p>
@@ -18,7 +19,7 @@
 <script src='GField.js'></script>
 <script src='EllipticCurveSecp256k1.js'></script>
 <script src='ECDSA.js'></script>
-<script src='sha256.js'></script>
+<script src='sha.js'></script>
 <script src='autotest.js'></script>
 <script src='hex.js'></script>
 
@@ -48,6 +49,14 @@ function testSha() {
         document.getElementById("resultat").innerHTML += "<p><font color='green'>PASSED OK</font>";
         },0
     )
+}
+function testSha512() {
+     // Start...
+    document.getElementById("resultat").innerHTML += "<font color='gray'>Running...</font>";       
+        // Run tests...
+        autotest_sha512( onTestFail  )
+        // test PASSED OK
+        document.getElementById("resultat").innerHTML = "<p><font color='green'>PASSED OK</font>";
 }
 
 function testEcdsa() {

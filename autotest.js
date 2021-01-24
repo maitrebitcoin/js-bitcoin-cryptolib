@@ -1,7 +1,7 @@
 // auto tests for the js-bitcoin-cryptolib
 // test for sha2-256 dans ecdsa se
 
-function FAILED(valueTested, result, expected, message ) {
+function FAILED(fonError, valueTested, result, expected, message ) {
      // error
      fonError( valueTested, result, expected, message )
      // stop the test
@@ -20,7 +20,7 @@ function autotest_sha256( fonError ) {
         var hashAsHexString =  hex(hash);
         if (hashAsHexString != expected) {
             // error
-            FAILED( s, hashAsHexString, expected )
+            FAILED( fonError, s, hashAsHexString, expected )
         }
 
     }
@@ -47,6 +47,35 @@ function autotest_sha256( fonError ) {
 }
 
 // fonError : callback called if the test fails
+function autotest_sha512( fonError ) {
+    // s       : value to hash 
+    // expeded : "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    function _test_( s, expected  ) 
+    {
+        // calculate hash
+        var hash  = sha512( s )
+        // is it the expected result ?
+        var hashAsHexString =  hex(hash);
+        if (hashAsHexString != expected) {
+            // error
+            FAILED( fonError, s, hashAsHexString, expected )
+        }
+
+    }
+
+    // test some values 
+    _test_( "",  
+            "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e")
+
+    _test_( "The quick brown fox jumps over the lazy dog",  
+            "07e547d9586f6a73f73fbac0435ed76951218fb7d0c8d788a309d785436bbb642e93a252a954f23912547d1e8a3b5ed6e1bfd7097821233fa0538f3db854fee6")
+
+
+    // SUCESS
+  
+}
+
+// fonError : callback called if the test fails
 function autotest_ecdsa( fonError ) {
     var ecdsa = new ECDSA();
 
@@ -57,7 +86,7 @@ function autotest_ecdsa( fonError ) {
     var result   = pub.toString()
     var expected ="3068765c2ab75bcfcbd5ae3ccefbdd25b94f414ab0a58c67a780fd437e35c81e,5fa059f6ecab2e2e11a880130b04697859d75eea77f603c715946ed430ef69a4"
     if (result!=expected) {
-        FAILED( valTest, result,expected)
+        FAILED( fonError, valTest, result,expected)
     }
 
     // sign  a message
@@ -67,12 +96,12 @@ function autotest_ecdsa( fonError ) {
     // check signature
     var res = ecdsa.verifySignature(sMessage, signature, pub )
     if (!res.ok) {
-        FAILED( valTest, result,expected, res.message)
+        FAILED( fonErrorn, valTest, result,expected, res.message)
     }
     // alter message, should fail
     var res = ecdsa.verifySignature(sMessage+".", signature, pub )
     if (res.ok) {
-        FAILED( valTest, result,expected, "signature should fail")
+        FAILED( fonError, valTest, result,expected, "signature should fail")
     }
 
    // SUCESS
