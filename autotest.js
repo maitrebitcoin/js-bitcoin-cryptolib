@@ -81,6 +81,31 @@ function autotest_sha512( fonError ) {
 }
 
 // fonError : callback called if the test fails
+function autotest_hmac_sha512(fonError) {
+       // s       : value to hash 
+    // expeded : "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    function _test_( k, s, expected  ) 
+    {
+        // calculate hash
+        var hash  = hmac_sha512(k, s )
+        // is it the expected result ?
+        var hashAsHexString =  hex(hash);
+        if (hashAsHexString != expected) {
+            // error
+            FAILED( fonError, s, hashAsHexString, expected )
+        }
+
+    }
+
+    // test values from
+    // https://tools.ietf.org/html/rfc4231
+    _test_("Jefe", "what do ya want for nothing?",
+           "164b7a7bfcf819e2e395fbe73b56e0a387bd64222e831fd610270cd7ea2505549758bf75c05a994a6d034f65f8f0e6fdcaeab1a34d4a6b4b636e070a38bce737"
+     )
+
+}
+
+// fonError : callback called if the test fails
 function autotest_ecdsa( fonError ) {
     var ecdsa = new ECDSA();
 
@@ -111,3 +136,4 @@ function autotest_ecdsa( fonError ) {
 
    // SUCESS
 }
+

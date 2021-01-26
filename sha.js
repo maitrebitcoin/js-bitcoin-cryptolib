@@ -345,5 +345,49 @@ function sha512( buffer ) {
 
 }//function sha256( buffer  )
 
+// XOR each byte of a buffer
+function xorBuffer( bufA, bufB ) {
+    console.assert( bufA.length == bufB.length )
+    var res='';
+    for (var i=0;i<bufA.length;i++) {
+        // c = a xor b
+        var c = bufA.charCodeAt(i) ^ bufB.charCodeAt(i)
+        res += String.fromCharCode(c)
+    }
+    console.assert( res.length == bufB.length )
+    return res
+}
 
+// HMAC function
+// source https://en.wikipedia.org/wiki/HMAC
+function hmac( key, message, hash, blocksize, outpusize ) {
 
+    // Keys longer than blockSize are shortened by hashing them
+    if (key.length > blocksize) 
+        key = hash(key) // key is outputSize bytes long
+    // Keys shorter than blockSize are padded to blockSize by padding with zeros on the right
+    if (key.length < blocksize) {
+        // Pad key with zeros to make it blockSize bytes long
+        var n0Padding = blocksize -key.length
+        key   += '\x00'.repeat(  n0Padding );
+    }
+
+    var o_key_pad = xorBuffer( key, '\x5c'.repeat(blocksize))
+    var i_key_pad = xorBuffer( key, '\x36'.repeat(blocksize))
+
+    return hash(o_key_pad + hash(i_key_pad + message))
+}
+
+/**
+ * hash a mssage + key using the hmac-sha-512 algoritmh
+ * 
+ * @param   {key string}  buffer
+ *  @param  {key message} buffer
+ * @returns {binary string}
+ */
+function hmac_sha512( key, message ) {
+    // blocksize = 1024/8 => 128 
+    var hash =  hmac( key,message, sha512, 128, 64 )
+    console.assert( hash.length == 64 )    
+    return hash
+}

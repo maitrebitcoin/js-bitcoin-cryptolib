@@ -5,10 +5,11 @@
 <h1> js-bitcoin-cryptolib test page </h1>
 <p><hr><p>
 
-<button onclick="testSha()">   <h2> Test sha256 </h2> </button>
-<button onclick="testSha512()">   <h2> Test sha512 </h2> </button>
-<button onclick="testEcdsa()"> <h2> Test ecdsa  </h2> </button>
-<button onclick="ecdsaSample()"><h2> Ecdsa sample</h2> </button>
+<button onclick="testSha()">       <h2> Test sha256 </h2> </button>
+<button onclick="testSha512()">    <h2> Test sha512 </h2> </button>
+<button onclick="testHmacSha512()"><h2> Test hmac-sha512 </h2> </button>
+<button onclick="testEcdsa()">     <h2> Test ecdsa  </h2> </button>
+<button onclick="ecdsaSample()">   <h2> Ecdsa sample</h2> </button>
 <p><p>
 
 <p style="font-family:monospace;font-size:160%" id="resultat">
@@ -28,7 +29,7 @@
 // called if a test fails
 function onTestFail( s, hashAsHexString, expected)
 {
-    var sErr = "sha('" + s+ "') => <br>\n" +  hashAsHexString+' != <br>\n'+expected
+    var sErr = "hash('" + s+ "') => <br>\n" +  hashAsHexString+' != <br>\n'+expected
     console.log(sErr)
 
     document.getElementById("resultat").innerHTML = "<p>"  +sErr + "<p><font color='red'>FAILED</font>";
@@ -55,6 +56,14 @@ function testSha512() {
     document.getElementById("resultat").innerHTML += "<font color='gray'>Running...</font>";       
         // Run tests...
         autotest_sha512( onTestFail  )
+        // test PASSED OK
+        document.getElementById("resultat").innerHTML = "<p><font color='green'>PASSED OK</font>";
+}
+function testHmacSha512() {
+     // Start...
+    document.getElementById("resultat").innerHTML += "<font color='gray'>Running...</font>";       
+        // Run tests...
+        autotest_hmac_sha512( onTestFail  )
         // test PASSED OK
         document.getElementById("resultat").innerHTML = "<p><font color='green'>PASSED OK</font>";
 }
