@@ -99,9 +99,15 @@ function autotest_hmac_sha512(fonError) {
 
     // test values from
     // https://tools.ietf.org/html/rfc4231
+    _test_("\x0b".repeat(20), "Hi There",
+           "87aa7cdea5ef619d4ff0b4241a1d6cb02379f4e2ce4ec2787ad0b30545e17cdedaa833b7d6b8a702038b274eaea3f4e4be9d914eeb61f1702e696c203a126854"  )
     _test_("Jefe", "what do ya want for nothing?",
-           "164b7a7bfcf819e2e395fbe73b56e0a387bd64222e831fd610270cd7ea2505549758bf75c05a994a6d034f65f8f0e6fdcaeab1a34d4a6b4b636e070a38bce737"
-     )
+           "164b7a7bfcf819e2e395fbe73b56e0a387bd64222e831fd610270cd7ea2505549758bf75c05a994a6d034f65f8f0e6fdcaeab1a34d4a6b4b636e070a38bce737"  )
+    _test_("\xaa".repeat(20), "\xdd".repeat(50),
+           "fa73b0089d56a284efb0f0756c890be9b1b5dbdd8ee81a3655f83e33b2279d39bf3e848279a722c806b485a47e67c807b946a337bee8942674278859e13292fb"  )
+   _test_("\xaa".repeat(131), "Test Using Larger Than Block-Size Key - Hash Key First",
+           "80b24263c7c1a3ebb71493c1dd7be8b49b46d1f41b4aeec1121b013783f8f3526b56d037e05f2598bd0fd2215d6a1e5295e64f73f63f0aec8b915a985d786598"  )
+
 
 }
 
