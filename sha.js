@@ -391,3 +391,4 @@ function hmac_sha512( key, message ) {
     console.assert( hash.length == 64 )    
     return hash
 }
+    

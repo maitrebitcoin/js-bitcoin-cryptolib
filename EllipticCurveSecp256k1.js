@@ -134,5 +134,10 @@ pointScalarMult( point, number ) {
      console.assert( this.pointOnCurve(pointResult) || pointResult.isZero() );   
      return pointResult;
 }
+// Multiplication of the generator point by a big integer
+pointGeneratorScalarMult(  number ) {
+ 
+     return this.pointScalarMult( this.G, number ) ;
+}
 
 }// class EllipticCurveSecp256k1

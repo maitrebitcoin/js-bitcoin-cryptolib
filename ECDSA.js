@@ -147,7 +147,7 @@ signMessage( message, privateKey ) {
     // TOOD : deterministic-ECDSA, the value k is HMAC-derived from h + privKey (see RFC 6979)
     var k      = getRandomBigInt256()
     // Calculate the random point R = k * G and take its x-coordinate: r = R.x
-    var pointR = this.ec.pointScalarMult( this.ec.G, k );
+    var pointR = this.ec.pointGeneratorScalarMult( k );
     var r      = this.oField.modulo( pointR.x );
     // Calculate the signature proof: s = k^{-1} * (h + r * privKey) mod nk 
     var invK   = this.oField.inversion(k);
@@ -176,7 +176,7 @@ verifySignature( message, signature, publicKey ) {
         return new ECDSA.SignatureCheck(false, 'invalid public key : 0');
     if (!this.ec.pointOnCurve(publicKey.point))  
         return new ECDSA.SignatureCheck(false, 'invalid public key : not on curve');
-    var point0  = this.ec.pointScalarMult( this.ec.G,  this.oField.N );
+    var point0  = this.ec.pointGeneratorScalarMult( this.oField.N );
     if (!point0.isZero)
         return new ECDSA.SignatureCheck(false, 'invalid public key : P*K is not 0');
     //  check signature
@@ -199,7 +199,7 @@ verifySignature( message, signature, publicKey ) {
     var u1   = this.oField.mult( h,           invS );
     var u2   = this.oField.mult( signature.r, invS );
     // calculate u1*G + u2*publicKey
-    var pt1      =  this.ec.pointScalarMult( this.ec.G,       u1 )
+    var pt1      =  this.ec.pointGeneratorScalarMult(         u1 )
     var pt2      =  this.ec.pointScalarMult( publicKey.point, u2 )
     var pt1Plus2 =  this.ec.pointAdd(pt1, pt2);
     
