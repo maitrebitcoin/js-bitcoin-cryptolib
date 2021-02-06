@@ -115,9 +115,6 @@ function ecdsaSample() {
     document.getElementById("resultat").innerHTML = sDump;
 }
 
-
-
-
 function bip32Sample() {
 
     var phrase ="pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
@@ -129,9 +126,9 @@ function bip32Sample() {
 
     // dump
     var sDump  = ""
-    sDump += "<hr>seed :     " + hex( seed )
-    sDump += "<hr>master key signature raw:     " + hex( res.toBuffer() )
-    sDump += "<hr>master key signature base58 : " + base58CheckEncode( res.toBuffer() )
+    sDump += "<hr>seed :     <p>" + hex( seed )
+    sDump += "<hr>master key signature raw:   <p>" + hex( res.toRawBuffer() )
+    sDump += "<hr>master key signature base58:<p>" + res.toStringBase58() 
 
     
     document.getElementById("resultat").innerHTML = sDump;    

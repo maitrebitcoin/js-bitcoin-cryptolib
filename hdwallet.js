@@ -51,28 +51,8 @@ function base58CheckEncode( buffer, prefix ) {
     sBufCrc= sha256(sha256( prefix +buffer ))
     // get 4 first bytes
     sCrc = sBufCrc.substring(0,4); 
-
-    var sBase = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
-    // convert to hexa
-    var hexaBufAndCrc = hex(  buffer + sCrc )
-    // convert to number
-    var numBufAndCrc = BigInt( "0x" + hexaBufAndCrc )
-    // main loop : divive by 58 until numBuf go to 0.
-    var res = ""
-    var _58 = BigInt(58)
-    while (numBufAndCrc>0) {
-        var c = Number( numBufAndCrc % _58); // modulo
-        // add char in front
-        res = sBase[c] + res
-        // next char, divide by 58
-        numBufAndCrc = numBufAndCrc /  _58;
-    }
-    // add leading 1 for the "0" in start of <buffer>
-    var nLeading0 = 0;
-    while (buffer[nLeading0]==='\x00') nLeading0++;
-    res = "1".repeat(nLeading0) + res
-
-    return res
+    // encode un buffer with 4 crc bytes
+    return base58Encode( prefix +buffer + sCrc )
 }
 
 
@@ -91,13 +71,17 @@ class hdwallet {
             this.key       = key;
             this.chainCode = chainCode;        
             this.depth     = depth;  
+            this.private   = true;
         }
         isExtendedKey() {return true;}
-        // convert to buffer (serialisation)
-        toBuffer() {
+        isPrivateKey() {return this.private;}
+        // convert to raw buffer (serialisation)
+        // ex: 0488ade400000000000000000096cfbe1212036394874c07eadf5a657fb782b30a1518551b039099d4ace1754100d9af112377807b573e2b038ad31d6a141e1d530a9a4f38377ea0523a18a42161
+        toRawBuffer() {
             var buf = '';
             // 4 byte: version bytes
-            buf += intTobigEndia32Buffer(0x0488ADE4) // mainnet: 0x0488B21E public, 0x0488ADE4 private
+            var nVersion = this.private  ? 0x0488ADE4 : 0x0488B21E;
+            buf += intTobigEndia32Buffer(nVersion) // mainnet: 0x0488B21E public, 0x0488ADE4 private
             // 1 byte: depth: 0x00 for master nodes, 0x01 for level-1 derived keys, ....
             buf +=  String.fromCharCode(this.depth   )
             // 4 bytes: the fingerprint of the parent's key (0x00000000 if master key)
@@ -110,6 +94,13 @@ class hdwallet {
             buf += "\x00" + BigInt256ToLowEndianBuffer( this.key)
             console.assert( buf.length == 78)
             return buf
+        }
+        // convert sur 58base endoding
+        // ex: "xprv9s21ZrQH143K3ZSfMynXEy6nuHq4E2q7Hkoa58hQwRtr2pmuPeNFU3yd7eogz96USc9EtbF4AJuorvMEJPMQdTW2C35YSaPPaD2bn8U4F9V"
+        toStringBase58() {
+            // encode buffer with CRC in base 58
+            var buffer =  this.toRawBuffer();
+            return base58CheckEncode( buffer )
         }
     };
 
