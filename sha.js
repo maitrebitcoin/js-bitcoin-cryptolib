@@ -13,6 +13,22 @@ function intTobigEndia32Buffer(x) {
     
     return buf
 }    
+// convert a Big int into a big endian buffer of 32 bytes representing a 256 bits int.
+function BigInt256ToLowEndianBuffer(x) {
+    console.log(typeof x == "bigint")
+    var buf = ""
+    var _255 = BigInt(0xFF);
+    var _8   = BigInt(0x08);
+    for (var i=0;i<32;i++) {
+         // low 8 bits to buffer    
+         var c = Number(x & _255);
+         buf = String.fromCharCode(c) + buf
+         // next 8 bits
+         x = x >> _8;
+    }
+    console.assert(buf.length == 32)
+    return buf
+}
 
 /**
  * hash a buffer using the sha2 256 algoritmh
@@ -391,4 +407,3 @@ function hmac_sha512( key, message ) {
     console.assert( hash.length == 64 )    
     return hash
 }
-    
