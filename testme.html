@@ -25,7 +25,7 @@
 <script src='ECDSA.js'></script>
 <script src='sha.js'></script>
 <script src='autotest.js'></script>
-<script src='hex.js'></script>
+<script src='encodeDecode.js'></script>
 <script src='hdwallet.js'></script>
 
 <script>
@@ -118,8 +118,8 @@ function ecdsaSample() {
 function bip32Sample() {
 
     var phrase ="pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
-    var bseed = BigInt("0x6e85439607050fad311b71238aacdd27d3095329201baa367c43e93869621de213f2c75dac958ecc1a87d55a94baf02e223de1d686c276882c112e841b01a8df")
-      var seed = sha512(phrase);
+    //var bseed = BigInt("0x6e85439607050fad311b71238aacdd27d3095329201baa367c43e93869621de213f2c75dac958ecc1a87d55a94baf02e223de1d686c276882c112e841b01a8df")
+    var seed = bufferFromHex("6e85439607050fad311b71238aacdd27d3095329201baa367c43e93869621de213f2c75dac958ecc1a87d55a94baf02e223de1d686c276882c112e841b01a8df");
     var bip32 = new hdwallet( seed );
 
     var res = bip32.getMasterKey();
@@ -128,7 +128,8 @@ function bip32Sample() {
     var sDump  = ""
     sDump += "<hr>seed :     <p>" + hex( seed )
     sDump += "<hr>master key signature raw:   <p>" + hex( res.toRawBuffer() )
-    sDump += "<hr>master key signature base58:<p>" + res.toStringBase58() 
+    sDump += "<hr>master key signature base58:<p>" + res.toStringBase58() + "<p>" +
+    "xprv9s21ZrQH143K4b44oYF6VxMLbBroCaDgiWetWXeDHanBdreeF8bQpUndSvVgHHwQNkifjfwZXgY8Fxub73dLbnJ7we9FSaae5PvXjBTfw4Y"
 
     
     document.getElementById("resultat").innerHTML = sDump;    
