@@ -9,6 +9,21 @@
  ******************************************************
  */
 
+/**
+ * run all tests
+ *  @param {fonError}  function called if a test fails
+ *  @param {fonStepOK} function called if a test completed successfully
+ * 
+*/
+function autotest_all(fonError, fonStepOK ){
+    
+    autotest_sha256(fonError)
+    fonStepOK("sha256")
+    autotest_sha512(fonError)
+    fonStepOK("sha512")
+    autotest_ecdsa(fonError)
+    fonStepOK("ecdsa") 
+}
 
 
 function FAILED(fonError, valueTested, result, expected, message ) {

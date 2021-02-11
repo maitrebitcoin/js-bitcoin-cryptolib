@@ -9,7 +9,7 @@
  ******************************************************
  */
 
-class GFied { 
+class GField { 
 
 // constructor
 constructor( N ) {
@@ -86,4 +86,4 @@ inversion ( x )  {
 }
 
 
-}//class GFied
+}//class GField

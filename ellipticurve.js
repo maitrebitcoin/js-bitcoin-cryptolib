@@ -46,7 +46,7 @@ constructor() {
     this.b = BigInt("7")
     // Modulo for point addition
     this.N = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F");
-    this.field = new GFied( this.N );
+    this.field = new GField( this.N );
     // G must be on the curve
     console.assert( this.pointOnCurve(this.G) );  
 }

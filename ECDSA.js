@@ -92,7 +92,7 @@ constructor(  ) {
     this.ec = new EllipticCurveSecp256k1();
     // curve order
     this.order   = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
-    this.oField  = new GFied(  this.order )
+    this.oField  = new GField(  this.order )
 }
 
 /**
