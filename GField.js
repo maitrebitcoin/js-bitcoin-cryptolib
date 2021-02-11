@@ -1,5 +1,13 @@
-// Galois Field on N/nN
-// operations mobulo N
+/**
+ ****************************************************** 
+ * @file    gfield.js 
+ * @file    Galois Field on N/nN : math operations mobulo N
+ * @author  pad@maitrebitcoin.com
+ * @module  js-bitcoin-criptolib
+ * 
+ * @license LGPL-3.0 
+ ******************************************************
+ */
 
 class GFied { 
 

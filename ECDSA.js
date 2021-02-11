@@ -1,7 +1,16 @@
-// Elliptic Curve Signature for Bitcoin
-// see :
-// https://cryptobook.nakov.com/digital-signatures/ecdsa-sign-verify-messages
-// https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm
+/**
+ ****************************************************** 
+ * @file    ecdsa.js 
+ * @file    Elliptic Curve Signature for Bitcoin
+ * @author  pad@maitrebitcoin.com
+ * @module  js-bitcoin-criptolib
+ * @see     https://cryptobook.nakov.com/digital-signatures/ecdsa-sign-verify-messages
+   @see     https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm
+ * 
+ * @license LGPL-3.0 
+ ******************************************************
+ */
+
 
 // generate cryto secure 256 bits random number
 function getRandomBigInt256() {
@@ -17,17 +26,6 @@ function getRandomBigInt256() {
     return BigInt(bighex);
 }
 
-// convert a buffer into BigInt assuming the buffer in low endian format
-function lowEndianBufferTo256BitInt( buf ) {
-    var result = BigInt(0);
-    const _256 = BigInt(256);
-    // add 32 bytes = 256 buts
-    for (var i=0;i<32;i++) {
-        var nI = BigInt(buf.charCodeAt(31-i)) 
-        result = result*_256  + nI
-    }
-    return result  
-}
 
 // Main class
 // ecdsa with secp256k1 parameters

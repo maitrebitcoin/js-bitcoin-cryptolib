@@ -1,5 +1,15 @@
-// auto tests for the js-bitcoin-cryptolib
-// test for sha2-256 dans ecdsa se
+/**
+ ****************************************************** 
+ * @file    autotest.js
+ * @file    auto tests for the js-bitcoin-cryptolib
+ * @author  pad@maitrebitcoin.com
+ * @module  js-bitcoin-criptolib
+ * 
+ * @license LGPL-3.0 
+ ******************************************************
+ */
+
+
 
 function FAILED(fonError, valueTested, result, expected, message ) {
      // error

@@ -1,59 +1,14 @@
-// hdwallet.js
-// bip32 bitcoin wallet.
-// see :
-// https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki
-
-
-function bufferFromHex( str ) {
-    var buffer = ""
-    str.match(/[\da-f]{2}/gi).map(function (h) {
-        buffer += String.fromCharCode( parseInt(h, 16) )
-    })
-
-    return buffer;
-}
-
 /**
- *  encode a binary buffer to base58
+ ****************************************************** 
+ * @file    hdwallet.js 
+ * @file    bip32 bitcoin wallet.
+ * @author  pad@maitrebitcoin.com
+ * @module  js-bitcoin-criptolib
+ * @see     https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki
  * 
- * @param   {string} buffer
- * @returns {string}
+ * @license LGPL-3.0 
+ ******************************************************
  */
-function base58Encode( buffer, prefix ) {
-    if (!prefix)
-        prefix = ''
-    var sBase = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
-    // convert to hexa
-    var hexaBuf= hex(  prefix + buffer )
-    // convert to number
-    var numBufAndCrc = BigInt( "0x" + hexaBuf )
-    // main loop : divive by 58 until numBuf go to 0.
-    var res = ""
-    var _58 = BigInt(58)
-    while (numBufAndCrc>0) {
-        var c = Number( numBufAndCrc % _58); // modulo
-        // add char in front
-        res = sBase[c] + res
-        // next char, divide by 58
-        numBufAndCrc = numBufAndCrc /  _58;
-    }
-    // add leading 1 for the "0" in start of <buffer>
-    var nLeading0 = 0;
-    while (buffer[nLeading0]==='\x00') nLeading0++;
-    res = "1".repeat(nLeading0) + res
-
-    return res
-}
-function base58CheckEncode( buffer, prefix ) {
-    if (!prefix)
-        prefix = ''
-    // calc crc
-    sBufCrc= sha256(sha256( prefix +buffer ))
-    // get 4 first bytes
-    sCrc = sBufCrc.substring(0,4); 
-    // encode un buffer with 4 crc bytes
-    return base58Encode( prefix +buffer + sCrc )
-}
 
 
 class hdwallet {

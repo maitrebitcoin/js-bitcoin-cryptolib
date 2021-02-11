@@ -1,7 +1,19 @@
-// js-bitcoin-criptolib
-// encode and decode from different format
+/**
+ ****************************************************** 
+ * @file    encodeDecode.js
+ * @file    encode and decode from different format
+ * @author  pad@maitrebitcoin.com
+ * @module  js-bitcoin-criptolib
+ * 
+ * @license LGPL-3.0 
+ ******************************************************
+ */
 
-// convert a numbers or a buffer into hexadecimal string.
+/**
+ * convert a numbers or a buffer into hexadecimal string.
+ * @param   {string,number,bingint} x the value or string/buffer to convert
+ * @returns {string} ex : "79BE667EF9DCBBAC5"
+ */
 function hex( x ){
     switch (typeof  x) {
         case 'bigint':
@@ -130,13 +142,9 @@ function base58Encode( buffer, prefix ) {
 }
 /**
  *  encode a binary buffer to base58 + crc
- *  ex: 
- *   "0488ade4000000000000000000fe0abe524ea251534fd667216a4ba40bf256f009e27900bf2a2582eaa7b746a5008265670a5e8723f78e0a443e4f67b68d5a368012bbfa5f7503fb6ebbdc404b93"
- *=>"xprv9s21ZrQH143K4b44oYF6VxMLbBroCaDgiWetWXeDHanBdreeF8bQpUndSvNEeaSaRcXfHv5o2MMSD8koExLB3qBc7baLFGB65y39uHsmuEN" 
-
  * 
- * @param   {string} buffer
- * @returns {string}
+ * @param   {string} buffer the buuffer to encode. ex : " "0488ade4000000000000000000fe0abe524e...""
+ * @returns {string} a base 58 encoded string. ex: ""xprv9s21ZrQH143K..."
  */
 function base58CheckEncode( buffer, prefix ) {
     if (!prefix)

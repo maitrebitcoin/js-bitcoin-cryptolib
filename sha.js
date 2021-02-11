@@ -1,34 +1,12 @@
-// sha2 implementation for js-bitcoin-cryptolib
-// sha2 256 + sha2 512
-// see : 
-// https://en.wikipedia.org/wiki/SHA-2
-
-
-// convert a int into a big endian buffer of 4 bytes representing a 32 bits int.
-function intTobigEndia32Buffer(x) {
-    var buf =    String.fromCharCode((x>>24) & 0xFF)
-        buf +=   String.fromCharCode((x>>16) & 0xFF)
-        buf +=   String.fromCharCode((x>> 8) & 0xFF)     
-        buf +=   String.fromCharCode( x      & 0xFF)                   
-    
-    return buf
-}    
-// convert a Big int into a big endian buffer of 32 bytes representing a 256 bits int.
-function BigInt256ToLowEndianBuffer(x) {
-    console.log(typeof x == "bigint")
-    var buf = ""
-    var _255 = BigInt(0xFF);
-    var _8   = BigInt(0x08);
-    for (var i=0;i<32;i++) {
-         // low 8 bits to buffer    
-         var c = Number(x & _255);
-         buf = String.fromCharCode(c) + buf
-         // next 8 bits
-         x = x >> _8;
-    }
-    console.assert(buf.length == 32)
-    return buf
-}
+/**
+ ****************************************************** 
+ * @file    sha.js
+ * @file    sha2 implementation for js-bitcoin-cryptolib
+ * @author  pad@maitrebitcoin.com
+ * @module  js-bitcoin-criptolib
+ * @see     https://en.wikipedia.org/wiki/SHA-2
+ * @license LGPL-3.0 
+ ******************************************************
 
 /**
  * hash a buffer using the sha2 256 algoritmh
@@ -55,18 +33,6 @@ function sha256( buffer ) {
         return temp[0]
     }    
 
-    // convert a int into a big endian buffer of 8 bytes representing a 64 bits int.
-    function intTobigEndian64Buffer(x) {
-        return "\x00".repeat(4) + intTobigEndia32Buffer(x)
-    }   
-    // convert a buffer into int assuming the buffer in ins big endian
-    function bigEndianBufferToInt( buf, pos ) {
-        var nRes = (buf.charCodeAt(pos)  <<24)
-                    | (buf.charCodeAt(pos+1)<<16)
-                    | (buf.charCodeAt(pos+2)<<8)
-                    | (buf.charCodeAt(pos+3))
-        return nRes  
-    }
 
     // sha2 constants :
     //  (first 32 bits of the fractional parts of the square roots of the first 8 primes 2..19):

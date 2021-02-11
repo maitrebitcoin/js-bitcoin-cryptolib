@@ -1,13 +1,23 @@
-// elliptic curve
+/**
+ ****************************************************** 
+ * @file    ellipticurve.js 
+ * @file    Elliptic curve with the Secp256k1 paramèters and associated types.
+ * @author  pad@maitrebitcoin.com
+ * @module  js-bitcoin-criptolib
+ * @see     https://en.bitcoin.it/wiki/Secp256k1
+ * 
+ * @license LGPL-3.0 
+ ******************************************************
+ */
 
-// point of an elliptic curve
+// A point on the elliptic curve
 class ECPoint {
 
 constructor(x,y) {
     this.x = x;
     this.y = y;
 }
-// check if 2 points are equals 
+// check if a point is equal to another
 equal( pointB )  {
     return    this.x == pointB.x 
            && this.y == pointB.y;
@@ -20,10 +30,10 @@ isZero( pointB )  {
 
 }//class ECPoint {
 
+// The elliptic curve
 class EllipticCurveSecp256k1 {    
 
-// creation of the curve with the Secp256k1 paramèters
-// see : https://en.bitcoin.it/wiki/Secp256k1
+// create a curve with the Secp256k1 paramèters
 constructor() {
     // G	elliptic curve base point, a point on the curve that generates a subgroup of large prime order P
     //      y^{2}=x^{3}+ax+b
