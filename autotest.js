@@ -13,16 +13,39 @@
  * run all tests
  *  @param {fonError}  function called if a test fails
  *  @param {fonStepOK} function called if a test completed successfully
+ *  @param {fonEnd}    function called a the end of all tests if no error
  * 
 */
-function autotest_all(fonError, fonStepOK ){
-    
-    autotest_sha256(fonError)
-    fonStepOK("sha256")
-    autotest_sha512(fonError)
-    fonStepOK("sha512")
-    autotest_ecdsa(fonError)
-    fonStepOK("ecdsa") 
+function autotest_all(fonError, fonStepOK, fonEnd ){
+    var tabTestName  = new Array( "sha512", "sha256", "hmac_sha512", "ecdsa" )
+
+    var numTest = 0;
+
+    /**
+     * run  test
+     * @param {int} numTest 
+     * @async
+     */     
+    function _runOneTestAync(numTest) {
+         var testName = tabTestName[numTest];
+        // Run tests...
+        // ex :  autotest_sha512(fonError)
+        eval("autotest_"+ testName + "(fonError)")
+        // test <testName> is OK
+        fonStepOK(testName)
+        // last testt ?
+        if (numTest+1>=tabTestName.length)
+        {
+            fonEnd()
+            return;
+        }
+        // Run next test async
+        setTimeout( () => {_runOneTestAync(numTest+1)}, 0)           
+    };
+   
+    // Start with 1st test :
+   _runOneTestAync(0)
+
 }
 
 
