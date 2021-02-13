@@ -108,6 +108,36 @@ function bufferFromHex( str ) {
     return buffer;
 }
 
+// caracter set to encode/decde in base58
+const sBASE58_CHARSET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+const _58 = BigInt(58)
+
+/**
+ *  decode a string in base58 ta a binary buffer 
+ *
+ * @param   {string} base58encoded ex : "xprv9s21ZrQH143K.."
+ * @returns {string}               ex : "0488ade4000000000000000000fe0abe524e..."
+ */
+function base58Decode( base58encoded ) {
+    if (base58encoded=="") return "";
+    var numBuf = BigInt(0)
+    for (var i=0;i<base58encoded.length;i++) {
+        // get char <i> and convert it to a number in [0-57]
+        var cI = base58encoded[i];
+        var n = sBASE58_CHARSET.indexOf(cI);
+        // if invalid char
+        if (n==-1) {
+            console.assert(false,"invalid base 58 char : " + c);
+            return ""
+        }
+        // calc résul
+        numBuf  = numBuf * _58 + BigInt(n)
+    }
+    // convert numBuf to buffer
+    var sBuffeHex = hex(numBuf)
+    return bufferFromHex( sBuffeHex )
+
+}
 
 /**
  *  encode a binary buffer to base58
@@ -118,18 +148,18 @@ function bufferFromHex( str ) {
 function base58Encode( buffer, prefix ) {
     if (!prefix)
         prefix = ''
-    var sBase = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+
     // convert to hexa
     var hexaBuf= hex(  prefix + buffer )
     // convert to number
     var numBufAndCrc = BigInt( "0x" + hexaBuf )
     // main loop : divive by 58 until numBuf go to 0.
     var res = ""
-    var _58 = BigInt(58)
+    
     while (numBufAndCrc>0) {
         var c = Number( numBufAndCrc % _58); // modulo
         // add char in front
-        res = sBase[c] + res
+        res = sBASE58_CHARSET[c] + res
         // next char, divide by 58
         numBufAndCrc = numBufAndCrc /  _58;
     }
@@ -143,7 +173,7 @@ function base58Encode( buffer, prefix ) {
 /**
  *  encode a binary buffer to base58 + crc
  * 
- * @param   {string} buffer the buuffer to encode. ex : " "0488ade4000000000000000000fe0abe524e...""
+ * @param   {string} buffer the buuffer to encode. ex : " "0488ade4000000000000000000fe0abe524e..."
  * @returns {string} a base 58 encoded string. ex: ""xprv9s21ZrQH143K..."
  */
 function base58CheckEncode( buffer, prefix ) {

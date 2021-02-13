@@ -143,13 +143,14 @@ function bip32Sample() {
     var bip32 = new hdwallet( seed );
 
     var res = bip32.getMasterKey();
+    var resOK =  "xprv9s21ZrQH143K4b44oYF6VxMLbBroCaDgiWetWXeDHanBdreeF8bQpUndSvVgHHwQNkifjfwZXgY8Fxub73dLbnJ7we9FSaae5PvXjBTfw4Y"
 
     // dump
     var sDump  = ""
     sDump += "<hr>seed :     <p>" + hex( seed )
     sDump += "<hr>master key signature raw:   <p>" + hex( res.toRawBuffer() )
-    sDump += "<hr>master key signature base58:<p>" + res.toStringBase58() + "<p>" +
-    "xprv9s21ZrQH143K4b44oYF6VxMLbBroCaDgiWetWXeDHanBdreeF8bQpUndSvVgHHwQNkifjfwZXgY8Fxub73dLbnJ7we9FSaae5PvXjBTfw4Y"
+    sDump += "<hr>master key signature base58:<p>" + res.toStringBase58() + "<p>" + resOK
+    sDump += "<p>" + hex(base58Decode(resOK))
 
     
     document.getElementById("resultat").innerHTML = sDump;    
