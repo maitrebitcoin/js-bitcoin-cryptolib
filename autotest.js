@@ -17,7 +17,7 @@
  * 
 */
 function autotest_all(fonError, fonStepOK, fonEnd ){
-    var tabTestName  = new Array( "sha512", "sha256", "hmac_sha512", "ecdsa" )
+    var tabTestName  = new Array( "sha512", "sha256", "hmac_sha512", "ecdsa","bip32" )
 
     var numTest = 0;
 
@@ -190,4 +190,33 @@ function autotest_ecdsa( fonError ) {
 
    // SUCESS
 }
+
+// fonError : callback called if the test fails
+function autotest_bip32( fonError ) {
+    /** 
+     * @param {string}   seedHex  seed buffer in hex forma. ex : "("6e85439607050fad311b71238..."
+     * @param {expected} expected expected result in base 58. ex  "xprv9s21ZrQH143K4b..."
+     * seed            :  seed buffer in hexa.
+     */
+    function _test_( seedHex, expected  ) 
+    {
+        // calculate rood
+        var seed  = bufferFromHex(seedHex)
+        var bip32 = new hdwallet( seed );
+        var res   = bip32.getMasterKey();
+        var res58 = res.toStringBase58()
+
+        // is it the expected result ?
+        if (res58 != expected) {
+            // error
+            FAILED( fonError, seedHex, res58, expected )
+        }
+    }
+
+    _test_("6e85439607050fad311b71238aacdd27d3095329201baa367c43e93869621de213f2c75dac958ecc1a87d55a94baf02e223de1d686c276882c112e841b01a8df",
+           "xprv9s21ZrQH143K4b44oYF6VxMLbBroCaDgiWetWXeDHanBdreeF8bQpUndSvVgHHwQNkifjfwZXgY8Fxub73dLbnJ7we9FSaae5PvXjBTfw4Y");
+
+
+}
+
 
