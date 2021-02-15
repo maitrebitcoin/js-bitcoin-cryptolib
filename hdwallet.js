@@ -1,7 +1,7 @@
 /**
  ****************************************************** 
  * @file    hdwallet.js 
- * @file    bip32 bitcoin wallet.
+ * @file    bip32 bitcoin wallet support.
  * @author  pad@maitrebitcoin.com
  * @module  js-bitcoin-criptolib
  * @see     https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki
@@ -10,6 +10,8 @@
  ******************************************************
  */
 
+const nSIGNATURE_PrivateKey = 0x0488ADE4
+const nSIGNATURE_PublicKey  = 0x0488B21E
 
 class hdwallet {
 
@@ -30,19 +32,21 @@ class hdwallet {
         }
         isExtendedKey() {return true;}
         isPrivateKey() {return this.private;}
-        // convert to raw buffer (serialisation)
-        // ex: 0488ade400000000000000000096cfbe1212036394874c07eadf5a657fb782b30a1518551b039099d4ace1754100d9af112377807b573e2b038ad31d6a141e1d530a9a4f38377ea0523a18a42161
+        /** 
+        * convert the extented key to raw buffer (serialisation)
+        * * @returns {buffer} binairy buffer. ex: "0488ade400000000000000000096cfbe121203639....""
+        */
         toRawBuffer() {
             var buf = '';
             // 4 byte: version bytes
-            var nVersion = this.private  ? 0x0488ADE4 : 0x0488B21E;
-            buf += intTobigEndia32Buffer(nVersion) // mainnet: 0x0488B21E public, 0x0488ADE4 private
+            var nVersion = this.private  ? nSIGNATURE_PrivateKey : nSIGNATURE_PublicKey;
+            buf += intTobigEndian32Buffer(nVersion) // mainnet: 0x0488B21E public, 0x0488ADE4 private
             // 1 byte: depth: 0x00 for master nodes, 0x01 for level-1 derived keys, ....
             buf +=  String.fromCharCode(this.depth   )
             // 4 bytes: the fingerprint of the parent's key (0x00000000 if master key)
-            buf += intTobigEndia32Buffer(0)
+            buf += intTobigEndian32Buffer(0)
             // 4 bytes: child number. This is ser32(i) for i in xi = xpar/i, with xi the key being serialized. (0x00000000 if master key)
-            buf += intTobigEndia32Buffer(0)
+            buf += intTobigEndian32Buffer(0)
             // 32 bytes: the chain code
             buf +=  this.chainCode
             // 33 bytes: the public key or private key data (serP(K) for public keys, 0x00 || ser256(k) for private keys)
@@ -50,12 +54,47 @@ class hdwallet {
             console.assert( buf.length == 78)
             return buf
         }
-        // convert sur 58base endoding
-        // ex: "xprv9s21ZrQH143K3ZSfMynXEy6nuHq4E2q7Hkoa58hQwRtr2pmuPeNFU3yd7eogz96USc9EtbF4AJuorvMEJPMQdTW2C35YSaPPaD2bn8U4F9V"
+        /** 
+        * convert the extented key to a base58 endoded string
+        * @returns {string} ex: "xprv9s21ZrQH143K3ZSfM..."      
+        */
         toStringBase58() {
             // encode buffer with CRC in base 58
             var buffer =  this.toRawBuffer();
             return base58CheckEncode( buffer )
+        }
+        /** 
+        * init from a base58 encoding
+        * @param   {sting} str58 a base58 endoded string 
+        * @returns {bool} true if succes. false if
+        */
+        bfromStringBase58( str58 ) {
+            // decocode string to buffer
+            var buffer =  base58CheckDecode(str58)
+            if (buffer=="") return false;
+            // must be 78 bytes
+            if (buffer.length!=78) return false;
+            // 4 byte: version bytes
+            var nVersion    = bigEndianBufferToInt( buffer.substring(0,4) )
+            if (nVersion == nSIGNATURE_PrivateKey)
+                this.private  =  true
+            else if (nVersion == nSIGNATURE_PublicKey)
+                this.private  =  false
+            else
+                return false; // unknown version
+            // 1 byte: depth: 
+            this.depth      =  buffer.charCodeAt(4)
+            // 4 bytes: the fingerprint of the parent's key (0x00000000 if master key)
+            var fingerprint = bigEndianBufferToInt( buffer.substring(5,9) )
+            // 4 bytes: child number. This is ser32(i) for i in xi = xpar/i, with xi the key being serialized. (0x00000000 if master key)
+            var childNumber = bigEndianBufferToInt( buffer.substring(9,13) )
+            // 32 bytes: the chain code    
+            this.chainCode  =                       buffer.substring(13,45) 
+            // 33 bytes: the public key or private key data (serP(K) for public keys, 0x00 || ser256(k) for private keys)
+            if (this.private)
+                this.key    =                        buffer.substring(46,78)             
+            else
+                this.key    =                        buffer.substring(45,78) 
         }
     };
 
@@ -77,7 +116,7 @@ _ckdPrivatr( extendedKey, i ) {
      if (bHardenedKey) {
         // hardened child
         //Data = 0x00 || ser256(kpar) || ser32(i))
-        data = "\x00" + extendedKey.key + intTobigEndia32Buffer(i)
+        data = "\x00" + extendedKey.key + intTobigEndian32Buffer(i)
      }
      else { 
         // normal chid
@@ -87,7 +126,7 @@ _ckdPrivatr( extendedKey, i ) {
         // calculate P = K * G   
         var KPoint  = this.ecdsa.ec.pointGeneratorScalarMult( extkeyAsBigInt );
         // calc buffer 
-        data = P.toBuffer() + intTobigEndia32Buffer(i)
+        data = P.toBuffer() + intTobigEndian32Buffer(i)
     }
     // calculate hash from key and buffer
     var hash512 = hmac_sha512(  extendedKey.chainCode, data );

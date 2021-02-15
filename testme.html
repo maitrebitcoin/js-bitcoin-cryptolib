@@ -141,6 +141,8 @@ function bip32Sample() {
 
     var res = bip32.getMasterKey();
     var resOK =  "xprv9s21ZrQH143K4b44oYF6VxMLbBroCaDgiWetWXeDHanBdreeF8bQpUndSvVgHHwQNkifjfwZXgY8Fxub73dLbnJ7we9FSaae5PvXjBTfw4Y"
+    var resOKdec = res
+    resOKdec.bfromStringBase58(resOK)
 
     // dump
     var sDump  = ""

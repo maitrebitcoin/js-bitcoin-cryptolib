@@ -120,8 +120,14 @@ const _58 = BigInt(58)
  */
 function base58Decode( base58encoded ) {
     if (base58encoded=="") return "";
+    
+    //  leading 1 means  "0" in the result buffer
+    var nLeading0 = 0;
+    while (base58encoded[0]==='1')
+        nLeading0++;
+    
     var numBuf = BigInt(0)
-    for (var i=0;i<base58encoded.length;i++) {
+    for (var i=nLeading0;i<base58encoded.length;i++) {
         // get char <i> and convert it to a number in [0-57]
         var cI = base58encoded[i];
         var n = sBASE58_CHARSET.indexOf(cI);
@@ -134,8 +140,35 @@ function base58Decode( base58encoded ) {
         numBuf  = numBuf * _58 + BigInt(n)
     }
     // convert numBuf to buffer
-    var sBuffeHex = hex(numBuf)
+    var sBuffeHex = hex_BigInt(numBuf)
+    // inssert a 0 in front if odd
+    if (sBuffeHex.length % 2 == 1)
+        sBuffeHex = "0"+ sBuffeHex
+    // insert leading 0
+    sBuffeHex = "00".repeat(nLeading0) + sBuffeHex
+
     return bufferFromHex( sBuffeHex )
+}
+/**
+ *  decode a string in base58 ta a binary buffer with crc
+ *
+ * @param   {string} base58encoded ex : "xprv9s21ZrQH143K.."
+ * @returns {string}               ex : "0488ade4000000000000000000fe0abe524e..."
+ */
+function base58CheckDecode(base58encoded) {
+    // decode to raw buffer
+    var bufferAndCrc = base58Decode(base58encoded)
+    if (bufferAndCrc=="") return "" // failed
+    // get resulb
+    var nLen = bufferAndCrc.length
+    var buffer = bufferAndCrc.substring(0,nLen-4)
+    // get crc
+    var crc = bufferAndCrc.substring(nLen-4,nLen)
+    // calc crc
+    var calcCrc= sha256(sha256( buffer ))
+    if (calcCrc.substr(0,4) != crc) return "" // bad crc
+    // sucess
+    return buffer
 
 }
 
@@ -198,15 +231,7 @@ function lowEndianBufferTo256BitInt( buf ) {
     }
     return result  
 }
-// convert a int into a big endian buffer of 4 bytes representing a 32 bits int.
-function intTobigEndia32Buffer(x) {
-    var buf =    String.fromCharCode((x>>24) & 0xFF)
-        buf +=   String.fromCharCode((x>>16) & 0xFF)
-        buf +=   String.fromCharCode((x>> 8) & 0xFF)     
-        buf +=   String.fromCharCode( x      & 0xFF)                   
-    
-    return buf
-}    
+  
 // convert a Big int into a big endian buffer of 32 bytes representing a 256 bits int.
 function BigInt256ToLowEndianBuffer(x) {
     console.log(typeof x == "bigint")
@@ -223,16 +248,29 @@ function BigInt256ToLowEndianBuffer(x) {
     console.assert(buf.length == 32)
     return buf
 }
-
+// convert a int into a big endian buffer of 4 bytes representing a 32 bits int.
+function intTobigEndian32Buffer(x) {
+    var buf =    String.fromCharCode((x>>24) & 0xFF)
+        buf +=   String.fromCharCode((x>>16) & 0xFF)
+        buf +=   String.fromCharCode((x>> 8) & 0xFF)     
+        buf +=   String.fromCharCode( x      & 0xFF)                   
+    
+    return buf
+}  
 // convert a int into a big endian buffer of 8 bytes representing a 64 bits int.
 function intTobigEndian64Buffer(x) {
-    return "\x00".repeat(4) + intTobigEndia32Buffer(x)
-}   
-// convert a buffer into int assuming the buffer in ins big endian
+    return "\x00".repeat(4) + intTobigEndian32Buffer(x)
+}  
+/**
+* convert a buffer into int assuming the buffer in ins big endian
+* @param {buffer} buf
+* @param {int}    pos 1st char to convert in buf. 0 if non set
+*/
 function bigEndianBufferToInt( buf, pos ) {
-    var nRes = (buf.charCodeAt(pos)  <<24)
+    if (!pos) pos= 0;
+    var res  =    (buf.charCodeAt(pos  )<<24)
                 | (buf.charCodeAt(pos+1)<<16)
-                | (buf.charCodeAt(pos+2)<<8)
-                | (buf.charCodeAt(pos+3))
-    return nRes  
+                | (buf.charCodeAt(pos+2)<<8 )
+                | (buf.charCodeAt(pos+3)    )
+    return res  
 }
