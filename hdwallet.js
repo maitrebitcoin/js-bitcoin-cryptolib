@@ -18,7 +18,10 @@ class hdwallet {
 // ------ types -----
     // represent a extended key for a hdwallet
     static ExtendedKey = class { 
-        constructor( key, chainCode, depth ) {
+        constructor() {
+        }
+        // init as a private key
+        initAsPrivate( key, chainCode, depth ) {
             console.assert( typeof key == 'bigint' )
             console.assert( typeof chainCode == 'string' )
             console.assert( chainCode.length == 32,"chainCode must be 256 bits")            
@@ -92,7 +95,7 @@ class hdwallet {
             this.chainCode  =                       buffer.substring(13,45) 
             // 33 bytes: the public key or private key data (serP(K) for public keys, 0x00 || ser256(k) for private keys)
             if (this.private)
-                this.key    =                        buffer.substring(46,78)             
+                this.key    = bigEndianBufferTo256BitInt( buffer.substring(46,78) )
             else
                 this.key    =                        buffer.substring(45,78) 
         }
@@ -122,7 +125,7 @@ _ckdPrivatr( extendedKey, i ) {
         // normal chid
         // Data = serP(point(kpar)) || ser32(i)).
         // convert to 256 Bits integer
-        var extkeyAsBigInt  = lowEndianBufferTo256BitInt( extendedKey.key)     
+        var extkeyAsBigInt  = bigEndianBufferTo256BitInt( extendedKey.key)     
         // calculate P = K * G   
         var KPoint  = this.ecdsa.ec.pointGeneratorScalarMult( extkeyAsBigInt );
         // calc buffer 
@@ -132,11 +135,12 @@ _ckdPrivatr( extendedKey, i ) {
     var hash512 = hmac_sha512(  extendedKey.chainCode, data );
     // calculate résult
     // child key = parse256(IL) + kpar (mod n).
-    var IL = lowEndianBufferTo256BitInt( hash512.substring(0,32) )
+    var IL = bigEndianBufferTo256BitInt( hash512.substring(0,32) )
     var IR = hash512.substring(32, 64) 
     var childKey =  this.ecdsa.oField.add( IL, extendedKey.key )
 
-    var res = new hdwallet.ExtendedKey( childKey, IR, i );
+    var res = new hdwallet.ExtendedKey()
+    res.initAsPrivate( childKey, IR, i );
     return res;
 }
 
@@ -149,9 +153,12 @@ getMasterKey() {
     // calculate HMAC-SHA512(Key = "Bitcoin seed", Data = S)
     var hash512 = hmac_sha512( "Bitcoin seed", this.seed );
     // cut in 2 part 256 bits long
-    var IL = lowEndianBufferTo256BitInt( hash512.substring(0,32) )
-    var IR = hash512.substring(32, 64) 
-    var res = new hdwallet.ExtendedKey( IL, IR, 0 );
+    var IL = hash512.substring(0, 32) 
+    var IR = hash512.substring(32,64) 
+    // init the extended private key :  key, chainCode, depth
+    var key =  bigEndianBufferTo256BitInt( IL )
+    var res = new hdwallet.ExtendedKey();
+    res.initAsPrivate( key, IR, 0 );
     return res;
 }
 

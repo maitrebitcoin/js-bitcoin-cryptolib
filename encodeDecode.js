@@ -219,9 +219,27 @@ function base58CheckEncode( buffer, prefix ) {
     // encode un buffer with 4 crc bytes
     return base58Encode( prefix +buffer + sCrc )
 }
-
-// convert a buffer into BigInt assuming the buffer in low endian format
-function lowEndianBufferTo256BitInt( buf ) {
+/**
+ * convert a buffer into BigInt assuming the buffer in big endian format 
+ * = most significant byte first
+ * @param {buffer} buf 
+ */
+function bigEndianBufferTo256BitInt( buf ) {
+    var result = BigInt(0);
+    const _256 = BigInt(256);
+    // add 32 bytes = 256 buts
+    for (var i=0;i<32;i++) {
+        var nI = BigInt(buf.charCodeAt(i)) 
+        result = result*_256  + nI
+    }
+    return result  
+}
+/**
+ * convert a buffer into BigInt assuming the buffer in little endian format 
+ * = most significant byte last
+ * @param {buffer} buf 
+ */
+function littleEndianBufferTo256BitInt( buf ) {
     var result = BigInt(0);
     const _256 = BigInt(256);
     // add 32 bytes = 256 buts
@@ -234,7 +252,7 @@ function lowEndianBufferTo256BitInt( buf ) {
   
 // convert a Big int into a big endian buffer of 32 bytes representing a 256 bits int.
 function BigInt256ToLowEndianBuffer(x) {
-    console.log(typeof x == "bigint")
+    console.assert(typeof x == "bigint")
     var buf = ""
     var _255 = BigInt(0xFF);
     var _8   = BigInt(0x08);
