@@ -1,6 +1,6 @@
 /**
  ****************************************************** 
- * @file    js-bitcoin-lib
+ * @file    js-bitcoin-lib.js
  * @file    main file for js-bitcoin-cryptolib
  * @author  pad@maitrebitcoin.com
  * @module  js-bitcoin-criptolib
@@ -13,7 +13,7 @@
  */
 
 function include_js(s) {
-    document.writeln("<script src='" +s +"'><"+"/script>");
+    document.write("<script src='" +s +"'><"+"/script>");
 }
 
 // include all needeed js files in the lib

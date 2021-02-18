@@ -69,22 +69,24 @@ class hdwallet {
         /** 
         * init from a base58 encoding
         * @param   {sting} str58 a base58 endoded string 
-        * @returns {bool} true if succes. false if
+        * @returns {error} undefined if no error. a  objet with an error member otherwise
         */
-        bfromStringBase58( str58 ) {
+        initFromStringBase58( str58 ) {
             // decocode string to buffer
             var buffer =  base58CheckDecode(str58)
-            if (buffer=="") return false;
+            if (buffer.error)
+                return buffer; // failed
             // must be 78 bytes
-            if (buffer.length!=78) return false;
+            if (buffer.length!=78) 
+                return {error:"invalid buffer length, must be 78", length:buffer.length }; // failed
             // 4 byte: version bytes
-            var nVersion    = bigEndianBufferToInt( buffer.substring(0,4) )
-            if (nVersion == nSIGNATURE_PrivateKey)
+            var version    = bigEndianBufferToInt( buffer.substring(0,4) )
+            if (version == nSIGNATURE_PrivateKey)
                 this.private  =  true
-            else if (nVersion == nSIGNATURE_PublicKey)
+            else if (version == nSIGNATURE_PublicKey)
                 this.private  =  false
             else
-                return false; // unknown version
+                return  {error:"unknown version header", version:hex(version) }; 
             // 1 byte: depth: 
             this.depth      =  buffer.charCodeAt(4)
             // 4 bytes: the fingerprint of the parent's key (0x00000000 if master key)
@@ -97,7 +99,8 @@ class hdwallet {
             if (this.private)
                 this.key    = bigEndianBufferTo256BitInt( buffer.substring(46,78) )
             else
-                this.key    =                        buffer.substring(45,78) 
+                this.key    =                             buffer.substring(45,78) 
+            // success
         }
     };
 
@@ -147,7 +150,7 @@ _ckdPrivatr( extendedKey, i ) {
 /**
  *  get the master key
  * 
- * @returns {hdwallet.ExtendedKey}
+ * @returns {hdwallet.ExtendedKey} the master key (private key)
  */
 getMasterKey() {
     // calculate HMAC-SHA512(Key = "Bitcoin seed", Data = S)
@@ -160,6 +163,34 @@ getMasterKey() {
     var res = new hdwallet.ExtendedKey();
     res.initAsPrivate( key, IR, 0 );
     return res;
+}
+/**
+ *  get a private key for a derivation path
+ * @param   {string}  derivationPath the derivation path. ex: "m/0'/1"
+ * @returns {hdwallet.ExtendedKey}   the master key (private key)
+ */
+getPrivateKeyFromPath( derivationPath ) {
+    // master key ?
+    if (derivationPath=='m') return getMasterKey()
+    // get remaining path
+    // ex : "0'/1"
+    var nPos = derivationPath.indexOf("/")
+    if (nPos<=0) {
+        return {error:"invalid derivation path format",derivationPath:derivationPath};
+    }
+    var remainingPath = derivationPath.substr( nPos+1 );
+    var indexI    = remainingPath.split()[0]; // ex =  "0'/1" => "0'"
+    var lastChar  = indexI.substr( indexI.length-1 ) 
+    var hardened  = (lastChar == "H") || (lastChar=="'") // H or ' accepted
+    if (hardened)
+        indexI = remainingPath.substr( 0, indexI.length-1 ) // remove ' ou H at the end
+    var index     = parseInt(remainingPath)
+    if (hardened)
+        if (index = -index)
+    // get master key
+    var masterKey = getMasterKey();
+    //@test : 1 derivation
+    return _ckdPrivatr(masterKey, index)
 }
 
 

@@ -212,10 +212,25 @@ function autotest_bip32( fonError ) {
             FAILED( fonError, seedHex, res58, expected )
         }
     }
+    // check tha the value raise an error
+    function _test_error( string58  ) 
+    {
+       var extKey =  new hdwallet.ExtendedKey() // bip32.getMasterKey();
+       var res= extKey.initFromStringBase58(string58)
+       if (!res.error) {
+        FAILED( fonError, string58, res58, "ERROR expected" )
+       }
+
+    }
 
     _test_("6e85439607050fad311b71238aacdd27d3095329201baa367c43e93869621de213f2c75dac958ecc1a87d55a94baf02e223de1d686c276882c112e841b01a8df",
            "xprv9s21ZrQH143K4b44oYF6VxMLbBroCaDgiWetWXeDHanBdreeF8bQpUndSvVgHHwQNkifjfwZXgY8Fxub73dLbnJ7we9FSaae5PvXjBTfw4Y");
 
+    // invalid values, should raise an error           
+    _test_error("")
+    _test_error("*bad string")
+    _test_error("xprv9s21ZrQH143K4b44oYF6VxMLb")
+    _test_error("xprv9s21ZrQH143K4b44oYF6VxMLbBroCaDgiWetWXeDHanBdreeF8bQpUndSvVgHHwQNkifjfwZXgY8Fxub73dLbnJ7we9FSaae5PvXjBTfw4Z")  // CRC
 
 }
 
