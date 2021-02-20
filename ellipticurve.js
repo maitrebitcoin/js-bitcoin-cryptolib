@@ -17,15 +17,36 @@ constructor(x,y) {
     this.x = x;
     this.y = y;
 }
-// check if a point is equal to another
+/**
+ *  check if the point is equal to <pointB>
+ *  @return {bool}
+ */
 equal( pointB )  {
     return    this.x == pointB.x 
            && this.y == pointB.y;
 }
-// check if a points is 0
+/**
+ * check if a points is (0,0)
+ *  @return {bool}
+ */
 isZero( pointB )  {
     return    this.x == 0
            && this.y == 0
+}
+/**
+ *   convert the point to a 33 bytes buffer 
+ * @return {string} 33 bytes buffer
+ */
+toBuffer() {
+    var res = ""
+    // the 1st byte si 0X02 or 0x03 depending of the parity of y
+    if (this.y % BigInt(2) == 1)
+        res  += '\x02'
+    else 
+        res  += '\x03'
+    res += bigInt256ToBigEndianBuffer( this.x )
+    console.assert( res.length == 33)
+    return res;
 }
 
 }//class ECPoint {
@@ -149,5 +170,6 @@ pointGeneratorScalarMult(  number ) {
  
      return this.pointScalarMult( this.G, number ) ;
 }
+
 
 }// class EllipticCurveSecp256k1

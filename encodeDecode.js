@@ -230,6 +230,8 @@ function base58CheckEncode( buffer, prefix ) {
  * @param {buffer} buf 
  */
 function bigEndianBufferTo256BitInt( buf ) {
+    console.assert( typeof buf == "string")
+
     var result = BigInt(0);
     const _256 = BigInt(256);
     // add 32 bytes = 256 buts
@@ -245,6 +247,8 @@ function bigEndianBufferTo256BitInt( buf ) {
  * @param {buffer} buf 
  */
 function littleEndianBufferTo256BitInt( buf ) {
+    console.assert( typeof buf == "string")
+
     var result = BigInt(0);
     const _256 = BigInt(256);
     // add 32 bytes = 256 buts
@@ -255,8 +259,13 @@ function littleEndianBufferTo256BitInt( buf ) {
     return result  
 }
   
-// convert a Big int into a big endian buffer of 32 bytes representing a 256 bits int.
-function BigInt256ToLowEndianBuffer(x) {
+/**
+ *  convert a Big int into a big endian buffer of 32 bytes representing a 256 bits int.
+ * = most significant byte first
+ *  @param {bigInt} x 256 bit number to convert
+ *  @return big endian buffer of 32 bytes
+ */
+function bigInt256ToBigEndianBuffer(x) {
     console.assert(typeof x == "bigint")
     var buf = ""
     var _255 = BigInt(0xFF);
@@ -272,7 +281,7 @@ function BigInt256ToLowEndianBuffer(x) {
     return buf
 }
 // convert a int into a big endian buffer of 4 bytes representing a 32 bits int.
-function intTobigEndian32Buffer(x) {
+function int32ToBigEndianBuffer(x) {
     var buf =    String.fromCharCode((x>>24) & 0xFF)
         buf +=   String.fromCharCode((x>>16) & 0xFF)
         buf +=   String.fromCharCode((x>> 8) & 0xFF)     
@@ -282,7 +291,7 @@ function intTobigEndian32Buffer(x) {
 }  
 // convert a int into a big endian buffer of 8 bytes representing a 64 bits int.
 function intTobigEndian64Buffer(x) {
-    return "\x00".repeat(4) + intTobigEndian32Buffer(x)
+    return "\x00".repeat(4) + int32ToBigEndianBuffer(x)
 }  
 /**
 * convert a buffer into int assuming the buffer in ins big endian

@@ -43,17 +43,17 @@ class hdwallet {
             var buf = '';
             // 4 byte: version bytes
             var nVersion = this.private  ? nSIGNATURE_PrivateKey : nSIGNATURE_PublicKey;
-            buf += intTobigEndian32Buffer(nVersion) // mainnet: 0x0488B21E public, 0x0488ADE4 private
+            buf += int32ToBigEndianBuffer(nVersion) // mainnet: 0x0488B21E public, 0x0488ADE4 private
             // 1 byte: depth: 0x00 for master nodes, 0x01 for level-1 derived keys, ....
             buf +=  String.fromCharCode(this.depth   )
             // 4 bytes: the fingerprint of the parent's key (0x00000000 if master key)
-            buf += intTobigEndian32Buffer(0)
+            buf += int32ToBigEndianBuffer(0)
             // 4 bytes: child number. This is ser32(i) for i in xi = xpar/i, with xi the key being serialized. (0x00000000 if master key)
-            buf += intTobigEndian32Buffer(0)
+            buf += int32ToBigEndianBuffer(0)
             // 32 bytes: the chain code
             buf +=  this.chainCode
             // 33 bytes: the public key or private key data (serP(K) for public keys, 0x00 || ser256(k) for private keys)
-            buf += "\x00" + BigInt256ToLowEndianBuffer( this.key)
+            buf += "\x00" + bigInt256ToBigEndianBuffer( this.key)
             console.assert( buf.length == 78)
             return buf
         }
@@ -117,22 +117,20 @@ constructor( seed ) {
 _ckdPrivatr( extendedKey, i ) {
      console.assert( extendedKey.isExtendedKey() )
 
-     bHardenedKey = i<0; // or i > 0x80000000
+     var bHardenedKey = (i & 0x80000000) != 0; // or i > 0x80000000
      var data;
      if (bHardenedKey) {
         // hardened child
         //Data = 0x00 || ser256(kpar) || ser32(i))
-        data = "\x00" + extendedKey.key + intTobigEndian32Buffer(i)
+        data = "\x00" + bigInt256ToBigEndianBuffer(extendedKey.key) + int32ToBigEndianBuffer(i)
      }
      else { 
         // normal chid
         // Data = serP(point(kpar)) || ser32(i)).
-        // convert to 256 Bits integer
-        var extkeyAsBigInt  = bigEndianBufferTo256BitInt( extendedKey.key)     
         // calculate P = K * G   
-        var KPoint  = this.ecdsa.ec.pointGeneratorScalarMult( extkeyAsBigInt );
+        var KPoint  = this.ecdsa.ec.pointGeneratorScalarMult( extendedKey.key );
         // calc buffer 
-        data = P.toBuffer() + intTobigEndian32Buffer(i)
+        data = KPoint.toBuffer() + int32ToBigEndianBuffer(i)
     }
     // calculate hash from key and buffer
     var hash512 = hmac_sha512(  extendedKey.chainCode, data );
@@ -186,11 +184,11 @@ getPrivateKeyFromPath( derivationPath ) {
         indexI = remainingPath.substr( 0, indexI.length-1 ) // remove ' ou H at the end
     var index     = parseInt(remainingPath)
     if (hardened)
-        if (index = -index)
+        index = 0x80000000 + index;
     // get master key
-    var masterKey = getMasterKey();
+    var masterKey = this.getMasterKey();
     //@test : 1 derivation
-    return _ckdPrivatr(masterKey, index)
+    return this._ckdPrivatr(masterKey, index)
 }
 
 

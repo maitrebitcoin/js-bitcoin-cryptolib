@@ -131,7 +131,7 @@ function sha256( buffer ) {
     //var b2 = new Uint8Array(H.buffer,0,32);
     var digest = "";
     for (var i = 0; i < 8; i++) { 
-        digest += intTobigEndian32Buffer( H[i] )
+        digest += int32ToBigEndianBuffer( H[i] )
     }
     console.assert( digest.length == 32)
     return digest;
@@ -199,11 +199,11 @@ function sha512( buffer ) {
     function UI64TobigEndian64Buffer(x) {
         var high = Number(x / _2pow32)  
         var low  = Number(x % _2pow32); 
-        return intTobigEndian32Buffer(high) + intTobigEndian32Buffer(low)
+        return int32ToBigEndianBuffer(high) + int32ToBigEndianBuffer(low)
     }       
     // convert a int into a big endian buffer of 8 bytes representing a 64 bits int.
     function intTobigEndian128Buffer(x) {
-        return "\x00".repeat(12) + intTobigEndian32Buffer(x)
+        return "\x00".repeat(12) + int32ToBigEndianBuffer(x)
     }   
     // convert a buffer into uint64 assuming the buffer in ins big endian
     function bigEndianBufferToUI64( buf, pos ) {
