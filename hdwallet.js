@@ -21,16 +21,12 @@ class hdwallet {
         constructor() {
         }
         // init as a private key
-        initAsPrivate( key, chainCode, depth ) {
+        initAsPrivate( key, chainCode ) {
             console.assert( typeof key == 'bigint' )
             console.assert( typeof chainCode == 'string' )
             console.assert( chainCode.length == 32,"chainCode must be 256 bits")            
-            console.assert( typeof depth == 'number' )
-            console.assert( depth >=  0 )
-            console.assert( depth <= 255 )
             this.key       = key;
             this.chainCode = chainCode;        
-            this.depth     = depth;  
             this.private   = true;
         }
         isExtendedKey() {return true;}
@@ -40,6 +36,10 @@ class hdwallet {
         * * @returns {buffer} binairy buffer. ex: "0488ade400000000000000000096cfbe121203639....""
         */
         toRawBuffer() {
+            //  <this.depth>  bmust be defined a this point
+            console.assert( typeof this.depth == 'number' )            
+            console.assert( this.depth >=  0 )
+            console.assert( this.depth <= 255 )            
             var buf = '';
             // 4 byte: version bytes
             var nVersion = this.private  ? nSIGNATURE_PrivateKey : nSIGNATURE_PublicKey;
@@ -141,7 +141,8 @@ _ckdPrivatr( extendedKey, i ) {
     var childKey =  this.ecdsa.oField.add( IL, extendedKey.key )
 
     var res = new hdwallet.ExtendedKey()
-    res.initAsPrivate( childKey, IR, i );
+    res.initAsPrivate( childKey, IR );
+    res.index = i
     return res;
 }
 
@@ -156,16 +157,17 @@ getMasterKey() {
     // cut in 2 part 256 bits long
     var IL = hash512.substring(0, 32) 
     var IR = hash512.substring(32,64) 
-    // init the extended private key :  key, chainCode, depth
+    // init the extended private key :  key, chainCode
     var key =  bigEndianBufferTo256BitInt( IL )
-    var res = new hdwallet.ExtendedKey();
-    res.initAsPrivate( key, IR, 0 );
-    return res;
+    var masterKey = new hdwallet.ExtendedKey();
+    masterKey.initAsPrivate( key, IR );
+    masterKey.depth = 0;
+    return masterKey;
 }
 /**
  *  get a private key for a derivation path
  * @param   {string}  derivationPath the derivation path. ex: "m/0'/1"
- * @returns {hdwallet.ExtendedKey}   the master key (private key)
+ * @returns {hdwallet.ExtendedKey}   the extended private key 
  */
 getPrivateKeyFromPath( derivationPath ) {
     // master key ?
@@ -188,7 +190,9 @@ getPrivateKeyFromPath( derivationPath ) {
     // get master key
     var masterKey = this.getMasterKey();
     //@test : 1 derivation
-    return this._ckdPrivatr(masterKey, index)
+    var extKey = this._ckdPrivatr(masterKey, index)
+    extKey.depth = 1;
+    return extKey;
 }
 
 

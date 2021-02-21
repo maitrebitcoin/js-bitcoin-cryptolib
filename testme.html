@@ -161,21 +161,25 @@ function bip32Sample() {
     var res   = master; //bip32.getMasterKey();
 
     // value ok
-    var resOKAsStr =  "xprv9s21ZrQH143K4b44oYF6VxMLbBroCaDgiWetWXeDHanBdreeF8bQpUndSvVgHHwQNkifjfwZXgY8Fxub73dLbnJ7we9FSaae5PvXjBTfw4Y"
-    var resOK      = new hdwallet.ExtendedKey() //
-    resOK.initFromStringBase58(resOKAsStr)
+    //var resOKAsStr =  "xprv9s21ZrQH143K4b44oYF6VxMLbBroCaDgiWetWXeDHanBdreeF8bQpUndSvVgHHwQNkifjfwZXgY8Fxub73dLbnJ7we9FSaae5PvXjBTfw4Y"
+    var resOKAsStr =  "xprv9uVXYtuVbPpJQFs3ccU7odsG3m6iPp5jsAqXY1NstBEeLB1sj3sh572x8iSo16if7b9DFRXXZdMvHKvSm39oKNR7uXCHKwM9gc8EZgZk3bA"
+    var resOKM0      = new hdwallet.ExtendedKey() //
+    resOKM0.initFromStringBase58(resOKAsStr)
 
-
+    console.log(   hex( resOKM0.toRawBuffer()) ) 
+  
 
     // dump
     var sDump  = ""
     sDump += "<hr>seed :     <p>" + hex( seed )
     sDump += "<hr>master key signature raw:   <p>" + hex( res.toRawBuffer() )
     sDump += "<hr>master key signature base58:<p>" + res.toStringBase58() + "<p>" + resOKAsStr
-    sDump += "<p>" + hex(base58Decode(resOK))
+    sDump += "<p>" //+ hex(base58Decode(resOK))
     
     sDump += "<hr>m/0 raw:   <p>" + hex( extKeyM0.toRawBuffer() )
-    sDump += "<hr>m/0 base58:<p>" + extKeyM0.toStringBase58() + "<p>" + resOK
+    sDump += "<hr>m/0 base58:<p>" + extKeyM0.toStringBase58() 
+    sDump += "<hr>m/0 OK    :<p>" + resOKAsStr
+    sDump += "<hr>m/0 OK    :<p>" + resOKAsStr
 
  
     
