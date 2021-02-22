@@ -227,9 +227,10 @@ function base58CheckEncode( buffer, prefix ) {
 /**
  * convert a buffer into BigInt assuming the buffer in big endian format 
  * = most significant byte first
- * @param {buffer} buf 
+ * @param {string} buf 
+ * @return {BigInt} 256 bits unsigned big int
  */
-function bigEndianBufferTo256BitInt( buf ) {
+function bigInt256FromBigEndianBuffer( buf ) {
     console.assert( typeof buf == "string")
 
     var result = BigInt(0);
@@ -241,31 +242,14 @@ function bigEndianBufferTo256BitInt( buf ) {
     }
     return result  
 }
-/**
- * convert a buffer into BigInt assuming the buffer in little endian format 
- * = most significant byte last
- * @param {buffer} buf 
- */
-function littleEndianBufferTo256BitInt( buf ) {
-    console.assert( typeof buf == "string")
-
-    var result = BigInt(0);
-    const _256 = BigInt(256);
-    // add 32 bytes = 256 buts
-    for (var i=0;i<32;i++) {
-        var nI = BigInt(buf.charCodeAt(31-i)) 
-        result = result*_256  + nI
-    }
-    return result  
-}
   
 /**
- *  convert a Big int into a big endian buffer of 32 bytes representing a 256 bits int.
+ *  convert a 256 bits BigInt into a big endian buffer of 32 bytes in big endian format.
  * = most significant byte first
- *  @param {bigInt} x 256 bit number to convert
- *  @return big endian buffer of 32 bytes
+ *  @param  {bigInt} x 256 bit number to convert
+ *  @return {string} big endian buffer of 32 bytes
  */
-function bigInt256ToBigEndianBuffer(x) {
+function bigEndianBufferFromBigInt256(x) {
     console.assert(typeof x == "bigint")
     var buf = ""
     var _255 = BigInt(0xFF);
@@ -280,29 +264,70 @@ function bigInt256ToBigEndianBuffer(x) {
     console.assert(buf.length == 32)
     return buf
 }
-// convert a int into a big endian buffer of 4 bytes representing a 32 bits int.
-function int32ToBigEndianBuffer(x) {
-    var buf =    String.fromCharCode((x>>24) & 0xFF)
-        buf +=   String.fromCharCode((x>>16) & 0xFF)
-        buf +=   String.fromCharCode((x>> 8) & 0xFF)     
-        buf +=   String.fromCharCode( x      & 0xFF)                   
-    
-    return buf
-}  
-// convert a int into a big endian buffer of 8 bytes representing a 64 bits int.
-function intTobigEndian64Buffer(x) {
-    return "\x00".repeat(4) + int32ToBigEndianBuffer(x)
-}  
+
 /**
-* convert a buffer into int assuming the buffer in ins big endian
-* @param {buffer} buf
+* convert a buffer into int assuming the buffer is in big endian format
+* = most significant byte first
+* @param {string} buf
 * @param {int}    pos 1st char to convert in buf. 0 if non set
 */
-function bigEndianBufferToInt( buf, pos ) {
+function int32FromBigEndianBuffer( buf, pos ) {
     if (!pos) pos= 0;
     var res  =    (buf.charCodeAt(pos  )<<24)
                 | (buf.charCodeAt(pos+1)<<16)
                 | (buf.charCodeAt(pos+2)<<8 )
                 | (buf.charCodeAt(pos+3)    )
     return res  
+}
+
+/**
+ *  convert a int into a big endian buffer of 4 bytes representing a 32 bits int.
+ */
+function bigEndianBufferFromInt32(x) {
+     var buf = String.fromCharCode((x>>24) & 0xFF)
+        buf += String.fromCharCode((x>>16) & 0xFF)
+        buf += String.fromCharCode((x>> 8) & 0xFF)     
+        buf += String.fromCharCode( x      & 0xFF)                   
+    
+    return buf
+}  
+
+/**
+ *  convert a UI64 into a big endian buffer of 8 bytes representing a 64 bits int.
+ * @param  {BigInt} x 64 bits unsiginend number
+ * @return {string} 8 bytes buffer
+ */
+function bigEndianBufferFromUInt64(x) {
+    console.assert(x>=0);      
+    const _2pow32 =  BigInt("0x100000000");
+    var high = Number(x / _2pow32)  
+    var low  = Number(x % _2pow32); 
+    return bigEndianBufferFromInt32(high) + bigEndianBufferFromInt32(low)
+}      
+/** 
+ * convert a int into a big endian buffer of 8 bytes representing a 128 bits int.
+ * @param  {BigInt} x 128 bits unsignend number.
+ * @return {string} 16 byte buffer
+ */
+function bigEndianBufferFromUInt128(x) {
+    const _2pow64 =  BigInt("0x100000000000000000");
+    var high = (x / _2pow64)  
+    var low  = (x % _2pow64);     
+    return bigEndianBufferFromUInt64(high) + bigEndianBufferFromUInt64(low)
+}   
+/** 
+ *  convert a buffer into uint64 assuming the buffer in ins big endian
+ * = most significant byte first
+ * @param  {string} buf 
+ * @param  {Number} pos postiion of the 1st char to convert in buf
+ * @return {BigInt} 64 bits unsigned int
+ */ 
+function UInt64FrombigEndianBuffer( buf, pos ) {
+    var temp = new BigUint64Array( 1 )
+    var nRes = temp[0];
+    for (var i=0;i<8;i++) {
+        nRes = nRes * BigInt(256);
+        nRes += BigInt( buf.charCodeAt(pos+i) );
+    }
+    return nRes  
 }

@@ -40,11 +40,12 @@ isZero( pointB )  {
 toBuffer() {
     var res = ""
     // the 1st byte si 0X02 or 0x03 depending of the parity of y
-    if (this.y % BigInt(2) == 1)
+    // 0x02 for even / x03 for odd 
+    if (this.y % BigInt(2) == 0) // if y is even
         res  += '\x02'
     else 
         res  += '\x03'
-    res += bigInt256ToBigEndianBuffer( this.x )
+    res += bigEndianBufferFromBigInt256( this.x )
     console.assert( res.length == 33)
     return res;
 }

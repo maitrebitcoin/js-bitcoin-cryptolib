@@ -60,7 +60,7 @@ function sha256( buffer ) {
     if (n0Padding == 64) n0Padding = 0;
     buffer += '\x00'.repeat(n0Padding)
     //append L as a 64-bit big-endian integer, making the total post-processed length a multiple of 64 bytest (512 bits)
-    buffer +=  intTobigEndian64Buffer(L)
+    buffer +=  bigEndianBufferFromUInt64( BigInt(L) )
     console.assert( buffer.length % 64 == 0)
   
     // Process the message in successive 64 bytes chunks:   
@@ -76,7 +76,7 @@ function sha256( buffer ) {
 
         // copy chunk into first 16 words w[0..15] of the message schedule array
         for (var i = 0; i < 16; i++) {
-            w[i] = bigEndianBufferToInt(blockI, i*4)
+            w[i] = int32FromBigEndianBuffer(blockI, i*4)
         }
         // Extend the first 16 words into the remaining 48 words w[16..63] of the message schedule array:
         for (var i = 16; i< 64; i++) {
@@ -131,7 +131,7 @@ function sha256( buffer ) {
     //var b2 = new Uint8Array(H.buffer,0,32);
     var digest = "";
     for (var i = 0; i < 8; i++) { 
-        digest += int32ToBigEndianBuffer( H[i] )
+        digest += bigEndianBufferFromInt32( H[i] )
     }
     console.assert( digest.length == 32)
     return digest;
@@ -195,26 +195,7 @@ function sha512( buffer ) {
         console.assert(  temp[0] < BigInt("0x10000000000000000") )
         return temp[0]
     }    
-    // convert a UI64 into a big endian buffer of 8 bytes representing a 64 bits int.
-    function UI64TobigEndian64Buffer(x) {
-        var high = Number(x / _2pow32)  
-        var low  = Number(x % _2pow32); 
-        return int32ToBigEndianBuffer(high) + int32ToBigEndianBuffer(low)
-    }       
-    // convert a int into a big endian buffer of 8 bytes representing a 64 bits int.
-    function intTobigEndian128Buffer(x) {
-        return "\x00".repeat(12) + int32ToBigEndianBuffer(x)
-    }   
-    // convert a buffer into uint64 assuming the buffer in ins big endian
-    function bigEndianBufferToUI64( buf, pos ) {
-        var temp = new BigUint64Array( 1 )
-        var nRes = temp[0];
-        for (var i=0;i<8;i++) {
-            nRes = nRes * BigInt(256);
-            nRes += BigInt( buf.charCodeAt(pos+i) );
-        }
-        return nRes  
-    }
+
 
     // sha2 constants :
     //  (first 64 bits of the fractional parts of the square roots of the first 8 primes 2..19):
@@ -249,7 +230,7 @@ function sha512( buffer ) {
     if (n0Padding == 128) n0Padding = 0;
     buffer += '\x00'.repeat(n0Padding)
     //append L as a 64-bit big-endian integer, making the total post-processed length a multiple of 128 bytest (1024 bits)
-    buffer +=  intTobigEndian128Buffer(L)
+    buffer +=  bigEndianBufferFromUInt128( BigInt(L) )
     console.assert( buffer.length % 128 == 0)
   
     // Process the message in successive 128 bytes chunks (1024 bits):   
@@ -265,7 +246,7 @@ function sha512( buffer ) {
 
         // copy chunk into first 16 qwords w[0..15] of the message schedule array
         for (var i = 0; i < 16; i++) {
-            w[i] = bigEndianBufferToUI64(blockI, i*8)
+            w[i] = UInt64FrombigEndianBuffer(blockI, i*8)
         }
         // Extend the first 16 words into the remaining 48 words w[16..63] of the message schedule array:
         for (var i = 16; i< 80; i++) {
@@ -319,7 +300,7 @@ function sha512( buffer ) {
     // result converted into a string buffer
     var digest = "";
     for (var i = 0; i < 8; i++) { 
-        digest += UI64TobigEndian64Buffer( H[i] )
+        digest += bigEndianBufferFromUInt64( H[i] )
     }
     // result must be 512 bytes long
     console.assert( digest.length == 64)

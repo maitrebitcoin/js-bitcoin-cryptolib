@@ -177,12 +177,11 @@ function bip32Sample() {
     sDump += "<p>" //+ hex(base58Decode(resOK))
     
     sDump += "<hr>m/0 raw:   <p>" + hex( extKeyM0.toRawBuffer() )
-    sDump += "<hr>m/0 base58:<p>" + extKeyM0.toStringBase58() 
-    sDump += "<hr>m/0 OK    :<p>" + resOKAsStr
-    sDump += "<hr>m/0 OK    :<p>" + resOKAsStr
+    sDump += "<p>m/0 base58: " + extKeyM0.toStringBase58() 
+    sDump += "<hr> m/0 OK____: " + resOKAsStr
+    sDump += "<p> m/0 OK raw: " + hex( resOKM0.toRawBuffer() )
+    sDump += "<p> m/0 OK2____: " + resOKM0.toStringBase58() 
 
- 
-    
     document.getElementById("resultat").innerHTML = sDump;    
 }
 

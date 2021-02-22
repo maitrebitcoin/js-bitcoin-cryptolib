@@ -140,7 +140,7 @@ signMessage( message, privateKey ) {
     // calc message hash
     var hashbuffer    = sha256(sha256( message ));
     // convert to 256 Bits integer
-    var h      = bigEndianBufferTo256BitInt(hashbuffer)
+    var h      = bigInt256FromBigEndianBuffer(hashbuffer)
     // generate random number k
     // TOOD : deterministic-ECDSA, the value k is HMAC-derived from h + privKey (see RFC 6979)
     var k      = getRandomBigInt256()
@@ -190,7 +190,7 @@ verifySignature( message, signature, publicKey ) {
     // calc message hash
     var hashbuffer    = sha256(sha256( message ));
     // convert to 256 Bits integer
-    var h      = bigEndianBufferTo256BitInt(hashbuffer)
+    var h      = bigInt256FromBigEndianBuffer(hashbuffer)
 
     // u1 = h * 1/signature.s 
     var invS = this.oField.inversion(signature.s);    
