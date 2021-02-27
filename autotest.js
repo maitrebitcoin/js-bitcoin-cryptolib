@@ -17,7 +17,7 @@
  * 
 */
 function autotest_all(fonError, fonStepOK, fonEnd ){
-    var tabTestName  = new Array( "sha512", "sha256", "hmac_sha512", "ecdsa","bip32" )
+    var tabTestName  = new Array( "ripemd160", "sha512", "sha256", "hmac_sha512", "ecdsa","bip32" )
 
     var numTest = 0;
 
@@ -120,13 +120,45 @@ function autotest_sha512( fonError ) {
             "07e547d9586f6a73f73fbac0435ed76951218fb7d0c8d788a309d785436bbb642e93a252a954f23912547d1e8a3b5ed6e1bfd7097821233fa0538f3db854fee6")
     _test_( "be688838ca8686e5c90689bf2ab585cef1137c999b48c70b92f67a5c34dc15697b5d11c982ed6d71be1e1e7f7b4e0733884aa97c3f7a339a8ed03577cf74be09",  
             "89728620891234831636ec22de526c96d1587bd89cb18c6efa820de3ee1c78e7bae59dd0eda0e5b452fbf2d45c7a4b2420e1c2532fa0753076c5b74dfca2c046")
+    // SUCESS
+}
+/**
+ * test the ripemd160() fucntion
+ * @param {function} fonError callback called if the test fails
+ */
+function autotest_ripemd160( fonError ) {
+    // s       : value to hash 
+    // expeded : "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    function _test_( s, expected  ) 
+    {
+        // calculate hash
+        var hash  = ripemd160( s )
+        // is it the expected result ?
+        var hashAsHexString =  hex(hash);
+        if (hashAsHexString != expected) {
+            // error
+            FAILED( fonError, s, hashAsHexString, expected )
+        }
 
+    }
 
-
+    // test some values 
+    _test_( "",  
+            "9c1185a5c5e9fc54612808977ee8f548b2258d31")
+    _test_( "abc",  
+            "8eb208f7e05d987a9b044a8e98c6b087f15a0bfc")
+    _test_( "The quick brown fox jumps over the lazy dog",  
+            "37f332f68db77bd9d7edd4969571ad671cf9dd3b")
+    _test_( "be688838ca8686e5c90689bf2ab585cef1137c999b48c70b92f67a5c34dc15697b5d11c982ed6d71be1e1e7f7b4e0733884aa97c3f7a339a8ed03577cf74be09",  
+            "dbeed69c6320579a69e6d25f443dccc8dc22532f")
+    _test_( "be688838ca8686e5c90689bf2ab585cef1137c999b48c70b92f67a5c34dc15697b5d11c982ed6d71be1e1e7f7b4e0733884aa97c3f7a339a8ed03577cf74be09_",
+            "ec7a52a5cd601f79c1e5e7fd6dba0b9806eea53f")
 
     // SUCESS
-  
 }
+
+
+
 
 // fonError : callback called if the test fails
 function autotest_hmac_sha512(fonError) {

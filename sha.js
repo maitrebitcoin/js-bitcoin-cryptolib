@@ -11,8 +11,8 @@
 /**
  * hash a buffer using the sha2 256 algoritmh
  * 
- * @param   {binary string} buffer
- * @returns {binary string}
+ * @param   {string} buffer
+ * @returns {string} 256 bits buffer (32 bits)
  */
 function sha256( buffer ) {
 
@@ -141,18 +141,18 @@ function sha256( buffer ) {
 /**
  * hash a buffer using the sha2 512 algoritmh
  * 
- * @param   {binary string} buffer
- * @returns {binary string}
+ * @param   {string} buffer
+ * @returns {string} 512 bits buffer (64 bytes)
  */
 function sha512( buffer ) {
     const _2pow32 =  BigInt("0x100000000");
-    // force conveert int to BigInt uin32
+    // force convert int to BigInt uin32
     function toBigUI32(x) {
         var temp = new Uint32Array([x])
         return BigInt( temp[0] );
     }
 
-   // right rotate x if bits bits, result forced in unsigned int 642 bits
+   // right rotate x if bits bits, result forced in unsigned int 64 bits
     function rightrotate64(x, bits) {
         var high = Number(x / _2pow32)  
         var low  = Number(x % _2pow32); 
@@ -342,11 +342,11 @@ function hmac( key, message, hash, blocksize, outpusize ) {
 }
 
 /**
- * hash a mssage + key using the hmac-sha-512 algoritmh
+ * hash a message + key using the hmac-sha-512 algoritmh
  * 
- * @param   {key string}  buffer
- *  @param  {key message} buffer
- * @returns {binary string}
+ * @param   {string} key buffer
+ * @param   {string} message buffer
+ * @returns {string} 512 bits digest
  */
 function hmac_sha512( key, message ) {
     // blocksize = 1024/8 => 128 
@@ -354,3 +354,169 @@ function hmac_sha512( key, message ) {
     console.assert( hash.length == 64 )    
     return hash
 }
+
+
+
+/**
+ * hash a buffer using the ripemd-160 algorithm
+ * @see https://en.bitcoin.it/wiki/RIPEMD-160
+ * @see https://homes.esat.kuleuven.be/~bosselae/ripemd160.html
+ * 
+ * @param   {string} buffer 
+ * @returns {string} 160 bits digest
+ */
+function ripemd160(  buffer ) {
+    console.assert( typeof buffer == "string")
+
+    // --- RIPMD160 constants ----
+    // Initial values for the working array
+    var MDBuffer1st =               [ 0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, 0xc3d2e1f0  ] 
+    // number to add
+    var KAdd0    = new Uint32Array( [ 0x00000000, 0x5a827999, 0x6ed9eba1, 0x8f1bbcdc, 0xa953fd4e ] );    
+    var KAdd1    = new Uint32Array( [ 0x50a28be6, 0x5c4dd124, 0x6d703ef3, 0x7a6d76e9, 0x00000000 ] );    
+    // amount for rotate 
+    var RotAAmount0 = [
+        11, 14, 15, 12, 5, 8, 7, 9, 11, 13, 14, 15, 6, 7, 9, 8,
+        7, 6, 8, 13, 11, 9, 7, 15, 7, 12, 15, 9, 11, 7, 13, 12,
+        11, 13, 6, 7, 14, 9, 13, 15, 14, 8, 13, 6, 5, 12, 7, 5,
+        11, 12, 14, 15, 14, 15, 9, 8, 9, 14, 5, 6, 8, 6, 5, 12,
+        9, 15, 5, 11, 6, 8, 13, 12, 5, 12, 13, 14, 11, 8, 5, 6  ]
+    var RotAAmount1 = [
+        8, 9, 9, 11, 13, 15, 15, 5, 7, 7, 8, 11, 14, 14, 12, 6,
+        9, 13, 15, 7, 12, 8, 9, 11, 7, 7, 12, 7, 6, 15, 13, 11,
+        9, 7, 15, 11, 8, 6, 6, 14, 12, 13, 5, 14, 13, 13, 7, 5,
+        15, 5, 8, 11, 14, 14, 6, 14, 6, 9, 12, 9, 12, 5, 15, 8,
+        8, 5, 12, 9, 12, 5, 14, 6, 8, 13, 6, 5, 15, 13, 11, 11  ]         
+    //selection of message word
+    var SelectWord0 = [
+        0, 1, 2, 3 , 4, 5, 6 ,7, 8 ,9, 10, 11, 12, 13, 14,15,
+        7, 4, 13, 1, 10, 6, 15, 3, 12, 0, 9, 5, 2, 14, 11, 8,
+        3, 10, 14, 4, 9, 15, 8, 1, 2, 7, 0, 6, 13, 11, 5, 12,
+        1, 9, 11, 10, 0, 8, 12, 4, 13, 3, 7, 15, 14, 5, 6, 2,
+        4, 0, 5, 9, 7, 12, 2, 10, 14, 1, 3, 8, 11, 6, 15, 13, ]
+    var SelectWord1 = [  
+        5, 14, 7, 0, 9, 2, 11, 4, 13, 6, 15, 8, 1, 10, 3, 12,
+        6, 11, 3, 7, 0, 13, 5, 10, 14, 15, 8, 12, 4, 9, 1, 2,
+        15, 5, 1, 3, 7, 14, 6, 9, 11, 8, 12, 2, 10, 0, 4, 13,
+        8, 6, 4, 1, 3, 11, 15, 0, 5, 12, 2, 13, 9, 7, 10, 14,
+        12, 15, 10, 4, 1, 5, 8, 7, 6, 2, 13, 14, 0, 3, 9, 11 ]
+
+
+    // padding to 512 bit = 64 byte 
+    var bufferLen = buffer.length; // before paddin
+    buffer = '\x80' + buffer
+    var n0Padding = 64 - (buffer.length + 8) % 64;
+    if (n0Padding == 64) n0Padding = 0;
+    buffer += '\x00'.repeat(n0Padding) 
+    //append L as a 64-bit big-endian integer, making the total post-processed length a multiple of 64 bytest (512 bits)
+    buffer +=  bigEndianBufferFromUInt64( BigInt(bufferLen) )
+    console.assert( buffer.length % 64 == 0)
+
+    /**
+     * convert a buffer to an array of 32 bits unsigned integer
+     * @param {string} buffer 
+     */
+    function uint32ArrayFromBuffer( buffer ) {
+        console.assert( buffer.length % 4 == 0 )
+        var nbInt = buffer.length/4;
+        var result = new Uint32Array(nbInt)
+        for (var i=0;i<nbInt/4;i++) {
+            result[i] = int32FromBigEndianBuffer( buffer.substring( i*4, i*4+4) )
+        }
+    }
+    // rotate left <x> on <bits> bits
+    function leftRotate(x, bits)   {
+        var temp     = new Uint32Array( [ x  ] )
+        temp[0]  = ( temp[0]<<bits ) | ( temp[0]>>>(32 - bits))
+        return   temp[0];
+
+//        return    (x << nbBit)  
+//                | (x >> (32-nbBit));
+    }
+    // the five basic nonlinear functions at bit level: exor, mux, s-, mux, -
+    function _basicFunc( x, y, z, numFunc )  {      
+         switch (numFunc) {
+            case 0: return x ^ y ^z;             // x XOR y XOR z     
+            case 1: return (x & y) | (~x & z);   // (x AND y) OR (NOT(x) AND z) 
+            case 2: return (x | ~y) ^ z          // (x OR NOT(y)) XOR z  
+            case 3: return (x & z) | (y & ~z)    // (x AND z) OR (y AND NOT(z))
+            case 4: return x ^ (y | ~z)          // x XOR (y OR NOT(z))   
+            default : console.assert(false);
+        }
+    }
+
+    // safe 32 bits addition with overflow ignored
+    function adduint32 (x, y) { 
+        var temp    = new Uint32Array( [ x, y ] )
+        temp[0] += temp[1];
+        return temp[0]
+    }    
+
+
+    // Init working buffer with constants
+    var mdBuffer  = new Uint32Array( MDBuffer1st )
+
+    // Main loop
+    // Process the message in successive 64 bytes chunks:   
+    var nbBlock = buffer.length / 64;
+    for (var ibloc=0;ibloc<nbBlock;ibloc++) {
+        // extract the 64 bytes bloc for iteration <ibloc>
+        blockI = buffer.substring( ibloc*64, (ibloc+1)*64 )
+        
+        // 2*5 DWORD : the working array. 
+        // first iteration : constants from MDBuffer1st
+        // next  ierations : hash result from previous iterations
+        var left  =  mdBuffer 
+        var right =  mdBuffer 
+        
+        // internal iteraion fuction
+        function _fIteration( a, b, c, d, e, x, iterationIndex, bLeft )  {
+            var numBlock = iterationIndex >> 4 // = iterationIndex/16
+            // constants for this iteration        
+            var K         = bLeft ? KAdd0[numBlock]             : KAdd1[numBlock];
+            var rotAmount = bLeft ? RotAAmount0[iterationIndex] : RotAAmount1[iterationIndex];
+            var numFunc   = bLeft ? iterationIndex >> 4         : 4 - (iterationIndex >> 4)
+
+            var t  = a + _basicFunc(b, c, d, numFunc) + x + K | 0 ;
+            var tt = adduint32( leftRotate( t, rotAmount) , e ) 
+
+            a = e;
+            e = d
+            d = leftRotate(c, 10) 
+            c = b
+            b = tt
+            return [a,b,c,d,e];
+        }
+ 
+        // internal loop
+        for(var j=0;j<80;j++) {       
+            // get 32 bits from the source buffer 
+            var xIndexL = SelectWord0[j] // left
+            var xIndexR = SelectWord1[j] // right
+            var xLj = int32FromLittleEndianBuffer( blockI , xIndexL*4 )
+            var xRj = int32FromLittleEndianBuffer( blockI , xIndexR*4 )
+            // mix with left and right arrays
+            left  = _fIteration(  left[0],  left[1],  left[2],  left[3],  left[4], xLj, j, true  );
+            right = _fIteration( right[0], right[1], right[2], right[3], right[4], xRj, j, false );
+        }
+    
+        // combine results
+        var t       = adduint32( adduint32( mdBuffer[1] , left[2] ), right[3] )
+        mdBuffer[1] = adduint32( adduint32( mdBuffer[2] , left[3] ), right[4] )
+        mdBuffer[2] = adduint32( adduint32( mdBuffer[3] , left[4] ), right[0] )
+        mdBuffer[3] = adduint32( adduint32( mdBuffer[4] , left[0] ), right[1] )
+        mdBuffer[4] = adduint32( adduint32( mdBuffer[0] , left[1] ), right[2] )
+        mdBuffer[0] = t;
+ 
+    } // for (var ibloc=0;ibloc<nbBlock;ibloc++) 
+
+    // build result hash
+    var digest= ""
+    for (var i=0;i<5;i++)  {
+        digest += littleEndianBufferFromInt32( mdBuffer[i] )
+    }
+    console.assert( digest.length = 160/8 );
+    return digest;
+
+}
+

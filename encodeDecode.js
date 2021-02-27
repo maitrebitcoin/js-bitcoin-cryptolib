@@ -180,8 +180,8 @@ function base58CheckDecode(base58encoded) {
 /**
  *  encode a binary buffer to base58
  *
- * @param   {string} buffer
- * @returns {string}
+ * @param   {string} buffer source binairy buffer
+ * @returns {string} encoded string. ex : "xprv9s21ZrQH143K"
  */
 function base58Encode( buffer, prefix ) {
     if (!prefix)
@@ -279,17 +279,41 @@ function int32FromBigEndianBuffer( buf, pos ) {
                 | (buf.charCodeAt(pos+3)    )
     return res  
 }
+/**
+* convert a buffer into int assuming the buffer is in liitle endian format
+* = least significant byte first (intel for ex.)
+* @param {string} buf
+* @param {int}    pos 1st char to convert in buf. 0 if non set
+*/
+function int32FromLittleEndianBuffer( buf, pos ) {
+    if (!pos) pos= 0;
+    var res  =    (buf.charCodeAt(pos+3 )<<24)
+                | (buf.charCodeAt(pos+2)<<16)
+                | (buf.charCodeAt(pos+1)<<8 )
+                | (buf.charCodeAt(pos  )    )
+    return res  
+}
 
 /**
  *  convert a int into a big endian buffer of 4 bytes representing a 32 bits int.
  */
 function bigEndianBufferFromInt32(x) {
-     var buf = String.fromCharCode((x>>24) & 0xFF)
+    var buf =  String.fromCharCode((x>>24) & 0xFF)
         buf += String.fromCharCode((x>>16) & 0xFF)
         buf += String.fromCharCode((x>> 8) & 0xFF)     
-        buf += String.fromCharCode( x      & 0xFF)                   
-    
+        buf += String.fromCharCode( x      & 0xFF)                     
     return buf
+}  
+/**
+ *  convert a int into a little endian buffer of 4 bytes representing a 32 bits int.
+ * = least significant byte first (intel for ex.)
+ */
+function littleEndianBufferFromInt32(x) {
+   var buf =  String.fromCharCode (x      & 0xFF)
+       buf += String.fromCharCode((x>> 8) & 0xFF)
+       buf += String.fromCharCode((x>>16) & 0xFF)     
+       buf += String.fromCharCode((x>>24) & 0xFF)                    
+   return buf
 }  
 
 /**
