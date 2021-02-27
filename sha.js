@@ -404,12 +404,12 @@ function ripemd160(  buffer ) {
 
     // padding to 512 bit = 64 byte 
     var bufferLen = buffer.length; // before paddin
-    buffer = '\x80' + buffer
+    buffer = buffer+ '\x80' 
     var n0Padding = 64 - (buffer.length + 8) % 64;
     if (n0Padding == 64) n0Padding = 0;
     buffer += '\x00'.repeat(n0Padding) 
-    //append L as a 64-bit big-endian integer, making the total post-processed length a multiple of 64 bytest (512 bits)
-    buffer +=  bigEndianBufferFromUInt64( BigInt(bufferLen) )
+    //append as a 64-bit big-endian integer of the number of bits, making the total post-processed length a multiple of 64 bytest (512 bits)
+    buffer +=  littleEndianBufferFromUInt64( BigInt(bufferLen)*BigInt(8) )
     console.assert( buffer.length % 64 == 0)
 
     /**

@@ -315,7 +315,6 @@ function littleEndianBufferFromInt32(x) {
        buf += String.fromCharCode((x>>24) & 0xFF)                    
    return buf
 }  
-
 /**
  *  convert a UI64 into a big endian buffer of 8 bytes representing a 64 bits int.
  * @param  {BigInt} x 64 bits unsiginend number
@@ -327,6 +326,19 @@ function bigEndianBufferFromUInt64(x) {
     var high = Number(x / _2pow32)  
     var low  = Number(x % _2pow32); 
     return bigEndianBufferFromInt32(high) + bigEndianBufferFromInt32(low)
+}      
+/**
+ *  convert a UI64 into a little endian buffer of 8 bytes representing a 64 bits int.
+ * = least significant byte first (intel for ex.)
+ * @param  {BigInt} x 64 bits unsiginend number
+ * @return {string} 8 bytes buffer
+ */
+function littleEndianBufferFromUInt64(x) {
+    console.assert(x>=0);      
+    const _2pow32 =  BigInt("0x100000000");
+    var high = Number(x / _2pow32)  
+    var low  = Number(x % _2pow32); 
+    return littleEndianBufferFromInt32(low) + littleEndianBufferFromInt32(high) 
 }      
 /** 
  * convert a int into a big endian buffer of 8 bytes representing a 128 bits int.
