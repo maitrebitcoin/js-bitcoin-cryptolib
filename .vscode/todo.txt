@@ -1,0 +1,8 @@
+.remove new ECDSA()   
+.import pubkey from buffer
+.test encode/decode
+.cache key
+.derivation if we only have pubket
+.bip39 : phase to/from buffer
+.samples
+.check all comments format

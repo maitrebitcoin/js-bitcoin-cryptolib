@@ -56,6 +56,7 @@ class ECDSA {
             console.assert(  point.y )               
             this.point = point;          
         }
+        isPublicKey() { return true; }
         toString() {
             return hex(this.point.x) + ',' + hex(this.point.y)
         }        
@@ -96,7 +97,7 @@ constructor(  ) {
     this.ec = new EllipticCurveSecp256k1();
     // curve order
     this.order   = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
-    this.oField  = new GField(  this.order )
+    this.gField  = new GField(  this.order )
 }
 
 /**
@@ -133,15 +134,43 @@ privateKeyFromBigInt( number ) {
     return privateKey
 }
 /**
+ *  generate a private key from a buffer
+ * @param   {string} buffer   256 bits big endian format
+ * @returns {ECDSA.PrivateKey}
+ */
+privateKeyFromBuffer( buffer ) {
+    console.assert( typeof buffer == 'string' ) 
+    console.assert( buffer.length == 32 ) 
+    var  number = bigInt256FromBigEndianBuffer( buffer )
+    var privateKey = new ECDSA.PrivateKey( number );
+    return privateKey
+}
+
+/**
  * get the public key associated to a private key
  * @param  {ECDSA.PrivateKey} privateKey
  * @returns {ECDSA.PublicKey}
  */
-publicKeyFormPrivateKey( privateKey ) {
+publicKeyFromPrivateKey( privateKey ) {
     var point = this.ec.pointScalarMult( this.ec.G, privateKey.value );
     var publicKey = new ECDSA.PublicKey(point);
     return publicKey;
 }
+/**
+ * get the public key from a serialised bufffer. 
+ * @param  {string} buffer 33 ou 64 bytes buffer
+ * @returns {ECDSA.PublicKey}
+ */
+publicKeyFromBuffer( buffer ) {
+    //@TODO
+    console.assert("TODO")
+    return {error:"not implemented"}
+
+    var point = new ECPoint(0,0);
+    var publicKey = new ECDSA.PublicKey(point);
+    return publicKey;
+}
+
 /**
  * sign a message
  * 
@@ -160,12 +189,12 @@ signMessage( message, privateKey ) {
     var k      = getRandomBigInt256()
     // Calculate the random point R = k * G and take its x-coordinate: r = R.x
     var pointR = this.ec.pointGeneratorScalarMult( k );
-    var r      = this.oField.modulo( pointR.x );
+    var r      = this.gField.modulo( pointR.x );
     // Calculate the signature proof: s = k^{-1} * (h + r * privKey) mod nk 
-    var invK   = this.oField.inversion(k);
-    var rpk    = this.oField.mult(   r,     privateKey.value ); // r*privKey
-    var h_rpk  = this.oField.add(    h,     rpk );              // h + r*privKey
-    var s      = this.oField.mult(   invK,  h_rpk );
+    var invK   = this.gField.inversion(k);
+    var rpk    = this.gField.mult(   r,     privateKey.value ); // r*privKey
+    var h_rpk  = this.gField.add(    h,     rpk );              // h + r*privKey
+    var s      = this.gField.mult(   invK,  h_rpk );
     //var minuss = this.oField.negate( s ); //@TODO, use it if < s 
     // create result
     var signature = new ECDSA.Signature( pointR.x, s)
@@ -188,17 +217,17 @@ verifySignature( message, signature, publicKey ) {
         return new ECDSA.SignatureCheck(false, 'invalid public key : 0');
     if (!this.ec.pointOnCurve(publicKey.point))  
         return new ECDSA.SignatureCheck(false, 'invalid public key : not on curve');
-    var point0  = this.ec.pointGeneratorScalarMult( this.oField.N );
+    var point0  = this.ec.pointGeneratorScalarMult( this.gField.N );
     if (!point0.isZero)
         return new ECDSA.SignatureCheck(false, 'invalid public key : P*K is not 0');
     //  check signature
     if (signature.r <= 0) 
         return new ECDSA.SignatureCheck(false, 'invalid signature : r is 0');
-    if (signature.r >= this.oField.N) 
+    if (signature.r >= this.gField.N) 
         return new ECDSA.SignatureCheck(false, 'invalid signature : r is > N');
     if (signature.s <= 0) 
         return new ECDSA.SignatureCheck(false, 'invalid signature : s is 0');
-    if (signature.s >= this.oField.N) 
+    if (signature.s >= this.gField.N) 
         return new ECDSA.SignatureCheck(false, 'invalid signature : s is > N');
 
     // calc message hash
@@ -207,9 +236,9 @@ verifySignature( message, signature, publicKey ) {
     var h      = bigInt256FromBigEndianBuffer(hashbuffer)
 
     // u1 = h * 1/signature.s 
-    var invS = this.oField.inversion(signature.s);    
-    var u1   = this.oField.mult( h,           invS );
-    var u2   = this.oField.mult( signature.r, invS );
+    var invS = this.gField.inversion(signature.s);    
+    var u1   = this.gField.mult( h,           invS );
+    var u2   = this.gField.mult( signature.r, invS );
     // calculate u1*G + u2*publicKey
     var pt1      =  this.ec.pointGeneratorScalarMult(         u1 )
     var pt2      =  this.ec.pointScalarMult( publicKey.point, u2 )

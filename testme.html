@@ -157,13 +157,13 @@ function bip32Sample() {
 
 
     var phrase ="pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
-    //var bseed = BigInt("0x6e85439607050fad311b71238aacdd27d3095329201baa367c43e93869621de213f2c75dac958ecc1a87d55a94baf02e223de1d686c276882c112e841b01a8df")
     var seed = bufferFromHex("6e85439607050fad311b71238aacdd27d3095329201baa367c43e93869621de213f2c75dac958ecc1a87d55a94baf02e223de1d686c276882c112e841b01a8df");
     var bip32 = new hdwallet( seed );
 
     var master   = bip32.getMasterKey()
     // should be "xprv9uVXYtuVbPpJQFs3ccU7odsG3m6iPp5jsAqXY1NstBEeLB1sj3sh572x8iSo16if7b9DFRXXZdMvHKvSm39oKNR7uXCHKwM9gc8EZgZk3bA"
-    var extKeyM0 = bip32.getPrivateKeyFromPath("m/0")
+    var extKeyM0   = bip32.getPrivateKeyFromPath("m/0")
+    var extKeyMPub = bip32.getPubliceKeyFromPath("m/0")
 
 //@temp
 //    var xx= bip32.getPrivateKeyFromPath("bogeyman");

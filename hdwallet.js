@@ -18,29 +18,34 @@ class hdwallet {
 // ------ types -----
     // represent a extended key for a hdwallet
     static ExtendedKey = class { 
+        /**
+         * basic constructeur. to be completed with a call to initAsPrivate() or initFromStringBase58()
+         * @public
+         */
         constructor() {
         }
         /**
          *  init as a private key
-         *  @param {bugInt} key       256 bits key part of the extended key
-         *  @param {buffer}chainCode  256 bits chain code part of the extended key
+         *  @param {bigInt} key        256 bits ecdsa private key
+         *  @param {buffer} chainCode  256 bits chain code
+         *  @param {hdwallet.ExtendedKey} parentKey, optionnal (for mastker key only)
+         *  @param {ECDSA} ecdsa                     an instance of the ECDSA class to calculate keys. required.
          */
-        initAsPrivate( key, chainCode, parentKey ) {
+        initAsPrivate( key, chainCode, parentKey, ecdsa ) {
             console.assert( typeof key == 'bigint' )
             console.assert( typeof chainCode == 'string' )
             console.assert( chainCode.length == 32,"chainCode must be 256 bits")     
-  
-            this.key       = key;
-            this.chainCode = chainCode;        
-            this.private   = true;
+            console.assert( ecdsa )     
+ 
+            this.private    = true;
+            this.privateKey = ecdsa.privateKeyFromBigInt( key );
+            this.chainCode  = chainCode;        
             if (parentKey) {
-                console.assert( parentKey.private, "parent of a private key lust be a private key")          
-                // calculate key identifier. same as a legacy Bitcoin adress :              
-                var ecdsa      = new ECDSA();
-                var privateKey = ecdsa.privateKeyFromBigInt( parentKey.key )
-                var publicKey  = ecdsa.publicKeyFormPrivateKey( privateKey )
+                console.assert( parentKey.private, "parent of a private key must be a private key")          
+                // calculate key identifier : 32 first bit of hash( publickey )       
+                var publicKey           = ecdsa.publicKeyFromPrivateKey( parentKey.privateKey )
                 var publicKeySerialized = publicKey.toBuffer();
-                var keyId               = ripemd160( sha256( publicKeySerialized ))
+                var keyId               = ripemd160( sha256( publicKeySerialized ) ) // same hash as bitcoin public adress
                 // the first 32 bits of the identifier 
                 this.parentFingerprint = int32FromBigEndianBuffer( keyId.substr(0,4) )
             }
@@ -48,6 +53,41 @@ class hdwallet {
                 this.parentFingerprint = 0 // master key
             }
         }
+        /**
+         *  init as a public key
+         *  @param {CEDSA.PublicKey} key        ecdsa public key
+         *  @param {buffer}          chainCode  256 bits chain code
+         */        
+        initAsPublicKey( key, chainCode ) {
+            console.assert( key.isPublicKey() )
+            console.assert( typeof chainCode == 'string' )
+            console.assert( chainCode.length == 32,"chainCode must be 256 bits")     
+  
+            this.private   = false;
+            this.publicKey = key;
+            this.chainCode = chainCode;        
+        }
+
+        /**
+         * returns the extended public key if we are a private key
+         * @param  {ECDSA} ecdsa  an instance of the ECDSA class to calculate keys. 
+         * @return {hdwallet.ExtendedKey} the corresponding public extended key 
+        */
+       getExtendedPublicKey(ecdsa) {
+            console.assert( ecdsa, "ecdsa must be present" )
+            console.assert( this.isPrivateKey() )
+            // calculate  cdsa public key
+            var publicKey  = ecdsa.publicKeyFromPrivateKey( this.privateKey )
+            // create an extended key
+            var resKey = new hdwallet.ExtendedKey();
+            resKey.initAsPublicKey(  publicKey,  this.chainCode );
+            resKey.parentFingerprint = this.parentFingerprint 
+            resKey.depth             = this.depth
+            resKey.childNumber       = this.childNumber
+            return resKey;w
+       }
+
+
         isExtendedKey() {return true;}
         isPrivateKey() {return this.private;}
         /** 
@@ -74,7 +114,10 @@ class hdwallet {
             // 32 bytes: the chain code
             buf +=  this.chainCode
             // 33 bytes: the public key or private key data (serP(K) for public keys, 0x00 || ser256(k) for private keys)
-            buf += "\x00" + bigEndianBufferFromBigInt256( this.key)
+            if (this.private)
+                buf += "\x00" + bigEndianBufferFromBigInt256( this.privateKey.value )
+            else
+                buf += this.publicKey.toBuffer()
             console.assert( buf.length == 78)
             return buf
         }
@@ -111,47 +154,77 @@ class hdwallet {
             // 1 byte: depth: 
             this.depth      =  buffer.charCodeAt(4)
             // 4 bytes: the fingerprint of the parent's key (0x00000000 if master key)
-            this.fingerprint = int32FromBigEndianBuffer( buffer.substring(5,9) )
+            this.parentFingerprint = int32FromBigEndianBuffer( buffer.substring(5,9) )
             // 4 bytes: child number. This is ser32(i) for i in xi = xpar/i, with xi the key being serialized. (0x00000000 if master key)
             this.childNumber = int32FromBigEndianBuffer( buffer.substring(9,13) )
             // 32 bytes: the chain code    
-            this.chainCode  =                       buffer.substring(13,45) 
+            this.chainCode       =                       buffer.substring(13,45) 
             // 33 bytes: the public key or private key data (serP(K) for public keys, 0x00 || ser256(k) for private keys)
-            if (this.private)
-                this.key    = bigInt256FromBigEndianBuffer( buffer.substring(46,78) )
-            else
-                this.key    =                               buffer.substring(45,78) 
+            if (this.private) {
+                var  privkeyVal = bigInt256FromBigEndianBuffer( buffer.substring(46,78) )
+                this.privateKey = new ECDSA.PrivateKey( privkeyVal )
+            }
+            else {
+                var pubKeyBuf   =                               buffer.substring(45,78) 
+                var ecdsa = new ECDSA()                  
+                this.publicKey = ecdsa.publicKeyFromBuffer(pubKeyBuf);
+            }
             // success
         }
     };
 
 // --- methods --------
 
-// construct a new hdwallet from a seed of 512 bytes
+/** 
+ *  construct a new hdwallet from a seed 
+ * @public
+ * @param {string} seed 512 bits buffer  
+ */
 constructor( seed ) {
-    console.assert( seed.length == 64,"seed must be 512 bits")
+    console.assert( seed.length >= 16 && seed.length <= 64 ,"seed must be between 128 and 512 bits")
     this.seed = seed
     this.ecdsa = new ECDSA();
 }
 
-// internal Child key derivation (CKD) functions for rprivate keys
+/**
+ *   internal Child key derivation (CKD) functions for rprivate keys
+ * @protected
+ * @param  {hdwallet.ExtendedKey} extendedKey parent key
+ * @param  {integer} i key index (childNumber)
+ * @return {hdwallet.ExtendedKey} child key
+ */
 _ckdPrivatr( extendedKey, i ) {
      console.assert( extendedKey.isExtendedKey() )
 
      var bHardenedKey = (i & 0x80000000) != 0; // or i > 0x80000000
      var data;
+   
      if (bHardenedKey) {
+        // the extended key mut be a private key
+        if (!extendedKey.isPrivateKey()) {
+            return {error:"hardened derivation of a public key is not possible."}
+        }
+        var key = extendedKey.privateKey.value
         // hardened child
         //Data = 0x00 || ser256(kpar) || ser32(i))
-        data = "\x00" + bigEndianBufferFromBigInt256(extendedKey.key) + bigEndianBufferFromInt32(i)
+        data = "\x00" + bigEndianBufferFromBigInt256(key) + bigEndianBufferFromInt32(i)
      }
      else { 
-        // normal chid
-        // Data = serP(point(kpar)) || ser32(i)).
-        // calculate P = K * G   
-        var KPoint  = this.ecdsa.ec.pointGeneratorScalarMult( extendedKey.key );
+        // normal chid         
+        var ecPoint // an Point on the ecdsa elliptic curve
+        if (!extendedKey.isPrivateKey()) {
+            // t
+            ecPoint  = extendedKey.publicKey.point;
+        }
+        else
+        {
+            var key = extendedKey.privateKey.value                
+            // calculate P = K * G   
+            ecPoint  = this.ecdsa.ec.pointGeneratorScalarMult( key );
+        }
+        // Data = serP(point(kpar)) || ser32(i)).        
         // calc buffer 
-        data = KPoint.toBuffer() + bigEndianBufferFromInt32(i)
+        data = ecPoint.toBuffer() + bigEndianBufferFromInt32(i)
     }
     // calculate hash from key and buffer
     var hash512 = hmac_sha512(  extendedKey.chainCode, data );
@@ -159,10 +232,10 @@ _ckdPrivatr( extendedKey, i ) {
     // child key = parse256(IL) + kpar (mod n).
     var IL = bigInt256FromBigEndianBuffer( hash512.substring(0,32) )
     var IR = hash512.substring(32, 64) 
-    var childKey =  this.ecdsa.oField.add( IL, extendedKey.key )
+    var childPrivateKey =  this.ecdsa.gField.add( IL, extendedKey.privateKey.value )
 
     var res = new hdwallet.ExtendedKey()
-    res.initAsPrivate( childKey, IR, extendedKey );
+    res.initAsPrivate( childPrivateKey, IR, extendedKey, this.ecdsa );
     res.childNumber = i
     return res;
 }
@@ -181,7 +254,7 @@ getMasterKey() {
     // init the extended private key :  key, chainCode
     var key =  bigInt256FromBigEndianBuffer( IL )
     var masterKey = new hdwallet.ExtendedKey();
-    masterKey.initAsPrivate( key, IR );
+    masterKey.initAsPrivate( key, IR, undefined, this.ecdsa  );
     masterKey.depth       = 0;
     masterKey.childNumber = 0;
     return masterKey;
@@ -260,6 +333,23 @@ _getPrivateKeyFromPathR( derivationPath, parentKey, depth ) {
     // recursive call on rhe remaining path <rightPath>
     var extKeyChild = this._getPrivateKeyFromPathR( rightPath, extendedKey, depth+1 )
     return extKeyChild;
+}
+
+/**
+ *  get a pubkic key for a derivation path
+ * @public
+ * @param   {string}  derivationPath the derivation path. ex: "m/0'/1"
+ * @returns {hdwallet.ExtendedKey}   the extended private key 
+ */
+getPubliceKeyFromPath( derivationPath ) {
+    // get the extendede private key
+    var extPrivateKey = this.getPrivateKeyFromPath(derivationPath);
+    if (extPrivateKey.error) 
+        return extPrivateKey; // failed
+    // get the public key
+    var  extPublicKey = extPrivateKey.getExtendedPublicKey(this.ecdsa);
+    return extPublicKey;
+
 }
 
 

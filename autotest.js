@@ -30,7 +30,13 @@ function autotest_all(fonError, fonStepOK, fonEnd ){
          var testName = tabTestName[numTest];
         // Run tests...
         // ex :  autotest_sha512(fonError)
-        eval("autotest_"+ testName + "(fonError)")
+        try {
+            eval("autotest_"+ testName + "(fonError)")
+        }
+        catch (error)  {
+            FAILED( fonError, "", "", error)     
+        }
+
         // test <testName> is OK
         fonStepOK(testName)
         // last testt ?
@@ -198,7 +204,7 @@ function autotest_ecdsa( fonError ) {
     // test public key derivation
     var valTest = "0c34cf6a7d24367baa81ef8331c8cb7ffafc0978ff6cf9e5d873de96142bdb86"
     var priv = ecdsa.privateKeyFromHexString(valTest)
-    var pub  = ecdsa.publicKeyFormPrivateKey(priv); 
+    var pub  = ecdsa.publicKeyFromPrivateKey(priv); 
     var result   = pub.toString()
     var expected ="3068765c2ab75bcfcbd5ae3ccefbdd25b94f414ab0a58c67a780fd437e35c81e,5fa059f6ecab2e2e11a880130b04697859d75eea77f603c715946ed430ef69a4"
     if (result!=expected) {
@@ -263,7 +269,7 @@ function autotest_bip32( fonError ) {
         var res58 = res.toStringBase58()
         // is it the expected result ?
         if (res58 != expected) {
-            
+
             // error
             FAILED( fonError, seedHex, res58, expected, deivationPath )
         }
@@ -279,6 +285,7 @@ function autotest_bip32( fonError ) {
        }
 
     }
+    var phrase ="pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
     var seed = "6e85439607050fad311b71238aacdd27d3095329201baa367c43e93869621de213f2c75dac958ecc1a87d55a94baf02e223de1d686c276882c112e841b01a8df";       
 
     _test_seed(seed, "xprv9s21ZrQH143K4b44oYF6VxMLbBroCaDgiWetWXeDHanBdreeF8bQpUndSvVgHHwQNkifjfwZXgY8Fxub73dLbnJ7we9FSaae5PvXjBTfw4Y");
@@ -288,8 +295,7 @@ function autotest_bip32( fonError ) {
     _test_error("*bad string")
     _test_error("xprv9s21ZrQH143K4b44oYF6VxMLb")
     _test_error("xprv9s21ZrQH143K4b44oYF6VxMLbBroCaDgiWetWXeDHanBdreeF8bQpUndSvVgHHwQNkifjfwZXgY8Fxub73dLbnJ7we9FSaae5PvXjBTfw4Z")  // CRC
-
-    var phrase ="pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
+   
 
     // test deriavation paths
     _test_derivation( seed, "m/0",    "xprv9uVXYtuVbPpJQFs3ccU7odsG3m6iPp5jsAqXY1NstBEeLB1sj3sh572x8iSo16if7b9DFRXXZdMvHKvSm39oKNR7uXCHKwM9gc8EZgZk3bA" )
@@ -299,6 +305,11 @@ function autotest_bip32( fonError ) {
     _test_derivation( seed, "m/0'/1", "xprv9xc6AdngdxP5rCTgvBexpJWZyEFemND99w7g9VnEU3wJ9CD6bo2Kv7JKE8HNudLW8gwx8PuVt1xDnVPMN37JqG7AiXYiQVHbhVxYHas19w9" )
     // BIP44
     _test_derivation( seed, "m/44'/0'/0'/0", "xprv9zqEnwRp3fCUBPZWaxV2ZnbLYfQxhVm4VfF7bh9tfSmF5eBTUxZLMnUHGTwy4ygakVWz9Y4w3LirEbrCSwTJoiFJ1JK92cqaNxKJPY6xkHc" )
+
+    // official test Vectors
+    var seed = "000102030405060708090a0b0c0d0e0f";       
+    _test_derivation( seed, "m",    "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi" )
+    //_test_derivation( seed, "m",    "xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcet8" )
 
 
 }
