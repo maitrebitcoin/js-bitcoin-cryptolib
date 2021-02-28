@@ -9,8 +9,10 @@
 <button onclick="testSha512()">    <h2> Test sha512 </h2> </button>
 <button onclick="testHmacSha512()"><h2> Test hmac-sha512 </h2> </button>
 <button onclick="testEcdsa()">     <h2> Test ecdsa  </h2> </button>
-<button onclick="testAll()">     <h2> Test ALL  </h2> </button>
+<button onclick="testBip32()">     <h2> Test bip32  </h2> </button>
 <p>
+<button onclick="testAll()">     <h2> Test ALL  </h2> </button>
+<hr>
 <button onclick="ecdsaSample()">   <h2> Ecdsa sample</h2> </button>
 <button onclick="bip32Sample()">    <h2> bip32 sample</h2> </button>
 
@@ -38,12 +40,12 @@
 <script>
 
 // called if a test fails
-function onTestFail( s, hashAsHexString, expected)
+function onTestFail( s, hashAsHexString, expected, message)
 {
     var sErr = "hash('" + s+ "') => <br>\n" +  hashAsHexString+' != <br>\n'+expected
     console.log(sErr)
 
-    document.getElementById("resultat").innerHTML += "<p>"  +sErr + "<p><font color='red'>FAILED</font>";
+    document.getElementById("resultat").innerHTML += "<p>"  +sErr + '<hr>' + message + "<p><font color='red'>FAILED</font>";
     console.assert(false)
     // stop the test
     throw -1;
@@ -97,7 +99,6 @@ function testHmacSha512() {
         // test PASSED OK
         document.getElementById("resultat").innerHTML = "<p><font color='green'>PASSED OK</font>";
 }
-
 function testEcdsa() {
     // Start...
     document.getElementById("resultat").innerHTML += "<font color='gray'>Running...</font>";
@@ -112,6 +113,17 @@ function testEcdsa() {
         },0
     )
 }
+function testBip32() {
+    // Start...
+    document.getElementById("resultat").innerHTML += "<font color='gray'>Running...</font>";
+     // Run tests...
+     autotest_bip32(  onTestFail  )
+     document.getElementById("resultat").innerHTML += "<p><font color='green'>PASSED OK</font>";
+
+    
+}
+
+
 
 
 

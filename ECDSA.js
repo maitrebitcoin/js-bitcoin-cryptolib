@@ -59,6 +59,10 @@ class ECDSA {
         toString() {
             return hex(this.point.x) + ',' + hex(this.point.y)
         }        
+        // convert to a 33 byte buffer (02+x or 03+x)
+        toBuffer() {
+            return this.point.toBuffer();
+        }
         isZero() {
             return this.point.isZero();
         }
@@ -108,7 +112,7 @@ newPrivateKey(  ) {
 }
 /**
  *  generate a private key from a hexadecimal string.
- * ex : "0c34cf6a7d24367baa81ef8331c8cb7ffafc0978ff6cf9e5d873de96142bdb86"
+  * @param   {string} hexString  ex : "0c34cf6a7d24367baa81ef8331c8cb7ffafc0978ff6cf9e5d873de96142bdb86"
  * @returns {ECDSA.PrivateKey}
  */
 privateKeyFromHexString( hexString ) {
@@ -119,8 +123,18 @@ privateKeyFromHexString( hexString ) {
     return privateKey
 }
 /**
+ *  generate a private key from a BigInt.
+ * @param   {bigInt} number  ex : 66622949934292052565325515457306921084360285924745542237609076927686267856258n
+ * @returns {ECDSA.PrivateKey}
+ */
+privateKeyFromBigInt( number ) {
+    console.assert( typeof number == 'bigint' ) 
+    var privateKey = new ECDSA.PrivateKey( number );
+    return privateKey
+}
+/**
  * get the public key associated to a private key
- * @param {ECDSA.PrivateKey} privateKey
+ * @param  {ECDSA.PrivateKey} privateKey
  * @returns {ECDSA.PublicKey}
  */
 publicKeyFormPrivateKey( privateKey ) {
