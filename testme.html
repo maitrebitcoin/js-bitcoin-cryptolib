@@ -162,8 +162,8 @@ function bip32Sample() {
 
     var master   = bip32.getMasterKey()
     // should be "xprv9uVXYtuVbPpJQFs3ccU7odsG3m6iPp5jsAqXY1NstBEeLB1sj3sh572x8iSo16if7b9DFRXXZdMvHKvSm39oKNR7uXCHKwM9gc8EZgZk3bA"
-    var extKeyM0   = bip32.getPrivateKeyFromPath("m/0")
-    var extKeyMPub = bip32.getPubliceKeyFromPath("m/0")
+    var extKeyM0   = bip32.getExtendedPrivateKeyFromPath("m/0")
+    var extKeyMPub = bip32.getExtendedPubliceKeyFromPath("m/0")
 
 //@temp
 //    var xx= bip32.getPrivateKeyFromPath("bogeyman");

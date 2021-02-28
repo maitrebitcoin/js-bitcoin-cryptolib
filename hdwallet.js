@@ -265,7 +265,7 @@ getMasterKey() {
  * @param   {string}  derivationPath the derivation path. ex: "m/0'/1"
  * @returns {hdwallet.ExtendedKey}   the extended private key 
  */
-getPrivateKeyFromPath( derivationPath ) {
+getExtendedPrivateKeyFromPath( derivationPath ) {
     // master key ?
     if (derivationPath=='m') return this.getMasterKey()
     // must start with "m/"
@@ -336,14 +336,14 @@ _getPrivateKeyFromPathR( derivationPath, parentKey, depth ) {
 }
 
 /**
- *  get a pubkic key for a derivation path
+ *  get a extended public key for a derivation path
  * @public
  * @param   {string}  derivationPath the derivation path. ex: "m/0'/1"
  * @returns {hdwallet.ExtendedKey}   the extended private key 
  */
-getPubliceKeyFromPath( derivationPath ) {
+getExtendedPubliceKeyFromPath( derivationPath ) {
     // get the extendede private key
-    var extPrivateKey = this.getPrivateKeyFromPath(derivationPath);
+    var extPrivateKey = this.getExtendedPrivateKeyFromPath(derivationPath);
     if (extPrivateKey.error) 
         return extPrivateKey; // failed
     // get the public key
@@ -351,6 +351,50 @@ getPubliceKeyFromPath( derivationPath ) {
     return extPublicKey;
 
 }
+
+/**
+ *  get a public key for a derivation path + index
+ * @public
+ * @param   {string}  derivationPath the derivation path. ex: "m/44'/0'/0'/0"
+ * @param   {int}     index          index of the child key. 0 is the first accout
+ * @returns {ECDSA.PublicLKey} the extended private key 
+ */
+getPublicKeyFromPath( derivationPath, index ) {
+    // get the extendede public key
+    var extPublicKey = this.getExtendedPubliceKeyFromPath(derivationPath + "/" + index );
+    if (extPublicKey.error) 
+        return extPublicKey; // failed
+    // get the public key
+    console.assert( extPublicKey.publicKey )
+    return extPublicKey.publicKey;
+
+}
+
+/**
+ *  get a public adress for a derivation path + index. 
+ *  
+ * @public
+ * @param   {string}  derivationPath the derivation path. ex: "m/44'/0'/0'/0"
+ * @param   {int}     index          index of the child key. 0 is the first accout
+ * @returns {stringy} P2PKH address = legacy format. ex : "1E3B4m6BSw7v2A7TiA2YxDTXBZjFEpBmPN"      
+ */
+getLegacyPublicAdressFromPath( derivationPath, index ) {
+    // get the extendede public key
+    var extPublicKey = this.getExtendedPubliceKeyFromPath(derivationPath + "/" + index );
+    if (extPublicKey.error) 
+        return extPublicKey; // failed
+    console.assert( extPublicKey.publicKey )
+    // serialised public key to raw buffer
+    var publicKeySerialized = extPublicKey.publicKey.toBuffer();
+    // legacy bitcoin format :
+    var hash               = ripemd160( sha256( publicKeySerialized ) ) // same hash as bitcoin public adress
+    var btcAdress          = base58CheckEncode( hash,  PREFIX_P2PKH );
+    return btcAdress
+
+}
+
+
+getPubliceKeyFromPath
 
 
 }; // class hdwallet

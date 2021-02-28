@@ -257,12 +257,12 @@ function autotest_bip32( fonError ) {
      * @param {expected} expected expected result in base 58. ex  "xprv9s21ZrQH143K4b..."
      * seed            :  seed buffer in hexa.
      */    
-    function _test_derivation( seedHex, deivationPath, expected  ) 
+    function _test_derivation( seedHex, deivationPath, expected, expectedPub  ) 
     {
         // calculate rood
         var seed  = bufferFromHex(seedHex)
         var bip32 = new hdwallet( seed );
-        var res   = bip32.getPrivateKeyFromPath(deivationPath)
+        var res   = bip32.getExtendedPrivateKeyFromPath(deivationPath)
         if (res.error) {
              FAILED( fonError, seedHex, res58, expected, deivationPath + '\n' +res.error )
         }
@@ -273,6 +273,19 @@ function autotest_bip32( fonError ) {
             // error
             FAILED( fonError, seedHex, res58, expected, deivationPath )
         }
+        if (!expectedPub) return; // OK
+        res   = bip32.getExtendedPubliceKeyFromPath(deivationPath)
+        if (res.error) {
+             FAILED( fonError, seedHex, res58, expected, deivationPath + '\n' +res.error )
+        }
+        var res58pub = res.toStringBase58()
+        // is it the expected result ?
+        if (res58pub != expectedPub ) {
+
+            // error
+            FAILED( fonError, seedHex, res58pub, expectedPub, deivationPath )
+        }      
+        // OK
     }    
 
     // check tha the value raise an error
@@ -297,14 +310,15 @@ function autotest_bip32( fonError ) {
     _test_error("xprv9s21ZrQH143K4b44oYF6VxMLbBroCaDgiWetWXeDHanBdreeF8bQpUndSvVgHHwQNkifjfwZXgY8Fxub73dLbnJ7we9FSaae5PvXjBTfw4Z")  // CRC
    
 
-    // test deriavation paths
+    // test derivation paths
     _test_derivation( seed, "m/0",    "xprv9uVXYtuVbPpJQFs3ccU7odsG3m6iPp5jsAqXY1NstBEeLB1sj3sh572x8iSo16if7b9DFRXXZdMvHKvSm39oKNR7uXCHKwM9gc8EZgZk3bA" )
     _test_derivation( seed, "m/1",    "xprv9uVXYtuVbPpJSMWKfrQRqWHjqisVFJtWSxgTL1Eejq115SRggWmPVJDvSKWMMWoQvQdXHifwXhpFhzjaydbPghB9VHVagms7PNCruPnU8Co" )
     _test_derivation( seed, "m/0'",   "xprv9uVXYtudw4MGZTnWJ1aCcC9jLk7wFMWuLGyYwTiLVkFRWcyMCVQt6YShPR25j4LeTDuE7PdEhiQUAqCpT227JyhnGu5z9Sf4F9srXjLHwnx" )
     _test_derivation( seed, "m/0'/0'","xprv9xc6Adnpycv3xyzDLojgHuRXKYQExX9qYhQgQJGnRJRt6UzPvszTsRriHtuagmjmjQQLbgCjLij6ZRWLgc3vGCKqcW6SbsABYLdhHqP6zq8" )
     _test_derivation( seed, "m/0'/1", "xprv9xc6AdngdxP5rCTgvBexpJWZyEFemND99w7g9VnEU3wJ9CD6bo2Kv7JKE8HNudLW8gwx8PuVt1xDnVPMN37JqG7AiXYiQVHbhVxYHas19w9" )
     // BIP44
-    _test_derivation( seed, "m/44'/0'/0'/0", "xprv9zqEnwRp3fCUBPZWaxV2ZnbLYfQxhVm4VfF7bh9tfSmF5eBTUxZLMnUHGTwy4ygakVWz9Y4w3LirEbrCSwTJoiFJ1JK92cqaNxKJPY6xkHc" )
+    _test_derivation( seed, "m/44'/0'/0'/0", "xprv9zqEnwRp3fCUBPZWaxV2ZnbLYfQxhVm4VfF7bh9tfSmF5eBTUxZLMnUHGTwy4ygakVWz9Y4w3LirEbrCSwTJoiFJ1JK92cqaNxKJPY6xkHc",
+                                             "xpub6DpbCSxht2kmPsdygz22vvY56hFT6xUurtAiQ5ZWDnJDxSWc2Vsauanm7mMWozi1gzB4WhZ9NFstB6JW84Naj3XiSj4r7p9NAKLQv7AFcKu" )
 
     // official test Vectors
     var seed = "000102030405060708090a0b0c0d0e0f";       
