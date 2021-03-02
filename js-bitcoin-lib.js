@@ -23,4 +23,4 @@ include_js('ecdsa.js');
 include_js('sha.js');
 include_js('encodedecode.js');
 include_js('hdwallet.js');
-
+include_js('bip39.js');
