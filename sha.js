@@ -321,8 +321,11 @@ function xorBuffer( bufA, bufB ) {
     return res
 }
 
-// HMAC function
-// source https://en.wikipedia.org/wiki/HMAC
+/**
+  * HMAC function
+  * @see https://en.wikipedia.org/wiki/HMAC
+  * @see https://tools.ietf.org/html/rfc2104.html
+  */
 function hmac( key, message, hash, blocksize, outpusize ) {
 
     // Keys longer than blockSize are shortened by hashing them

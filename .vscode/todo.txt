@@ -1,4 +1,6 @@
 .remove new ECDSA()   
+.add more test pour ecdsa (extpubkey, pubkey, pubadress)
+.add bip 49 adress
 .import pubkey from buffer
 .test encode/decode
 .cache key

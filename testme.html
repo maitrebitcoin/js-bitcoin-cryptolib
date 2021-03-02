@@ -33,6 +33,7 @@
 <script src='sha.js'></script> 
 <script src='encodedecode.js'></script> 
 <script src='hdwallet.js'></script> 
+<script src='bip39.js'></script> 
 
 <script src='autotest.js'></script>
 
@@ -135,17 +136,8 @@ function ecdsaSample() {
     var pub  = ecdsa.publicKeyFormPrivateKey(priv);
     // show keys
     var sDump = "private key :<p>" + priv.toString()
-              + "<hr>"
-              + "public key :<p>" + pub.toString() 
-    // sign  a message
-    var sMessage = "abdefghijlk12345"                
 
-    sDump += "<hr>message :<p><span style='background-color:#b0b0a0;'>" + sMessage + "</span><p>\n"
-    var signature = ecdsa.signMessage( sMessage, priv )
-        sDump += "<hr>signature : <p><span style='background-color:#b0e0e0;'>" + signature.toString() + "</span>"
-
-    document.getElementById("resultat").innerHTML = sDump;
-
+        
     // check signature
     var res = ecdsa.verifySignature(sMessage, signature, pub )
     sDump += "<hr>test signature : " + res.message
@@ -155,9 +147,20 @@ function ecdsaSample() {
 
 function bip32Sample() {
 
+    //@test
+    // https://stuff.birkenstab.de/pbkdf2/
+
+    var test4 =      PBKDF2_512( hmac_sha512, "password","salt", 4 )
+    //    "a3e4e33fc661f01e0a0824950576713fca8c6c27971aff4c3088b3d41442e723d4b603f204e07129f54e7f9a26456eab8ed8406b7a7a0c7917a7635abde2b1b7"
+    console.log( hex(test4) )  
+
 
     var phrase ="pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
-    var seed = bufferFromHex("6e85439607050fad311b71238aacdd27d3095329201baa367c43e93869621de213f2c75dac958ecc1a87d55a94baf02e223de1d686c276882c112e841b01a8df");
+    var seedOK = bufferFromHex("6e85439607050fad311b71238aacdd27d3095329201baa367c43e93869621de213f2c75dac958ecc1a87d55a94baf02e223de1d686c276882c112e841b01a8df");
+    var seed = bufferFromPhrase(phrase)
+    console.log( hex(seed) )
+    console.assert( seed == seedOK )
+    
     var bip32 = new hdwallet( seed );
 
     var master   = bip32.getMasterKey()

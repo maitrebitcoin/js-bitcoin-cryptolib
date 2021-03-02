@@ -23,7 +23,7 @@ function createBtcAccount() {
 
 
     var phrase ="pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
-    var seed = bufferFromHex("6e85439607050fad311b71238aacdd27d3095329201baa367c43e93869621de213f2c75dac958ecc1a87d55a94baf02e223de1d686c276882c112e841b01a8df");
+    var seed = bufferFromPhrase(phrase)
 
     // create a new bip32 wallet
     var bip32    = new hdwallet( seed );

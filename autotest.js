@@ -17,8 +17,8 @@
  * 
 */
 function autotest_all(fonError, fonStepOK, fonEnd ){
-    var tabTestName  = new Array( "ripemd160", "sha512", "sha256", "hmac_sha512", "ecdsa","bip32" )
-
+    var tabTestName  = new Array( "ripemd160", "sha512", "sha256", "hmac_sha512", "pbkdf2_hmac512", "ecdsa","bip32" )
+    
     var numTest = 0;
 
     /**
@@ -164,8 +164,6 @@ function autotest_ripemd160( fonError ) {
 }
 
 
-
-
 // fonError : callback called if the test fails
 function autotest_hmac_sha512(fonError) {
        // s       : value to hash 
@@ -193,9 +191,55 @@ function autotest_hmac_sha512(fonError) {
            "fa73b0089d56a284efb0f0756c890be9b1b5dbdd8ee81a3655f83e33b2279d39bf3e848279a722c806b485a47e67c807b946a337bee8942674278859e13292fb"  )
    _test_("\xaa".repeat(131), "Test Using Larger Than Block-Size Key - Hash Key First",
            "80b24263c7c1a3ebb71493c1dd7be8b49b46d1f41b4aeec1121b013783f8f3526b56d037e05f2598bd0fd2215d6a1e5295e64f73f63f0aec8b915a985d786598"  )
+}
 
+function autotest_pbkdf2_hmac512(fonError) {
+     
+    
+    function _test_nbIter( nbIteration, expected  ) 
+    {
+        // calculate hash
+        var hash  = PBKDF2_512( hmac_sha512, "password","salt", nbIteration )
+        // is it the expected result ?
+        var hashAsHexString =  hex(hash);
+        if (hashAsHexString != expected) {
+            // error
+            FAILED( fonError, nbIteration, hashAsHexString, expected )
+        }
+
+    }
+    function _test_bip39( phrase, expected  ) 
+    {
+        // calculate hash
+        var hash  = bufferFromPhrase( phrase )
+        // is it the expected result ?
+        var hashAsHexString =  hex(hash);
+        if (hashAsHexString != expected) {
+            // error
+            FAILED( fonError, nbIteration, hashAsHexString, expected )
+        }
+
+    }    
+
+    // test values from
+    // https://stuff.birkenstab.de/pbkdf2/
+    _test_nbIter(1,  "867f70cf1ade02cff3752599a3a53dc4af34c7a669815ae5d513554e1c8cf252c02d470a285a0501bad999bfe943c08f050235d7d68b1da55e63f73b60a57fce" )
+    _test_nbIter(2,  "e1d9c16aa681708a45f5c7c4e215ceb66e011a2e9f0040713f18aefdb866d53cf76cab2868a39b9f7840edce4fef5a82be67335c77a6068e04112754f27ccf4e" )
+    _test_nbIter(3,  "b6b07cb2cebf4ad84468391a543824fccffe0e0769dbe6bddf10a65673c4b648e612d44918f9ce9a19a1294cf5140628084ba994c3b21a4ef4741220b811c633" )
+    _test_nbIter(4,  "a3e4e33fc661f01e0a0824950576713fca8c6c27971aff4c3088b3d41442e723d4b603f204e07129f54e7f9a26456eab8ed8406b7a7a0c7917a7635abde2b1b7" )
+    _test_nbIter(8,  "5716406b47a8cf8738df359a1bfec0c6b503db9232ccb60971f3d21b511a8297776c8451663207d3f5f057268c880be73ccfe22a0710957f9d40c28fbe412412" )
+    _test_nbIter(16, "8834dcafecf53126ccfe4d46c676164def1433d7422109d59e19ab27b51c40402309aaad1b92656a55ce1667f381b375c44e88f6192d6082294d0336580a4111" )
+    _test_nbIter(128,"76436aade02c0cd4ab5df2b03eeff4c9fb060462e293226242bafcc75229b8cef403f4db8b0c8186062e28e25036af89f27dcaf9309b89895941de8746bc64bf" )
+
+    // test bip39
+    // test valeur from 
+    // https://iancoleman.io/bip39/
+    _test_bip39( "pistol thunder want public animal educate laundry all churn federal slab behind media front glow", 
+                 "6e85439607050fad311b71238aacdd27d3095329201baa367c43e93869621de213f2c75dac958ecc1a87d55a94baf02e223de1d686c276882c112e841b01a8df" )
 
 }
+
+
 
 // fonError : callback called if the test fails
 function autotest_ecdsa( fonError ) {
