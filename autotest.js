@@ -17,7 +17,7 @@
  * 
 */
 function autotest_all(fonError, fonStepOK, fonEnd ){
-    var tabTestName  = new Array( "ripemd160", "sha512", "sha256", "hmac_sha512", "pbkdf2_hmac512", "ecdsa","bip32" )
+    var tabTestName  = new Array( "ripemd160", "sha512", "sha256", "hmac_sha512",  "bip39", "pbkdf2_hmac512", "ecdsa","bip32" )
     
     var numTest = 0;
 
@@ -211,7 +211,7 @@ function autotest_pbkdf2_hmac512(fonError) {
     function _test_bip39( phrase, expected  ) 
     {
         // calculate hash
-        var hash  = bufferFromPhrase( phrase )
+        var hash  = seedFromPhrase( phrase )
         // is it the expected result ?
         var hashAsHexString =  hex(hash);
         if (hashAsHexString != expected) {
@@ -221,7 +221,7 @@ function autotest_pbkdf2_hmac512(fonError) {
 
     }    
 
-    // test values from
+    // test vectors from
     // https://stuff.birkenstab.de/pbkdf2/
     _test_nbIter(1,  "867f70cf1ade02cff3752599a3a53dc4af34c7a669815ae5d513554e1c8cf252c02d470a285a0501bad999bfe943c08f050235d7d68b1da55e63f73b60a57fce" )
     _test_nbIter(2,  "e1d9c16aa681708a45f5c7c4e215ceb66e011a2e9f0040713f18aefdb866d53cf76cab2868a39b9f7840edce4fef5a82be67335c77a6068e04112754f27ccf4e" )
@@ -232,10 +232,59 @@ function autotest_pbkdf2_hmac512(fonError) {
     _test_nbIter(128,"76436aade02c0cd4ab5df2b03eeff4c9fb060462e293226242bafcc75229b8cef403f4db8b0c8186062e28e25036af89f27dcaf9309b89895941de8746bc64bf" )
 
     // test bip39
-    // test valeur from 
+    // test vectors from
     // https://iancoleman.io/bip39/
     _test_bip39( "pistol thunder want public animal educate laundry all churn federal slab behind media front glow", 
                  "6e85439607050fad311b71238aacdd27d3095329201baa367c43e93869621de213f2c75dac958ecc1a87d55a94baf02e223de1d686c276882c112e841b01a8df" )
+
+}
+
+function autotest_bip39(fonError) {
+       
+    function _test( bufferHasHex, expected  ) 
+    {
+        var buffer = bufferFromHex(bufferHasHex)
+        // calculate hash
+        var phrase  = bip39phraseFromRandomBuffer( buffer  )
+        // is it the expected result ?
+        if (phrase != expected) {
+            // error
+            FAILED( fonError, bufferHasHex, phrase, expected )
+        }
+
+    }
+    // test vectors 
+    // https://github.com/trezor/python-mnemonic/blob/master/vectors.json
+    _test("00000000000000000000000000000000",
+           "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about")
+    _test("7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f",
+          "legal winner thank year wave sausage worth useful legal winner thank yellow")
+    _test("80808080808080808080808080808080",
+          "letter advice cage absurd amount doctor acoustic avoid letter advice cage above")         
+    _test("ffffffffffffffffffffffffffffffff",
+          "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong")         
+    _test("9e885d952ad362caeb4efe34a8e91bd2",
+          "ozone drill grab fiber curtain grace pudding thank cruise elder eight picnic")               
+    _test("000000000000000000000000000000000000000000000000",
+          "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon agent")
+    _test("7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f",
+          "legal winner thank year wave sausage worth useful legal winner thank year wave sausage worth useful legal will")
+    // 512 bitq
+    _test("0000000000000000000000000000000000000000000000000000000000000000",
+          "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art")
+    _test("7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f",
+          "legal winner thank year wave sausage worth useful legal winner thank year wave sausage worth useful legal winner thank year wave sausage worth title")
+    _test("8080808080808080808080808080808080808080808080808080808080808080",
+          "letter advice cage absurd amount doctor acoustic avoid letter advice cage absurd amount doctor acoustic avoid letter advice cage absurd amount doctor acoustic bless")
+    _test("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo vote")
+    _test("68a79eaca2324873eacc50cb9c6eca8cc68ea5d936f98787c60c7ebc74e6ce7c",
+          "hamster diagram private dutch cause delay private meat slide toddler razor book happy fancy gospel tennis maple dilemma loan word shrug inflict delay length")
+    _test("066dca1a2bb7e8a1db2832148ce9933eea0f3ac9548d793112d9a95c9407efad",
+          "all hour make first leader extend hole alien behind guard gospel lava path output census museum junior mass reopen famous sing advance salt reform",)
+ 
+
+
 
 }
 
