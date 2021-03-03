@@ -285,7 +285,7 @@ function int32FromBigEndianBuffer( buf, pos ) {
     return res  
 }
 /**
-* convert a buffer into int assuming the buffer is in liitle endian format
+* convert a buffer into 32 bit int assuming the buffer is in liitle endian format
 * = least significant byte first (intel for ex.)
 * @param {string} buf
 * @param {int}    pos 1st char to convert in buf. 0 if non set
@@ -295,6 +295,18 @@ function int32FromLittleEndianBuffer( buf, pos ) {
     var res  =    (buf.charCodeAt(pos+3 )<<24)
                 | (buf.charCodeAt(pos+2)<<16)
                 | (buf.charCodeAt(pos+1)<<8 )
+                | (buf.charCodeAt(pos  )    )
+    return res  
+}
+/**
+* convert a buffer into 16 bits int assuming the buffer is in liitle endian format
+* = least significant byte first (intel for ex.)
+* @param {string} buf
+* @param {int}    pos 1st char to convert in buf. 0 if non set
+*/
+function int16FromLittleEndianBuffer( buf, pos ) {
+    if (!pos) pos= 0;
+    var res  =    (buf.charCodeAt(pos+1)<<8 )
                 | (buf.charCodeAt(pos  )    )
     return res  
 }

@@ -10,6 +10,7 @@
 <button onclick="testHmacSha512()"><h2> Test hmac-sha512 </h2> </button>
 <button onclick="testEcdsa()">     <h2> Test ecdsa  </h2> </button>
 <button onclick="testBip32()">     <h2> Test bip32  </h2> </button>
+<button onclick="testBip39()">     <h2> Test bip39  </h2> </button>
 <p>
 <button onclick="testAll()">     <h2> Test ALL  </h2> </button>
 <hr>
@@ -119,6 +120,14 @@ function testBip32() {
     document.getElementById("resultat").innerHTML += "<font color='gray'>Running...</font>";
      // Run tests...
      autotest_bip32(  onTestFail  )
+     document.getElementById("resultat").innerHTML += "<p><font color='green'>PASSED OK</font>";
+
+}
+function testBip39() {
+    // Start...
+    document.getElementById("resultat").innerHTML += "<font color='gray'>Running...</font>";
+     // Run tests...
+     autotest_bip39(  onTestFail  )
      document.getElementById("resultat").innerHTML += "<p><font color='green'>PASSED OK</font>";
 
     

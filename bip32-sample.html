@@ -19,25 +19,46 @@
 <script src='js-bitcoin-lib.js'></script> 
 <script>
 
+// generate a cryto secure random buffer
+function getRandomBuffer( nbBit ) {
+    var nbUint32 = nbBit >> 5;
+    // get random 32 bits ints
+    var randArray = new Uint32Array(nbUint32);
+    window.crypto.getRandomValues(randArray);
+    // conversion to bigint via hexadecimal string
+    var buffer = "";
+    for (var i=0;i<nbUint32;i++) { 
+        buffer += bigEndianBufferFromInt32( randArray[i] )
+    }
+    console.assert(buffer.length*8 == nbBit)
+    return buffer
+}
+
+
+
 function createBtcAccount() {
 
-
-    var phrase ="pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
-    var seed = bufferFromPhrase(phrase)
-
+    // generate a random buffer
+    var randomBuffer = getRandomBuffer(128)
+    // calculate the mnemonic phrase from this buffer
+    // ex : "pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
+    var phrase       = bip39phraseFromRandomBuffer(randomBuffer)
+    // calculate the seed for a bip32 wallet
+    var seed         = seedFromPhrase(phrase)
     // create a new bip32 wallet
-    var bip32    = new hdwallet( seed );
+    var bip32Wallet   = new hdwallet( seed );
     // bip 44 derivation path
     var derivationPath = "m/44'/0'/0'/0"
     // get extended private and public key
-    var extPrivKey   = bip32.getExtendedPrivateKeyFromPath(derivationPath)
-    var extPubKey    = bip32.getExtendedPubliceKeyFromPath(derivationPath)
-    // get address
-    var pubKey0      = bip32.getPublicKeyFromPath(derivationPath, 0)
-    var pubAdress0   = bip32.getLegacyPublicAdressFromPath(derivationPath, 0)
+    var extPrivKey   = bip32Wallet.getExtendedPrivateKeyFromPath(derivationPath)
+    var extPubKey    = bip32Wallet.getExtendedPubliceKeyFromPath(derivationPath)
+    // get address 0 (1st)
+    var pubKey0      = bip32Wallet.getPublicKeyFromPath(derivationPath, 0)
+    var pubAdress0   = bip32Wallet.getLegacyPublicAdressFromPath(derivationPath, 0)
   
     // show result
-    var result  = "<p> Extended private key : "  + extPrivKey.toStringBase58()
+    var result  = "<p> backup phrase        : "  + phrase
+        result += "<p> Extended private key : "  + extPrivKey.toStringBase58()
         result += "<p> Extended public key  : "  + extPubKey.toStringBase58()
         result += "<p> public key 0         : "  + hex(pubKey0.toBuffer())
         result += "<p> public adress 0      : "  + pubAdress0
