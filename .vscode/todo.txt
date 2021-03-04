@@ -1,4 +1,3 @@
-.optim sha512
 .rename sha.js
 .remove new ECDSA()   
 .error as execptions
