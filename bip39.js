@@ -102,6 +102,7 @@ function xorBuffer( buf1, buf2 ) {
 }
 // 2048 english words 
 // @see https://github.com/bitcoinjs/bip39/blob/master/src/wordlists/english.json
+//      https://raw.githubusercontent.com/bitcoin/bips/master/bip-0039/english.txt
 var WordList_english = [
      'abandon','ability','able','about','above','absent','absorb','abstract','absurd','abuse','access','accident','account','accuse','achieve','acid','acoustic','acquire','across','act','action','actor','actress','actual','adapt','add','addict','address','adjust','admit','adult','advance'
     ,'advice','aerobic','affair','afford','afraid','again','age','agent','agree','ahead','aim','air','airport','aisle','alarm','album','alcohol','alert','alien','all','alley','allow','almost','alone','alpha','already','also','alter','always','amateur','amazing','among'

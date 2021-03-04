@@ -148,16 +148,11 @@ function sha256( buffer ) {
  */
 function sha512( buffer ) {
     const _2pow32 =  BigInt("0x100000000");
-    // force convert int to BigInt uin32
-    function toBigUI32(x) {
-        var temp = new Uint32Array([x])
-        return BigInt( temp[0] );
-    }
 
    // right rotate x of bits bits, result forced in unsigned int 64 bits
     function rightrotate64(x, bits) {
-        var high = Number(x / _2pow32)  
-        var low  = Number(x % _2pow32); 
+        var high = x.high
+        var low  = x.low
         if (bits>31) {
             bits -= 32;
             // exchange low and high
@@ -165,42 +160,98 @@ function sha512( buffer ) {
             low =high;
             high=temp;
         }
-        var highR = ( high >>> bits  |  (low  << (32-bits)) )
-        var lowR  = ( low  >>> bits  |  (high << (32-bits)) )
+        var res = {}
+        res.high = ( high >>> bits  |  (low  << (32-bits)) )
+        res.low  = ( low  >>> bits  |  (high << (32-bits)) )
         //result
-        var hl32    = new Uint32Array( [ highR, lowR ] )
-        return BigInt(hl32[0])*_2pow32 + BigInt(hl32[1]);           
+        return res      
 
     };
     // right shift x if bits bits
     function rightshift64(x, bits) {
-        var high = Number(x / _2pow32)  
-        var low  = Number(x % _2pow32); 
+        var high = x.high
+        var low  = x.low
         if (bits>31) {
             bits -= 32;
             high =0
             low =high;
         }        
-        var highR = high >>> bits  
-        var lowR  = low  >>> bits  |  (high << (32-bits))
+        var res = {}
+        res.high =   high >>> bits  
+        res.low  = ( low  >>> bits  |  (high << (32-bits)) )
         //result
-        var hl32    = new Uint32Array( [ highR, lowR ] )
-        return BigInt(hl32[0])*_2pow32 + BigInt(hl32[1]);           
+        return res            
     };    
     // safe 64 bits addition with overflow ignored
-    function adduint64 (x, y) { 
+    function __adduint64 (x, y) { 
         var temp    = new BigUint64Array( [ x, y ] )
         temp[0] += temp[1];
         return temp[0]
     }    
 
+    //---
+    function ui64FromBigEndianBuffer( buffer, pos ) {
+        var res = { high:int32FromBigEndianBuffer(buffer,pos),
+                    low: int32FromBigEndianBuffer(buffer,pos+4)
+                  }
+        return res; 
+    }
+    function bigEndianBufferFromui64(x) {
+       return bigEndianBufferFromInt32(x.high) 
+            + bigEndianBufferFromInt32(x.low)
+    }
 
+    function ui64NewArray( size ) {
+        var res = { high:0 , low: 0 }
+        var tab = []
+        for (var i=0;i<size;i++) {
+            tab.push(res)
+        }
+        return tab;
+    }
+    function ui64NewArrayFromBigUint64Array( srcArry ) {
+        var tab = []
+        for (var i=0;i<srcArry.length;i++) {
+            var res =  {}                   
+            res.high = Number(srcArry[i] / _2pow32)  
+            res.low  = Number(srcArry[i] % _2pow32)   
+            tab.push(res)
+        }
+        return tab
+    }
+
+    // 64 bits addition with overflow ignored
+    function adduint64 (x, y) { 
+        var xy =   BigInt(x.high>>>0)*_2pow32 + BigInt(x.low>>>0)
+                  +BigInt(y.high>>>0)*_2pow32 + BigInt(y.low>>>0); 
+        var res =  {}                   
+        res.high = Number(xy / _2pow32)  
+        res.low  = Number(xy % _2pow32)                   
+        return res     
+    }    
+    function xor64( x,y )  {
+        return { high:x.high ^ y.high, 
+                 low: x.low  ^ y.low }
+    }
+    function xor64_3( x,y,z)  {
+        return { high:x.high ^ y.high ^ z.high 
+               , low :x.low  ^ y.low  ^ z.low }
+    }    
+    function and64( x,y )  {
+        return { high:x.high & y.high, 
+                 low: x.low  & y.low }
+    }  
+    function not64( x )  {
+        return { high:~x.high, 
+                 low :~x.low }
+    }  
     // sha2 constants :
     //  (first 64 bits of the fractional parts of the square roots of the first 8 primes 2..19):
-    var H    = new BigUint64Array( ["0x6a09e667f3bcc908", "0xbb67ae8584caa73b", "0x3c6ef372fe94f82b", "0xa54ff53a5f1d36f1", 
+    var H_    = new BigUint64Array( ["0x6a09e667f3bcc908", "0xbb67ae8584caa73b", "0x3c6ef372fe94f82b", "0xa54ff53a5f1d36f1", 
                                     "0x510e527fade682d1", "0x9b05688c2b3e6c1f", "0x1f83d9abfb41bd6b", "0x5be0cd19137e2179" ] );     
+    H = ui64NewArrayFromBigUint64Array(H_)
     //  (first 64 bits of the fractional parts of the cube roots of the first 64 primes 2..311): 
-    var K    = new BigUint64Array( ["0x428a2f98d728ae22", "0x7137449123ef65cd", "0xb5c0fbcfec4d3b2f", "0xe9b5dba58189dbbc", "0x3956c25bf348b538", 
+    var K_   = new BigUint64Array( ["0x428a2f98d728ae22", "0x7137449123ef65cd", "0xb5c0fbcfec4d3b2f", "0xe9b5dba58189dbbc", "0x3956c25bf348b538", 
                                     "0x59f111f1b605d019", "0x923f82a4af194f9b", "0xab1c5ed5da6d8118", "0xd807aa98a3030242", "0x12835b0145706fbe", 
                                     "0x243185be4ee4b28c", "0x550c7dc3d5ffb4e2", "0x72be5d74f27b896f", "0x80deb1fe3b1696b1", "0x9bdc06a725c71235", 
                                     "0xc19bf174cf692694", "0xe49b69c19ef14ad2", "0xefbe4786384f25e3", "0x0fc19dc68b8cd5b5", "0x240ca1cc77ac9c65", 
@@ -216,6 +267,7 @@ function sha512( buffer ) {
                                     "0xd186b8c721c0c207", "0xeada7dd6cde0eb1e", "0xf57d4f7fee6ed178", "0x06f067aa72176fba", "0x0a637dc5a2c898a6", 
                                     "0x113f9804bef90dae", "0x1b710b35131c471b", "0x28db77f523047d84", "0x32caab7b40c72493", "0x3c9ebe0a15c9bebc", 
                                     "0x431d67c49c100d4c", "0x4cc5d4becb3e42b6", "0x597f299cfc657e2a", "0x5fcb6fab3ad6faec", "0x6c44198c4a475817" ] )
+    K =    ui64NewArrayFromBigUint64Array(K_)                                 
 
     // message length in bits
     var L  = buffer.length * 8
@@ -240,18 +292,18 @@ function sha512( buffer ) {
         // create a 80-entry message schedule array w[0..63] of 32-bit words
         // (The initial values in w[0..63] don't matter, so many implementations zero them here)
         //var buf64 = new ArrayBuffer( 64 );
-        var w = new BigUint64Array(80);
+        var w = ui64NewArray(80); 
 
         // copy chunk into first 16 qwords w[0..15] of the message schedule array
         for (var i = 0; i < 16; i++) {
-            w[i] = UInt64FrombigEndianBuffer(blockI, i*8)
+            w[i] = ui64FromBigEndianBuffer(blockI, i*8)
         }
         // Extend the first 16 words into the remaining 48 words w[16..63] of the message schedule array:
         for (var i = 16; i< 80; i++) {
-            var s0 = rightrotate64(w[i-15], 1) ^ rightrotate64(w[i-15], 8) ^ rightshift64(w[i-15], 7)
-            var s1 = rightrotate64(w[i- 2],19) ^ rightrotate64(w[i- 2],61) ^ rightshift64(w[i- 2], 6)
+            var s0 = xor64_3( rightrotate64(w[i-15], 1) , rightrotate64(w[i-15], 8) , rightshift64(w[i-15], 7) )
+            var s1 = xor64_3( rightrotate64(w[i- 2],19) , rightrotate64(w[i- 2],61) , rightshift64(w[i- 2], 6) )
             // set result
-            w[i] = adduint64(w[i-16], adduint64( s0 , adduint64( w[i-7] , s1))) //  w[i-16] + s0 + w[i-7] + s1
+            w[i] = adduint64(w[i-16], adduint64( s0 , adduint64( w[i-7] , s1))) 
         }
     
         //Initialize working variables to current hash value:
@@ -266,11 +318,11 @@ function sha512( buffer ) {
 
          //   Compression function main loop:
         for (var i = 0; i < 80; i++) {
-            var S1     = rightrotate64(e, 14) ^ rightrotate64(e,18) ^ rightrotate64(e, 41)            
-            var ch     = (e & f) ^ ((~e) & g)
-            var temp1  = adduint64(h, adduint64( S1, adduint64(ch , adduint64( K[i] , w[i] )))) // = h + S1 + ch + k[i] + w[i]
-            var S0    = rightrotate64(a, 28) ^ rightrotate64(a,34) ^ rightrotate64(a,39)
-            var maj    = (a & b) ^ (a & c) ^ (b & c)
+            var S1     = xor64_3( rightrotate64(e, 14) , rightrotate64(e,18) , rightrotate64(e, 41) )            
+            var ch     = xor64( and64(e,f) , and64( not64(e) , g) )
+            var temp1  = adduint64(h, adduint64( S1, adduint64(ch , adduint64( K[i] , w[i] )))) 
+            var S0     = xor64_3( rightrotate64(a, 28) , rightrotate64(a,34) , rightrotate64(a,39) )
+            var maj    = xor64_3( and64(a,b) , and64(a,c) , and64(b,c) )
             var temp2  = adduint64(S0 , maj)
             
             h = g
@@ -298,7 +350,7 @@ function sha512( buffer ) {
     // result converted into a string buffer
     var digest = "";
     for (var i = 0; i < 8; i++) { 
-        digest += bigEndianBufferFromUInt64( H[i] )
+        digest += bigEndianBufferFromui64( H[i] )
     }
     // result must be 512 bytes long
     console.assert( digest.length == 64)
