@@ -138,6 +138,8 @@ function sha256( buffer ) {
 
 }//function sha256( buffer  )
 
+
+
 /**
  * hash a buffer using the sha2 512 algoritmh
  * 
@@ -152,7 +154,7 @@ function sha512( buffer ) {
         return BigInt( temp[0] );
     }
 
-   // right rotate x if bits bits, result forced in unsigned int 64 bits
+   // right rotate x of bits bits, result forced in unsigned int 64 bits
     function rightrotate64(x, bits) {
         var high = Number(x / _2pow32)  
         var low  = Number(x % _2pow32); 
@@ -163,13 +165,12 @@ function sha512( buffer ) {
             low =high;
             high=temp;
         }
-        var highR = high >>> bits  |  (low  << (32-bits))
-        var lowR  = low  >>> bits  |  (high << (32-bits))
+        var highR = ( high >>> bits  |  (low  << (32-bits)) )
+        var lowR  = ( low  >>> bits  |  (high << (32-bits)) )
         //result
-        var temp    = new BigUint64Array( 1 )
-        temp[0] |= toBigUI32( highR ) * _2pow32
-        temp[0] |= toBigUI32( lowR ) 
-        return   temp[0];
+        var hl32    = new Uint32Array( [ highR, lowR ] )
+        return BigInt(hl32[0])*_2pow32 + BigInt(hl32[1]);           
+
     };
     // right shift x if bits bits
     function rightshift64(x, bits) {
@@ -183,16 +184,13 @@ function sha512( buffer ) {
         var highR = high >>> bits  
         var lowR  = low  >>> bits  |  (high << (32-bits))
         //result
-        var temp    = new BigUint64Array( 1 )
-        temp[0] |= toBigUI32( highR ) * _2pow32
-        temp[0] |= toBigUI32( lowR ) 
-        return   temp[0];
+        var hl32    = new Uint32Array( [ highR, lowR ] )
+        return BigInt(hl32[0])*_2pow32 + BigInt(hl32[1]);           
     };    
     // safe 64 bits addition with overflow ignored
     function adduint64 (x, y) { 
         var temp    = new BigUint64Array( [ x, y ] )
         temp[0] += temp[1];
-        console.assert(  temp[0] < BigInt("0x10000000000000000") )
         return temp[0]
     }    
 

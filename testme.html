@@ -16,7 +16,7 @@
 <hr>
 <button onclick="ecdsaSample()">   <h2> Ecdsa sample</h2> </button>
 <button onclick="bip32Sample()">    <h2> bip32 sample</h2> </button>
-
+<button onclick="bench()">    <h2> sha512 bench</h2> </button>
 <p><p>
 
 <p style="font-family:monospace;font-size:160%" id="resultat">
@@ -40,6 +40,41 @@
 
 
 <script>
+
+
+function seedFromPhrase_x(  mnemonicPhrase,  password, x ) {
+    var salt =  "mnemonic"
+    if (password)
+        salt += password
+    return PBKDF2_512( hmac_sha512, mnemonicPhrase,  salt, x  )
+}
+
+
+function bench() {
+    startTime = new Date();
+   
+    var phrase       =  "ozone drill grab fiber curtain grace pudding thank cruise elder eight picnic"
+
+    // less iteration
+    var seed = seedFromPhrase_x( phrase, "", 100)
+    //for (var i=0; i<1000; i++)   {  
+        
+        //var seed         = seedFromPhrase(phrase)
+
+    //}
+    endTime = new Date();
+    var timeDiff = endTime - startTime; //in ms
+
+    console.log(timeDiff)
+    if ( hex(seed) == "ba720e25b9c407f18d6dd87fb843fadd6b03395ca41225fcd997b190b27d0b93416724de52f90cd5c98300c52d2fbe74cf8ea3eb3025bf37857c21cee4098479" ) {
+        document.getElementById("resultat").innerHTML = "done - " + timeDiff +  "ms"
+    }
+    else {
+            document.getElementById("resultat").innerHTML =" FAILDED <hr>" +  hex(seed)
+            console.assert(false, hex(seed))
+    }
+
+}
 
 // called if a test fails
 function onTestFail( s, hashAsHexString, expected, message)
@@ -166,7 +201,7 @@ function bip32Sample() {
 
     var phrase ="pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
     var seedOK = bufferFromHex("6e85439607050fad311b71238aacdd27d3095329201baa367c43e93869621de213f2c75dac958ecc1a87d55a94baf02e223de1d686c276882c112e841b01a8df");
-    var seed = bufferFromPhrase(phrase)
+    var seed = seedFromPhrase(phrase)
     console.log( hex(seed) )
     console.assert( seed == seedOK )
     

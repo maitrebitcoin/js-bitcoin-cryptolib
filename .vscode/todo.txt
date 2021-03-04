@@ -1,4 +1,7 @@
+.optim sha512
+.rename sha.js
 .remove new ECDSA()   
+.error as execptions
 .add more test pour ecdsa (extpubkey, pubkey, pubadress)
 .add bip 49 adress
 .import pubkey from buffer
