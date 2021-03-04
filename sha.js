@@ -139,14 +139,6 @@ function sha256( buffer ) {
 }//function sha256( buffer  )
 
 
-function ui64FromBigEndianBuffer( buffer, pos ) {
-    var res = { high:int32FromBigEndianBuffer(buffer,pos),
-                low: int32FromBigEndianBuffer(buffer,pos+4)
-                }
-    return res; 
-}
-
-
 /**
  * hash a buffer using the sha2 512 algoritmh
  * 
@@ -155,6 +147,13 @@ function ui64FromBigEndianBuffer( buffer, pos ) {
  */
 function sha512( buffer ) {
     const _2pow32 =  BigInt("0x100000000");
+
+    function ui64FromBigEndianBuffer( buffer, pos ) {
+        var res = { high:int32FromBigEndianBuffer(buffer,pos)   >>>0,
+                    low: int32FromBigEndianBuffer(buffer,pos+4) >>>0
+                    }
+        return res; 
+    }    
 
    // right rotate x of bits bits, result forced in unsigned int 64 bits
     function rightrotate64(x, bits) {
@@ -168,8 +167,8 @@ function sha512( buffer ) {
             high=temp;
         }
         var res = {}
-        res.high = ( high >>> bits  |  (low  << (32-bits)) )
-        res.low  = ( low  >>> bits  |  (high << (32-bits)) )
+        res.high = ( high >>> bits  |  (low  << (32-bits)) ) 
+        res.low  = ( low  >>> bits  |  (high << (32-bits)) ) 
         //result
         return res      
 
@@ -185,7 +184,7 @@ function sha512( buffer ) {
         }        
         var res = {}
         res.high =   high >>> bits  
-        res.low  = ( low  >>> bits  |  (high << (32-bits)) )
+        res.low  = ( low  >>> bits  |  (high << (32-bits)) ) 
         //result
         return res            
     };    
@@ -193,7 +192,6 @@ function sha512( buffer ) {
        return bigEndianBufferFromInt32(x.high) 
             + bigEndianBufferFromInt32(x.low)
     }
-
     function ui64NewArray( size ) {
         var res = { high:0 , low: 0 }
         var tab = []
@@ -206,34 +204,44 @@ function sha512( buffer ) {
         var tab = []
         for (var i=0;i<srcArry.length;i++) {
             var res =  {}                   
-            res.high = Number(srcArry[i] / _2pow32)  
-            res.low  = Number(srcArry[i] % _2pow32)   
+            res.high = Number(srcArry[i] / _2pow32) 
+            res.low  = Number(srcArry[i] % _2pow32) 
             tab.push(res)
         }
         return tab
     }
-
-    // 64 bits addition with overflow ignored
+    // 64 bits : x + y with overflow ignored
     function adduint64 (x, y) { 
-        var xy =   BigInt(x.high>>>0)*_2pow32 + BigInt(x.low>>>0)
-                  +BigInt(y.high>>>0)*_2pow32 + BigInt(y.low>>>0); 
-        var res =  {}                   
-        res.high = Number(xy / _2pow32)  
-        res.low  = Number(xy % _2pow32)                   
+        // convert to unsigned 32 bits low and high
+        var xl = (x.low >>>0);
+        var xh = (x.high>>>0);
+        var yl = (y.low >>>0);
+        var yh = (y.high>>>0);        
+        var res =  {
+            low  : (xl + yl) >>> 0, // >>> 0 : convert to uint32
+            high : (xh + yh) >>> 0  // >>> 0 : convert to uint32
+        }             
+        // carry ?
+        if ( xl > res.low || yl > res.low)
+            res.high++;    
         return res     
     }    
+    // 64 bits : x xor y 
     function xor64( x,y )  {
         return { high:x.high ^ y.high, 
                  low: x.low  ^ y.low }
     }
+    // 64 bits : x xor y xor z
     function xor64_3( x,y,z)  {
         return { high:x.high ^ y.high ^ z.high 
                , low :x.low  ^ y.low  ^ z.low }
     }    
+    // 64 bits : x and y 
     function and64( x,y )  {
         return { high:x.high & y.high, 
                  low: x.low  & y.low }
     }  
+    // 64 bits : not x
     function not64( x )  {
         return { high:~x.high, 
                  low :~x.low }
@@ -281,12 +289,10 @@ function sha512( buffer ) {
     for (var ibloc=0;ibloc<nbBlock;ibloc++) {
         // extract the 128 bytes bloc
         blockI = buffer.substring( ibloc*128, (ibloc+1)*128 )
-
         // create a 80-entry message schedule array w[0..63] of 32-bit words
         // (The initial values in w[0..63] don't matter, so many implementations zero them here)
         //var buf64 = new ArrayBuffer( 64 );
         var w = ui64NewArray(80); 
-
         // copy chunk into first 16 qwords w[0..15] of the message schedule array
         for (var i = 0; i < 16; i++) {
             w[i] = ui64FromBigEndianBuffer(blockI, i*8)
@@ -308,8 +314,7 @@ function sha512( buffer ) {
         var f = H[5]
         var g = H[6]
         var h = H[7]
-
-         //   Compression function main loop:
+        //  Compression function main loop
         for (var i = 0; i < 80; i++) {
             var S1     = xor64_3( rightrotate64(e, 14) , rightrotate64(e,18) , rightrotate64(e, 41) )            
             var ch     = xor64( and64(e,f) , and64( not64(e) , g) )
@@ -317,7 +322,7 @@ function sha512( buffer ) {
             var S0     = xor64_3( rightrotate64(a, 28) , rightrotate64(a,34) , rightrotate64(a,39) )
             var maj    = xor64_3( and64(a,b) , and64(a,c) , and64(b,c) )
             var temp2  = adduint64(S0 , maj)
-            
+            // rotate values for next round     
             h = g
             g = f
             f = e
@@ -338,15 +343,14 @@ function sha512( buffer ) {
         H[6] = adduint64(H[6] , g)
         H[7] = adduint64(H[7] , h)
 
-    } //    for (var ibloc=i;ibloc<nbBlock;ibloc++) 
+    } //for (var ibloc=i;ibloc<nbBlock;ibloc++) 
 
     // result converted into a string buffer
     var digest = "";
     for (var i = 0; i < 8; i++) { 
         digest += bigEndianBufferFromui64( H[i] )
     }
-    // result must be 512 bytes long
-    console.assert( digest.length == 64)
+    console.assert( digest.length == 64, "sha512 result must be 512 bytes long")
     return digest;
 
 }//function sha256( buffer  )
