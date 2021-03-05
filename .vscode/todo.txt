@@ -1,8 +1,7 @@
-.segwit adress
+.segwit adress / bip 49 adress
 .remove new ECDSA()   
 .error as execptions
 .add more test for ecdsa (extpubkey, pubkey, pubadress)
-.add bip 49 adress
 .import pubkey from buffer
 .test encode/decode
 .derivation if we only have pubket
