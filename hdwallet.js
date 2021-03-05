@@ -13,6 +13,8 @@
 const SIGNATURE_PrivateKey = 0x0488ADE4
 const SIGNATURE_PublicKey  = 0x0488B21E
 
+const MASTERKEY_PATH = "m"
+
 class hdwallet {
 /** 
  *  create a new hdwallet from a seed 
@@ -34,8 +36,8 @@ constructor( seed ) {
  */
 getMasterKey() {
     // avail in cache ?
-    if (this.extPrivateKey_cache["m"] )
-        return this.extPrivateKey_cache["m"];
+    if (this.extPrivateKey_cache[MASTERKEY_PATH] )
+        return this.extPrivateKey_cache[MASTERKEY_PATH];
     // calculate HMAC-SHA512(Key = "Bitcoin seed", Data = S)
     var hash512 = hmac_sha512( "Bitcoin seed", this.seed );
     // cut in 2 part 256 bits long
@@ -48,7 +50,7 @@ getMasterKey() {
     masterKey.depth       = 0;
     masterKey.childNumber = 0;
     // keep in cache
-    this.extPrivateKey_cache["m"] = masterKey
+    this.extPrivateKey_cache[MASTERKEY_PATH] = masterKey
     return masterKey;
 }
 /**
@@ -61,18 +63,9 @@ getExtendedPrivateKeyFromPath( derivationPath ) {
     // avail in cache ?
     if (this.extPrivateKey_cache[derivationPath] )
         return this.extPrivateKey_cache[derivationPath];    
-    // master key ?
-    if (derivationPath=='m') return this.getMasterKey()
-    // must start with "m/"
-    if (derivationPath.substr(0,2) != "m/") {
-        return {error:"invalid derivation path format. must start with 'm/'",derivationPath:derivationPath};
-    }
-    // get remaining path
-    // ex : "0'/1"
-    var remainingPath = derivationPath.substr( 2 );
-    // call internal recursive func
-    var masterKey = this.getMasterKey()
-    var extPrivateKey = this._getPrivateKeyFromPathR( remainingPath, masterKey, 1 );
+
+    // call internal recursive method
+    var extPrivateKey = this._getPrivateKeyFromPathR(  derivationPath );
     if (extPrivateKey.error) {
         // error
         extPrivateKey.derivationPath = derivationPath;
@@ -198,54 +191,78 @@ _ckdPrivatr( extendedKey, i ) {
 }
 
 /**
- *  get a private key for a derivation path + parent R. 
- *  recursive internal function
+ * parse a derivation path
  * @protected
- * @param   {string}  derivationPath  the derivation path. ex: "0'/1"
- * @returns {hdwallet.ExtendedKey}   the extended private key 
+ * @param   {string}  derivationPath  the derivation path. ex: "0'/1/2"
+ * @returns {struct}  ex : { leftPath='0'/1',index:2,hardened:false  }
  */
-_getPrivateKeyFromPathR( derivationPath, parentKey, depth ) {
-     // extraction remaining path
-    // ex : "0'/1"  => "0'" and "1"
-    var nPos = derivationPath.indexOf("/")
+ _parseDerivationPath( derivationPath ) {
+    // must start with "m/"
+    if (derivationPath.substr(0,2) != "m/") {
+        throw {error:"invalid derivation path format. must start with 'm/'",derivationPath:derivationPath};
+    }        
+    // ex : "0'/1/2"  => "0'/1/" and "1"
+    var nPos = derivationPath.lastIndexOf("/")
     var leftPath  = ""
     var rightPath = ""
     if (nPos<=0) {
-        // no more child ckeys
+        // no more child keys
         leftPath = derivationPath
     }
     else  {
         leftPath  = derivationPath.substr( 0, nPos );    
         rightPath = derivationPath.substr( nPos+1 );
     }
-
-    var lastChar  = leftPath.substr( leftPath.length-1 ) 
+    var lastChar  = rightPath.substr( rightPath.length-1 ) 
     var hardened  = (lastChar == "H") || (lastChar=="'") // H or ' accepted
     if (hardened)
-        leftPath = leftPath.substr( 0, leftPath.length-1 ) // remove ' ou H at the end
-    // convert path to integer. ex : "43" => 43
-    var index     = parseInt(leftPath)
+        rightPath = rightPath.substr(0, rightPath.length-1) // remove ' or H
+     // convert path to integer. ex : "43" => 43
+    var index     = parseInt(rightPath)
+
     // test for invalid format
-    if (index<=0 && leftPath!='0') {
-        return {error:"invalid invalid derivation path format.", invalidParsed:leftPath }
+    if (index<=0 && rightPath!='0') {
+        throw {error:"invalid derivation path format.", derivationPath:derivationPath }
     }
-    if (hardened)
-        index = 0x80000000 + index;
-    // get master key
-    var masterKey = this.getMasterKey();
-    //@test : 1 derivation
-    var extendedKey = this._ckdPrivatr(parentKey, index)
-    extendedKey.depth = depth;
-    console.assert(extendedKey.childNumber == index);
-    // if  no more child ckeys
-    if (rightPath=="") 
-        return extendedKey;
-     
-    // recursive call on rhe remaining path <rightPath>
-    var extKeyChild = this._getPrivateKeyFromPathR( rightPath, extendedKey, depth+1 )
-    return extKeyChild;
+    if (rightPath=="") {
+        throw {error:"invalid derivation path format.", derivationPath:derivationPath }
+    }    
+    if (leftPath=="") {
+        throw {error:"invalid derivation path format.", derivationPath:derivationPath }
+    }        
+    // success
+    return { leftPath:leftPath,
+             index:   index,
+             hardened:hardened  };
 }
 
+/**
+ *  get a private key for a derivation path + parent R. 
+ *  recursive internal function
+ * @protected
+ * @param   {string}  derivationPath  the derivation path. ex: "0'/1"
+ * @returns {hdwallet.ExtendedKey}   the extended private key 
+ */
+_getPrivateKeyFromPathR( derivationPath ) {
+    // if derivationPath is the master key
+    if (derivationPath==MASTERKEY_PATH) 
+        return this.getMasterKey();
+    // parse derivationPath
+    var parsedPath = this._parseDerivationPath(derivationPath)
+
+    // recursive call to get the parent key
+    var extParentKey = this.getExtendedPrivateKeyFromPath(  parsedPath.leftPath )
+
+    // calc effective key index
+    var index     = parsedPath.index;
+    if (parsedPath.hardened)
+        index = 0x80000000 + index;
+    // calc derived key
+    var extChildKey = this._ckdPrivatr(extParentKey, index)
+    extChildKey.depth = extParentKey.depth+1;
+    console.assert(extChildKey.childNumber == index);
+    return extChildKey;
+}
 
 // ------ types -----
     // represent a extended key for a hdwallet
@@ -299,13 +316,12 @@ _getPrivateKeyFromPathR( derivationPath, parentKey, depth ) {
             this.publicKey = key;
             this.chainCode = chainCode;        
         }
-
         /**
          * returns the extended public key if we are a private key
          * @param  {ECDSA} ecdsa  an instance of the ECDSA class to calculate keys. 
          * @return {hdwallet.ExtendedKey} the corresponding public extended key 
         */
-       getExtendedPublicKey(ecdsa) {
+        getExtendedPublicKey(ecdsa) {
             console.assert( ecdsa, "ecdsa must be present" )
             console.assert( this.isPrivateKey() )
             // calculate  cdsa public key
@@ -317,9 +333,7 @@ _getPrivateKeyFromPathR( derivationPath, parentKey, depth ) {
             resKey.depth             = this.depth
             resKey.childNumber       = this.childNumber
             return resKey;w
-       }
-
-
+        }
         isExtendedKey() {return true;}
         isPrivateKey() {return this.private;}
         /** 
@@ -403,9 +417,7 @@ _getPrivateKeyFromPathR( derivationPath, parentKey, depth ) {
             }
             // success
         }
-    };
-
-
+    };// static ExtendedKey = class {
 
 
 }; // class hdwallet
