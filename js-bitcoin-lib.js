@@ -20,7 +20,7 @@ function include_js(s) {
 include_js('gfield.js');
 include_js('ellipticurve.js');
 include_js('ecdsa.js');
-include_js('sha.js');
+include_js('hash.js');
 include_js('encodedecode.js');
 include_js('hdwallet.js');
 include_js('bip39.js');

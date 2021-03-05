@@ -1,7 +1,7 @@
 /**
  ****************************************************** 
- * @file    sha.js
- * @file    sha2 implementation for js-bitcoin-cryptolib
+ * @file    hash.js
+ * @file    hash functions sha256, sh512 and ripemd160 
  * @author  pad@maitrebitcoin.com
  * @module  js-bitcoin-criptolib
  * @see     https://en.wikipedia.org/wiki/SHA-2

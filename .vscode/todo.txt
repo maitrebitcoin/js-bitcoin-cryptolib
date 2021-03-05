@@ -1,12 +1,12 @@
-.rename sha.js
+.bip 39 cache key
+.segwit adress
 .remove new ECDSA()   
 .error as execptions
-.add more test pour ecdsa (extpubkey, pubkey, pubadress)
+.add more test for ecdsa (extpubkey, pubkey, pubadress)
 .add bip 49 adress
 .import pubkey from buffer
 .test encode/decode
-.cache key
 .derivation if we only have pubket
-.bip39 : phase to/from buffer
 .samples
 .check all comments format
+.generate a doc
