@@ -3,7 +3,6 @@
 ECDSA secp256k1 ( Bitcoin digital signature scheme ) in Vanilla Javascript 
 HD Wallet support (BIP32, BIP39, BIP49)
 
-
 Does not refer to any external library for security reasons :
 
 * Can be downloaded and run as is into any browser
