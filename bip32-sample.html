@@ -45,7 +45,7 @@ function createBtcAccountSegwit(type) {
     // calculate the seed for a bip32 wallet
     var seed         = seedFromPhrase(phrase)
     // create a new bip32 wallet
-    var bip32Wallet   = new hdwallet( seed );
+    var bip32Wallet   = new hdwallet( seed, WalletType.SEGWIT  );
     // bip 49 derivation path
     var derivationPath = "m/49'/0'/0'/0"
      // get 1st valid public address . ex : "3BRTnZiug1MdARwxbSw9KDPfxjDDW6D1YZ"
@@ -68,7 +68,7 @@ function createBtcAccount(type) {
     // calculate the seed for a bip32 wallet
     var seed         = seedFromPhrase(phrase)
     // create a new bip32 wallet
-    var bip32Wallet   = new hdwallet( seed );
+    var bip32Wallet   = new hdwallet( seed, WalletType.LEGACY );
     // bip 44 derivation path
     var derivationPath = "m/44'/0'/0'/0"
     // get extended private and public key

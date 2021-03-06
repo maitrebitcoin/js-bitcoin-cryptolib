@@ -10,24 +10,41 @@
  ******************************************************
  */
 
-const SIGNATURE_PrivateKey = 0x0488ADE4
-const SIGNATURE_PublicKey  = 0x0488B21E
-
+ //  signature header for extended pub key 
+const SIGNATURE_PrivateKey_legacy = 0x0488ADE4  // ex :"xpriv..."
+const SIGNATURE_PublicKey_legacy  = 0x0488B21E
+// bip 49 (segwit).
+const SIGNATURE_PrivateKey_segwit = 0x049d7878  // ex :"ypriv..."
+const SIGNATURE_PublicKey_segwit  = 0x049d7cb2
+ 
+// known derivation path
 const MASTERKEY_PATH = "m"
+const LEGACY_PATH    = "m/44'/0'/0'/0"
+const SEWITG_PATH    = "m/49'/0'/0'/0"
+
+// hd wallet types
+const WalletType = {
+    LEGACY : "legacy-bip44",
+    SEGWIT : "segwit-bip49"
+}
+
 
 class hdwallet {
 /** 
  *  create a new hdwallet from a seed 
  * @public
  * @param {string} seed 128 to 512 bits buffer  
+ * @param {WalletType}  walletType WalletType.LEGACY or WalletType.SEGWIT
  */
-constructor( seed ) {
+constructor( seed, walletType ) {
     console.assert( seed.length >= 16 && seed.length <= 64 ,"seed must be between 128 and 512 bits")
-    this.seed = seed
-    this.ecdsa = new ECDSA();
+    console.assert( walletType == WalletType.LEGACY ||  walletType==WalletType.SEGWIT )
+    this.seed       = seed
+    this.walletType = walletType
+    this.ecdsa      = new ECDSA();
     // cache of extented private and public keys. 
     this.extPrivateKey_cache = [] 
-    this.extPublicKey_cache = [] 
+    this.extPublicKey_cache  = [] 
 }
 /**
  *  get the master key
@@ -46,7 +63,7 @@ getMasterKey() {
     // init the extended private key :  key, chainCode
     var key =  bigInt256FromBigEndianBuffer( IL )
     var masterKey = new hdwallet.ExtendedKey();
-    masterKey.initAsPrivate( key, IR, undefined, this.ecdsa  );
+    masterKey.initAsPrivate( key, IR, undefined, this.ecdsa, this.walletType  );
     masterKey.depth       = 0;
     masterKey.childNumber = 0;
     // keep in cache
@@ -150,10 +167,12 @@ getSegwitPublicAdressFromPath( derivationPath, index ) {
     console.assert( extPublicKey.publicKey )
     // serialised public key to raw buffer
     var publicKeySerialized = extPublicKey.publicKey.toBuffer();
-    // bitcoin format :
+    // bitcoin P2WPKH format :
+    // If the version byte is 0, and the witness program is 20 bytes:
+    // It is interpreted as a pay-to-witness-script-hash (P2WSH) program. 
     // NB : OP_HASH160 is ripemd160( sha256( x ) )
-    var hash               = ripemd160( sha256( publicKeySerialized ) )
-    var scriptSig          = '\x00\x14' + hash
+    var hashKey            = ripemd160( sha256( publicKeySerialized ) )
+    var scriptSig          = '\x00\x14' + hashKey // \x00 : version byte, \x14=20   witness program
     var addressBytes       = ripemd160( sha256( scriptSig)  )       
     var btcAdress          = base58CheckEncode( addressBytes,  PREFIX_P2SH );
     return btcAdress
@@ -211,7 +230,7 @@ _ckdPrivatr( extendedKey, i ) {
    var childPrivateKey =  this.ecdsa.gField.add( IL, extendedKey.privateKey.value )
 
    var res = new hdwallet.ExtendedKey()
-   res.initAsPrivate( childPrivateKey, IR, extendedKey, this.ecdsa );
+   res.initAsPrivate( childPrivateKey, IR, extendedKey, this.ecdsa, this.walletType );
    res.childNumber = i
    return res;
 }
@@ -306,15 +325,17 @@ _getPrivateKeyFromPathR( derivationPath ) {
          *  @param {hdwallet.ExtendedKey} parentKey, optionnal (for mastker key only)
          *  @param {ECDSA} ecdsa                     an instance of the ECDSA class to calculate keys. required.
          */
-        initAsPrivate( key, chainCode, parentKey, ecdsa ) {
+        initAsPrivate( key, chainCode, parentKey, ecdsa, walletType) {
             console.assert( typeof key == 'bigint' )
             console.assert( typeof chainCode == 'string' )
             console.assert( chainCode.length == 32,"chainCode must be 256 bits")     
             console.assert( ecdsa )     
+            console.assert( walletType )    
  
             this.private    = true;
             this.privateKey = ecdsa.privateKeyFromBigInt( key );
             this.chainCode  = chainCode;        
+            this.walletType = walletType
             if (parentKey) {
                 console.assert( parentKey.private, "parent of a private key must be a private key")          
                 // calculate key identifier : 32 first bit of hash( publickey )       
@@ -333,14 +354,16 @@ _getPrivateKeyFromPathR( derivationPath ) {
          *  @param {CEDSA.PublicKey} key        ecdsa public key
          *  @param {buffer}          chainCode  256 bits chain code
          */        
-        initAsPublicKey( key, chainCode ) {
+        initAsPublicKey( key, chainCode, walletType ) {
             console.assert( key.isPublicKey() )
             console.assert( typeof chainCode == 'string' )
             console.assert( chainCode.length == 32,"chainCode must be 256 bits")     
+            console.assert( walletType ) 
   
             this.private   = false;
             this.publicKey = key;
-            this.chainCode = chainCode;        
+            this.chainCode = chainCode;   
+            this.walletType = walletType     
         }
         /**
          * returns the extended public key if we are a private key
@@ -354,7 +377,7 @@ _getPrivateKeyFromPathR( derivationPath ) {
             var publicKey  = ecdsa.publicKeyFromPrivateKey( this.privateKey )
             // create an extended key
             var resKey = new hdwallet.ExtendedKey();
-            resKey.initAsPublicKey(  publicKey,  this.chainCode );
+            resKey.initAsPublicKey(  publicKey,  this.chainCode,  this.walletType );
             resKey.parentFingerprint = this.parentFingerprint 
             resKey.depth             = this.depth
             resKey.childNumber       = this.childNumber
@@ -375,7 +398,7 @@ _getPrivateKeyFromPathR( derivationPath ) {
             console.assert( this.depth <= 255 )            
             var buf = '';
             // 4 byte: version bytes
-            var nVersion = this.private  ? SIGNATURE_PrivateKey : SIGNATURE_PublicKey;
+            var nVersion = this._getVersionHeader()
             buf += bigEndianBufferFromInt32(nVersion) // mainnet: 0x0488B21E public, 0x0488ADE4 private
             // 1 byte: depth: 0x00 for master nodes, 0x01 for level-1 derived keys, ....
             buf +=  String.fromCharCode(this.depth   )
@@ -402,6 +425,20 @@ _getPrivateKeyFromPathR( derivationPath ) {
             var buffer =  this.toRawBuffer();
             return base58CheckEncode( buffer )
         }
+        /**
+         * get version header
+         * @returns {int} ex : SIGNATURE_PrivateKey_Legacy
+         */
+        _getVersionHeader()  {
+            if  (this.walletType == WalletType.SEGWIT )  {
+               return this.private  ? SIGNATURE_PrivateKey_segwit  : SIGNATURE_PublicKey_segwit;
+            }
+            if  (this.walletType == WalletType.LEGACY )  {
+                return this.private  ? SIGNATURE_PrivateKey_legacy  : SIGNATURE_PublicKey_legacy;
+            }            
+            throw  {error:"invalid vallet type", walletType:this.walletType }; 
+        }
+
         /** 
         * init from a base58 encoding
         * @param   {sting} str58 a base58 endoded string 
@@ -417,12 +454,27 @@ _getPrivateKeyFromPathR( derivationPath ) {
                 return {error:"invalid buffer length, must be 78", length:buffer.length }; // failed
             // 4 byte: version bytes
             var version    = int32FromBigEndianBuffer( buffer.substring(0,4) )
-            if (version == SIGNATURE_PrivateKey)
-                this.private  =  true
-            else if (version == SIGNATURE_PublicKey)
-                this.private  =  false
-            else
-                return  {error:"unknown version header", version:hex(version) }; 
+            switch (version) {
+                case SIGNATURE_PrivateKey_legacy:
+                    this.private     =  true
+                    this.walletType  =  WalletType.LEGACY
+                    break;
+                case SIGNATURE_PublicKey:
+                    this.private     =  false
+                    this.walletType  =  WalletType.LEGACY
+                    break;
+                case SIGNATURE_PrivateKey_legacy:
+                    this.private     =  true
+                    this.walletType  =  WalletType.SEGWIT 
+                    break;
+                case SIGNATURE_PublicKey:
+                    this.private    =  false
+                    this.walletType  =  WalletType.SEGWIT 
+                    break;                    
+            default:
+                throw  {error:"unknown version header", version:hex(version) }; 
+            }
+            console.assert( _getVersionHeader() == version )
             // 1 byte: depth: 
             this.depth      =  buffer.charCodeAt(4)
             // 4 bytes: the fingerprint of the parent's key (0x00000000 if master key)

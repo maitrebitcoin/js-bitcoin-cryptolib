@@ -1,4 +1,3 @@
-.segwit adress / bip 49 adress
 .remove new ECDSA()   
 .error as execptions
 .add more test for ecdsa (extpubkey, pubkey, pubadress)

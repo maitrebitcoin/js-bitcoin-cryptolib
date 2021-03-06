@@ -34,7 +34,7 @@ function autotest_all(fonError, fonStepOK, fonEnd ){
             eval("autotest_"+ testName + "(fonError)")
         }
         catch (error)  {
-            FAILED( fonError, "", "", error)     
+            FAILED( fonError, "", "", testName + ' ERROR - \n' +error)     
         }
 
         // test <testName> is OK
@@ -334,7 +334,7 @@ function autotest_bip32( fonError ) {
     {
         // calculate rood
         var seed  = bufferFromHex(seedHex)
-        var bip32 = new hdwallet( seed );
+        var bip32 = new hdwallet( seed, WalletType.LEGACY );
         var res   = bip32.getMasterKey();
         var res58 = res.toStringBase58()
 
@@ -354,7 +354,7 @@ function autotest_bip32( fonError ) {
     {
         // calculate rood
         var seed  = bufferFromHex(seedHex)
-        var bip32 = new hdwallet( seed );
+        var bip32 = new hdwallet( seed, WalletType.LEGACY );
         var res   = bip32.getExtendedPrivateKeyFromPath(deivationPath)
         if (res.error) {
              FAILED( fonError, seedHex, res58, expected, deivationPath + '\n' +res.error )
@@ -428,27 +428,51 @@ function autotest_bip49( fonError ) {
      * @param {expected} expected expected result in base 58. ex  "xprv9s21ZrQH143K4b..."
      * seed            :  seed buffer in hexa.
      */
-    function _test( seedHex, expected  ) 
+    function _test( seedHex, expectedExtPrivate, expectedExtPub, expectedAdress0  ) 
     {
         // calculate rood
         var seed  = bufferFromHex(seedHex)
         // create a new bip32 wallet
-        var bip32Wallet   = new hdwallet( seed );
+        var bip32Wallet   = new hdwallet( seed, WalletType.SEGWIT );
         // bip 49 derivation path
         var derivationPath = "m/49'/0'/0'/0"
+
+        // check extended keys
+        var extPrivate   = bip32Wallet.getExtendedPrivateKeyFromPath(derivationPath)
+        var extPrivateStr = extPrivate.toStringBase58();
+        if (extPrivateStr != expectedExtPrivate) {
+            // error
+            FAILED( fonError, seedHex, extPrivateStr, expectedExtPrivate )
+        }
+        var extPublic  = bip32Wallet.getExtendedPubliceKeyFromPath(derivationPath)
+        var extPublicStr = extPublic.toStringBase58();
+        if (extPublicStr != expectedExtPub) {
+            // error
+            FAILED( fonError, seedHex, extPublicStr, expectedExtPub )
+        }        
+
         // get 1st valid public address 
         var pubAdress   = bip32Wallet.getSegwitPublicAdressFromPath(derivationPath, 0)
         // is it the expected result ?
-        if (pubAdress != expected) {
+        if (pubAdress != expectedAdress0) {
             // error
-            FAILED( fonError, seedHex, pubAdress, expected )
+            FAILED( fonError, seedHex, pubAdress, expectedAdress0 )
         }
     }
-
+    
+    // abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about
     _test("5eb00bbddcf069084889a8ab9155568165f5c453ccb85e70811aaed6f6da5fc19a5ac40b389cd370d086206dec8aa6c43daea6690f20ad3d8d48b2d2ce9e38e4",
+          "yprvAKoaYbtSYB8DmmBt2Z7TgukWphdCiSMRVdzDK3aHUSna8jo6xnG41jQ11ToPk4SQnE5sau6CYK4od9fyz53mK7huW4JskyMMEmixACuyhhr",
+          "ypub6Ynvx7RLNYgWzFGM8aeU43hFNjTh7u5Grrup7Ryu2nKZ1Y8FWKaJZXiUrkJSnMmGVNBoVH1DNDtQ32tR4YFDRSpSUXjjvsiMnCvoPHVWXJP",
           "37VucYSaXLCAsxYyAPfbSi9eh4iEcbShgf")
     //bonus mean flower scrap plug output eyebrow urge drastic such minimum prefer
     _test("de9177fb34632d998a552b7f41bc9f42d43910da5aa6cedf83997a2d4a362d4a642a56e674e8cc686452ac300c4404210413a2330d39ef5eff2b54eb933f77ed",
-        "3BRTnZiug1MdARwxbSw9KDPfxjDDW6D1YZ")  
-
+          "yprvALiRambGqxJTUwfBKeBNgejTdYH3N7SwJswSQmtusFc5H3g2BVQofZ2hwwKy9GX47UYZQvNEWVrdgtjS6QCKPnyGF1pwjzGLHdVXw69JGKi",
+          "ypub6ZhmzH8AgKrkhRjeRfiP3ngCBa7XmaAng6s3DAJXRb949r1Aj2j4DMMBoEVa1KoWWZrkaKdn8y2u6nJyCBBcEHx5AfDAnNFmc8ayUpzLru3",
+          "3BRTnZiug1MdARwxbSw9KDPfxjDDW6D1YZ")  
+    //pistol thunder want public animal educate laundry all churn federal slab behind media front glow
+    _test("6e85439607050fad311b71238aacdd27d3095329201baa367c43e93869621de213f2c75dac958ecc1a87d55a94baf02e223de1d686c276882c112e841b01a8df",
+          "yprvAM9dMrT1XETGDBxySS599Xk9Y5B1rEaa55vkE156GcvScpyig96eAnKizNa3wzLYzyEeLhSXtaFgT6vLAky9en93YE5Avn7EpFmqFoV43V3",
+          "ypub6a8ymMyuMc1ZRg3SYTc9Wfgt671WFhJRSJrM2PUhpxTRVdJsDgQtiaeCqg8HViSzYpLLe4JCRvruh6Z9Pjee32WpoUUXAbvT2mTg4pTBRCd",
+          "33jf9oZuoZuySWYATVKbgLRva26f5X9iPG")  
 }

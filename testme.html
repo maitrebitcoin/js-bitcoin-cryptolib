@@ -216,7 +216,7 @@ function bip32Sample() {
     console.log( hex(seed) )
     console.assert( seed == seedOK )
     
-    var bip32 = new hdwallet( seed );
+    var bip32 = new hdwallet( seed, WalletType.LEGACY );
 
     var master   = bip32.getMasterKey()
     // should be "xprv9uVXYtuVbPpJQFs3ccU7odsG3m6iPp5jsAqXY1NstBEeLB1sj3sh572x8iSo16if7b9DFRXXZdMvHKvSm39oKNR7uXCHKwM9gc8EZgZk3bA"
