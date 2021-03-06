@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>       
+        #public {
+          border-radius: 25px;
+          border: 2px solid #22310d;
+          background-color: rgb(136, 165, 136);
+          padding: 20px; 
+          text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<h1> js-bitcoin-cryptolib create bictoin account sample page </h1>
+<p><hr><p>
+
+<button onclick="createBtcAccountSegwit()">    <h2> create new account </h2> </button>
+
+<p><p>
+
+<hr>
+public adrees
+<p style="font-family:monospace;font-size:160%" id="public">
+</p>
+<hr>
+secret phrase
+<p style="font-family:monospace;font-size:160%" id="secret">
+</p>
+
+<!----------------------------- javscript code -------------------------------->
+
+<script src='js-bitcoin-lib.js'></script> 
+<script>
+
+// generate a cryto secure random buffer
+function getRandomBuffer( nbBit ) {
+    var nbUint32 = nbBit >> 5;
+    // get random 32 bits ints
+    var randArray = new Uint32Array(nbUint32);
+    window.crypto.getRandomValues(randArray);
+    // conversion to bigint via hexadecimal string
+    var buffer = "";
+    for (var i=0;i<nbUint32;i++) { 
+        buffer += bigEndianBufferFromInt32( randArray[i] )
+    }
+    console.assert(buffer.length*8 == nbBit)
+    return buffer
+}
+
+function createBtcAccountSegwit(type) {
+
+    // generate a random buffer
+    var randomBuffer = getRandomBuffer(128)
+    // calculate the mnemonic phrase from this buffer
+    // ex : "pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
+    var phrase       = bip39phraseFromRandomBuffer(randomBuffer)
+    // calculate the seed for a bip32 wallet
+    var seed         = seedFromPhrase(phrase)
+    // create a new bip32 wallet
+    var bip32Wallet   = new hdwallet( seed, WalletType.SEGWIT  );
+    // bip 49 derivation path
+    var derivationPath = "m/49'/0'/0'/0"
+     // get 1st valid public address . ex : "3BRTnZiug1MdARwxbSw9KDPfxjDDW6D1YZ"
+    var pubAdress0   = bip32Wallet.getSegwitPublicAdressFromPath(derivationPath, 0)
+
+    // show result
+    document.getElementById("public").innerHTML =  pubAdress0 ;    
+    document.getElementById("secret").innerHTML =  phrase ;    
+}
+
+</script>
+
+</body>
+</html>

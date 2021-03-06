@@ -1,3 +1,5 @@
+
+.bech 32 support
 .remove new ECDSA()   
 .error as execptions
 .add more test for ecdsa (extpubkey, pubkey, pubadress)
@@ -7,3 +9,5 @@
 .samples
 .check all comments format
 .generate a doc
+.psbt genration
+.psbt signing
