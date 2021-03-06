@@ -7,7 +7,6 @@
 <p><hr><p>
 
 <button onclick="createBtcAccount()">    <h2> create new account - legacy </h2> </button>
-<button onclick="createBtcAccountSegwit()">    <h2> create new account - segwit </h2> </button>
 
 <p><p>
 
@@ -33,29 +32,6 @@ function getRandomBuffer( nbBit ) {
     }
     console.assert(buffer.length*8 == nbBit)
     return buffer
-}
-
-function createBtcAccountSegwit(type) {
-
-    // generate a random buffer
-    var randomBuffer = getRandomBuffer(128)
-    // calculate the mnemonic phrase from this buffer
-    // ex : "pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
-    var phrase       = bip39phraseFromRandomBuffer(randomBuffer)
-    // calculate the seed for a bip32 wallet
-    var seed         = seedFromPhrase(phrase)
-    // create a new bip32 wallet
-    var bip32Wallet   = new hdwallet( seed, WalletType.SEGWIT  );
-    // bip 49 derivation path
-    var derivationPath = "m/49'/0'/0'/0"
-     // get 1st valid public address . ex : "3BRTnZiug1MdARwxbSw9KDPfxjDDW6D1YZ"
-    var pubAdress0   = bip32Wallet.getSegwitPublicAdressFromPath(derivationPath, 0)
-
-    // show result
-    var result  = "<p> public adress 0      :<hr>"  + pubAdress0 + "<hr>"
-        result += "<p> private backup phrase:<hr>"  + phrase +"<hr>"
-
-    document.getElementById("result").innerHTML = result;    
 }
 
 function createBtcAccount(type) {
