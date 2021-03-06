@@ -9,12 +9,20 @@
           padding: 20px; 
           text-align: center;
         }
+        #secret {
+          border-radius: 25px;
+          border: 2px solid #3f2207;
+          background-color: rgb(204, 145, 67);
+          padding: 20px; 
+          text-align: center;
+        }        
     </style>
+    <title> 
+        sample : create bitcoin account 
+    </title>
 </head>
-<body>
 
-<h1> js-bitcoin-cryptolib create bictoin account sample page </h1>
-<p><hr><p>
+<body>
 
 <button onclick="createBtcAccountSegwit()">    <h2> create new account </h2> </button>
 
@@ -22,11 +30,11 @@
 
 <hr>
 public address :
-<p style="font-family:monospace;font-size:160%" id="public">
+<p style="font-family:monospace;font-size:160%" id="public" hidden=true>
 </p>
 <hr>
 secret phrase :
-<p style="font-family:monospace;font-size:160%" id="secret">
+<p style="font-family:monospace;font-size:160%" id="secret" hidden=true>
 </p>
 
 <!----------------------------- javscript code -------------------------------->
@@ -66,8 +74,10 @@ function createBtcAccountSegwit(type) {
     var pubAdress0   = bip32Wallet.getSegwitPublicAdressFromPath(derivationPath, 0)
 
     // show result
-    document.getElementById("public").innerHTML =  pubAdress0 ;    
-    document.getElementById("secret").innerHTML =  phrase ;    
+    document.getElementById("public").innerHTML = pubAdress0 ; 
+    document.getElementById("public").hidden    = false   
+    document.getElementById("secret").innerHTML = phrase ;    
+    document.getElementById("secret").hidden    = false   
 }
 
 </script>
