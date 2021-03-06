@@ -1,7 +1,7 @@
 /**
  ****************************************************** 
  * @file    hdwallet.js 
- * @file    bip32 bitcoin wallet support.
+ * @file    bip32  bitcoin hierarchical deterministic wallet support.
  * @author  pad@maitrebitcoin.com
  * @module  js-bitcoin-criptolib
  * @see     https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki
@@ -10,22 +10,23 @@
  ******************************************************
  */
 
- //  signature header for extended pub key 
-const SIGNATURE_PrivateKey_legacy = 0x0488ADE4  // ex :"xpriv..."
-const SIGNATURE_PublicKey_legacy  = 0x0488B21E
-// bip 49 (segwit).
-const SIGNATURE_PrivateKey_segwit = 0x049d7878  // ex :"ypriv..."
-const SIGNATURE_PublicKey_segwit  = 0x049d7cb2
- 
-// known derivation path
-const MASTERKEY_PATH = "m"
-const LEGACY_PATH    = "m/44'/0'/0'/0"
-const SEWITG_PATH    = "m/49'/0'/0'/0"
-
-// hd wallet types
+ // hd wallet types
 const WalletType = {
     LEGACY : "legacy-bip44",
     SEGWIT : "segwit-bip49"
+}
+//  signature header for extended pub key 
+const SignatureHeader = {
+    PrivateKey_legacy : 0x0488ADE4,  // ex :"xpriv..."
+    PublicKey_legacy  : 0x0488B21E,
+    PrivateKey_segwit : 0x049d7878,  // ex :"ypriv..." 
+    PublicKey_segwit  : 0x049d7cb2
+ }
+ // known derivation path
+const DerivationPath = {
+     MASTERKEY      : "m",
+     LEGACY_BIP44   : "m/44'/0'/0'/0",
+     SEWITG_BIP49   : "m/49'/0'/0'/0"
 }
 
 
@@ -38,7 +39,6 @@ class hdwallet {
  */
 constructor( seed, walletType ) {
     console.assert( seed.length >= 16 && seed.length <= 64 ,"seed must be between 128 and 512 bits")
-    console.assert( walletType == WalletType.LEGACY ||  walletType==WalletType.SEGWIT )
     this.seed       = seed
     this.walletType = walletType
     this.ecdsa      = new ECDSA();
@@ -53,8 +53,8 @@ constructor( seed, walletType ) {
  */
 getMasterKey() {
     // avail in cache ?
-    if (this.extPrivateKey_cache[MASTERKEY_PATH] )
-        return this.extPrivateKey_cache[MASTERKEY_PATH];
+    if (this.extPrivateKey_cache[DerivationPath.MASTERKEY] )
+        return this.extPrivateKey_cache[DerivationPath.MASTERKEY];
     // calculate HMAC-SHA512(Key = "Bitcoin seed", Data = S)
     var hash512 = hmac_sha512( "Bitcoin seed", this.seed );
     // cut in 2 part 256 bits long
@@ -67,7 +67,7 @@ getMasterKey() {
     masterKey.depth       = 0;
     masterKey.childNumber = 0;
     // keep in cache
-    this.extPrivateKey_cache[MASTERKEY_PATH] = masterKey
+    this.extPrivateKey_cache[DerivationPath.MASTERKEY] = masterKey
     return masterKey;
 }
 /**
@@ -290,7 +290,7 @@ _ckdPrivatr( extendedKey, i ) {
  */
 _getPrivateKeyFromPathR( derivationPath ) {
     // if derivationPath is the master key
-    if (derivationPath==MASTERKEY_PATH) 
+    if (derivationPath==DerivationPath.MASTERKEY) 
         return this.getMasterKey();
     // parse derivationPath
     var parsedPath = this._parseDerivationPath(derivationPath)
@@ -431,12 +431,13 @@ _getPrivateKeyFromPathR( derivationPath ) {
          */
         _getVersionHeader()  {
             if  (this.walletType == WalletType.SEGWIT )  {
-               return this.private  ? SIGNATURE_PrivateKey_segwit  : SIGNATURE_PublicKey_segwit;
+               return this.private  ? SignatureHeader.PrivateKey_segwit  : SignatureHeader.PublicKey_segwit;
             }
             if  (this.walletType == WalletType.LEGACY )  {
-                return this.private  ? SIGNATURE_PrivateKey_legacy  : SIGNATURE_PublicKey_legacy;
+                return this.private ? SignatureHeader.PrivateKey_legacy  : SignatureHeader.PublicKey_legacy;
             }            
-            throw  {error:"invalid vallet type", walletType:this.walletType }; 
+            // if the type of wallet is not set, return legacy values
+            return this.private ? SignatureHeader.PrivateKey_legacy  : SignatureHeader.PublicKey_legacy;
         }
 
         /** 
@@ -455,24 +456,24 @@ _getPrivateKeyFromPathR( derivationPath ) {
             // 4 byte: version bytes
             var version    = int32FromBigEndianBuffer( buffer.substring(0,4) )
             switch (version) {
-                case SIGNATURE_PrivateKey_legacy:
+                case SignatureHeader.PrivateKey_legacy:
                     this.private     =  true
                     this.walletType  =  WalletType.LEGACY
                     break;
-                case SIGNATURE_PublicKey:
+                case SignatureHeader.PublicKey_legacy:
                     this.private     =  false
                     this.walletType  =  WalletType.LEGACY
                     break;
-                case SIGNATURE_PrivateKey_legacy:
+                case SignatureHeader.PrivateKey_segwit:
                     this.private     =  true
                     this.walletType  =  WalletType.SEGWIT 
                     break;
-                case SIGNATURE_PublicKey:
+                case SignatureHeader.PublicKey_segwit:
                     this.private    =  false
                     this.walletType  =  WalletType.SEGWIT 
                     break;                    
-            default:
-                throw  {error:"unknown version header", version:hex(version) }; 
+                default:
+                    throw  {error:"unknown version header", version:hex(version) }; 
             }
             console.assert( _getVersionHeader() == version )
             // 1 byte: depth: 
