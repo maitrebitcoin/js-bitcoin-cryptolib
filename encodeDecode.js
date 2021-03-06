@@ -113,7 +113,7 @@ const sBASE58_CHARSET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvw
 const _58 = BigInt(58)
 // knonw prefix
 const PREFIX_P2PKH =          "\x00"  //  ex : 17VZNX1SN5NtKa8UQFxwQbFeFc3iqRYhem
-const PREFIX_P2SH =           "\x03"  //  ex : 3EktnHQD7RiAE6uzMj2ZifT9YgRrkSgzQX
+const PREFIX_P2SH =           "\x05"  //  ex : 3EktnHQD7RiAE6uzMj2ZifT9YgRrkSgzQX
 //const PREFIX_BIP32_pubkey    "\x0488B21E"  //  ex : xpub661MyMwAqRbcEYS8w7XLSVeEsBXy79zSzH1J8vCdxAZningWLdN3
 
 

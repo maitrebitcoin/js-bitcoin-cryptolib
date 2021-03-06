@@ -130,11 +130,37 @@ getLegacyPublicAdressFromPath( derivationPath, index ) {
     // serialised public key to raw buffer
     var publicKeySerialized = extPublicKey.publicKey.toBuffer();
     // legacy bitcoin format :
-    var hash               = ripemd160( sha256( publicKeySerialized ) ) // same hash as bitcoin public adress
+    var hash               = ripemd160( sha256( publicKeySerialized ) ) 
     var btcAdress          = base58CheckEncode( hash,  PREFIX_P2PKH );
     return btcAdress
-
 }
+/**
+ *  get a sawigt public adress for a derivation path + index. 
+ *  
+ * @public
+ * @param   {string}  derivationPath the derivation path. ex: "m/49'/0'/0'/0"
+ * @param   {int}     index          index of the child key. 0 is the first accout
+ * @returns {stringy} P2PKH address = legacy format. ex : "3EktnHQD7RiAE6uzMj2ZifT9YgRrkSgzQX"      
+ */
+getSegwitPublicAdressFromPath( derivationPath, index ) {
+    // get the extendede public key
+    var extPublicKey = this.getExtendedPubliceKeyFromPath(derivationPath + "/" + index );
+    if (extPublicKey.error) 
+        return extPublicKey; // failed
+    console.assert( extPublicKey.publicKey )
+    // serialised public key to raw buffer
+    var publicKeySerialized = extPublicKey.publicKey.toBuffer();
+    // bitcoin format :
+    // NB : OP_HASH160 is ripemd160( sha256( x ) )
+    var hash               = ripemd160( sha256( publicKeySerialized ) )
+    var scriptSig          = '\x00\x14' + hash
+    var addressBytes       = ripemd160( sha256( scriptSig)  )       
+    var btcAdress          = base58CheckEncode( addressBytes,  PREFIX_P2SH );
+    return btcAdress
+}
+
+
+
 
 /**
  *   internal Child key derivation (CKD) functions for rprivate keys

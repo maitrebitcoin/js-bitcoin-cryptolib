@@ -11,6 +11,7 @@
 <button onclick="testEcdsa()">     <h2> Test ecdsa  </h2> </button>
 <button onclick="testBip32()">     <h2> Test bip32  </h2> </button>
 <button onclick="testBip39()">     <h2> Test bip39  </h2> </button>
+<button onclick="testBip49()">     <h2> Test bip49  </h2> </button>
 <p>
 <button onclick="testAll()">     <h2> Test ALL  </h2> </button>
 <hr>
@@ -81,7 +82,7 @@ function bench() {
 // called if a test fails
 function onTestFail( s, hashAsHexString, expected, message)
 {
-    var sErr = "hash('" + s+ "') => <br>\n" +  hashAsHexString+' != <br>\n'+expected
+    var sErr = "test vak = '" + s+ "') => <br>\n" +  hashAsHexString+' != <br>\n'+expected
     console.log(sErr)
 
     document.getElementById("resultat").innerHTML += "<p>"  +sErr + '<hr>' + message + "<p><font color='red'>FAILED</font>";
@@ -166,9 +167,17 @@ function testBip39() {
      // Run tests...
      autotest_bip39(  onTestFail  )
      document.getElementById("resultat").innerHTML += "<p><font color='green'>PASSED OK</font>";
+}
+function testBip49() {
+    // Start...
+    document.getElementById("resultat").innerHTML += "<font color='gray'>Running...</font>";
+     // Run tests...
+     autotest_bip49(  onTestFail  )
+     document.getElementById("resultat").innerHTML += "<p><font color='green'>PASSED OK</font>";
 
     
 }
+
 
 
 

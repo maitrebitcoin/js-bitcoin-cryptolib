@@ -17,7 +17,7 @@
  * 
 */
 function autotest_all(fonError, fonStepOK, fonEnd ){
-    var tabTestName  = new Array( "ripemd160", "sha512", "sha256", "hmac_sha512",  "bip39", "pbkdf2_hmac512", "ecdsa","bip32" )
+    var tabTestName  = new Array( "ripemd160", "sha512", "sha256", "hmac_sha512",  "bip39", "pbkdf2_hmac512", "ecdsa","bip32","bip49" )
     
     var numTest = 0;
 
@@ -421,4 +421,34 @@ function autotest_bip32( fonError ) {
 
 }
 
+function autotest_bip49( fonError ) {
+    /** 
+     * test the  .getMasterKey() method
+     * @param {string}   seedHex  seed buffer in hex forma. ex : "("6e85439607050fad311b71238..."
+     * @param {expected} expected expected result in base 58. ex  "xprv9s21ZrQH143K4b..."
+     * seed            :  seed buffer in hexa.
+     */
+    function _test( seedHex, expected  ) 
+    {
+        // calculate rood
+        var seed  = bufferFromHex(seedHex)
+        // create a new bip32 wallet
+        var bip32Wallet   = new hdwallet( seed );
+        // bip 49 derivation path
+        var derivationPath = "m/49'/0'/0'/0"
+        // get 1st valid public address 
+        var pubAdress   = bip32Wallet.getSegwitPublicAdressFromPath(derivationPath, 0)
+        // is it the expected result ?
+        if (pubAdress != expected) {
+            // error
+            FAILED( fonError, seedHex, pubAdress, expected )
+        }
+    }
 
+    _test("5eb00bbddcf069084889a8ab9155568165f5c453ccb85e70811aaed6f6da5fc19a5ac40b389cd370d086206dec8aa6c43daea6690f20ad3d8d48b2d2ce9e38e4",
+          "37VucYSaXLCAsxYyAPfbSi9eh4iEcbShgf")
+    //bonus mean flower scrap plug output eyebrow urge drastic such minimum prefer
+    _test("de9177fb34632d998a552b7f41bc9f42d43910da5aa6cedf83997a2d4a362d4a642a56e674e8cc686452ac300c4404210413a2330d39ef5eff2b54eb933f77ed",
+        "3BRTnZiug1MdARwxbSw9KDPfxjDDW6D1YZ")  
+
+}
