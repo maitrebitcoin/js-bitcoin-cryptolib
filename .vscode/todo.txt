@@ -1,5 +1,4 @@
 .DER encode/decode
-.add word number on sample
 .bech 32 support
 .rename hwallet to HdWallet
 .ecdsa signature without random
@@ -14,6 +13,7 @@
 .node.js integration / sample
 .psbt genration
 .psbt signing
+.use lib with WD lib to double-check
 
 
 .QR code generation in sample
