@@ -12,8 +12,17 @@
  ******************************************************
  */
 
-function include_js(s) {
-    document.write("<script src='" +s +"'><"+"/script>");
+ // get url for "js-bitcoin-lib.js.js"
+ // ex = "file:///C:/Source/github/js-bitcoin-cryptolib/js-bitcoin-lib.js"
+var scripts    = document.getElementsByTagName("script") 
+var lastScript = scripts[scripts.length-1]
+var myUrl      = lastScript.src;
+// extract path
+var lastSlash  = myUrl.lastIndexOf('/')
+var libPath    = myUrl.substr( 0, lastSlash ) + '/'
+
+function include_js( jsfile ) {
+    document.write("<script src='" + libPath + jsfile +"'><"+"/script>");
 }
 
 // include all needeed js files in the lib

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1> js-bitcoin-cryptolib auto test page </h1>
+<p><hr><p>
+
+<button onclick="testEcdsa()">     <h2> Test ecdsa  </h2> </button>
+<button onclick="testBip32()">     <h2> Test bip32  </h2> </button>
+<button onclick="testBip39()">     <h2> Test bip39  </h2> </button>
+<button onclick="testBip49()">     <h2> Test bip49  </h2> </button>
+<p>
+<button onclick="testAll()"  id="btnGo">  <h1> Run all auto tests </h1> </button>
+<hr>
+<p><p>
+
+<p style="font-family:monospace;font-size:160%" id="autotestresult">
+    <!--auto test result here-->
+</p>
+
+<!----------------------------- javscript code -------------------------------->
+<script src='../js-bitcoin-lib.js'></script> 
+<script src='autotest.js'></script>
+<script>
+
+var autotestresult = document.getElementById("autotestresult")
+var btnGo          = document.getElementById("btnGo")
+
+/** 
+ * run all tests
+ */ 
+function testAll() {
+    // Start...
+    autotestresult.innerHTML += "<font color='gray'>Running...</font>";
+    btnGo.disabled = true
+
+    // Run the test async :
+    autotest_all( onTestFail, onOneTestOK, onAllTestFinisedOK  );
+}
+
+// called if a test fails
+function onTestFail( s, hashAsHexString, expected, message)
+{
+    var sErr = "test vak = '" + s+ "') => <br>\n" +  hashAsHexString+' != <br>\n'+expected
+    console.log(sErr)
+
+    autotestresult.innerHTML += "<p>"  +sErr + '<hr>' + message + "<p><font color='red'>FAILED</font>";
+    console.assert(false)
+    btnGo.disabled = false
+    // stop the test
+    throw -1;
+}
+// called if one test runs ok
+function onOneTestOK( s )
+{
+    console.log(s + " OK")
+    autotestresult.innerHTML += "<p>"  + s + " <font color='green'>OK</font>";
+
+}
+// called when all tests runs ok (eend)
+function onAllTestFinisedOK()
+{
+    console.log("ALL TEST PASSED OK")
+    autotestresult.innerHTML += "<p><font color='green'>ALL TEST PASSED OK</font>";
+    btnGo.disabled = false
+}
+
+
+
+function testEcdsa() {
+    // Start...
+    autotestresultL = "<font color='gray'>Running...</font>";
+    // Run the test async :
+    setTimeout( () => {
+           // Run tests...
+        autotest_ecdsa(  onTestFail  )
+        // test PASSED OK
+        autotestresult += "<p><font color='green'>PASSED OK</font>";
+        },0
+    )
+}
+function testBip32() {
+    // Start...
+    autotestresult = "<font color='gray'>Running...</font>";
+    // Run tests...
+    autotest_bip32(  onTestFail  )
+    autotestresult += "<p><font color='green'>PASSED OK</font>";
+}
+function testBip39() {
+    // Start...
+    autotestresult = "<font color='gray'>Running...</font>";
+     // Run tests...
+     autotest_bip39(  onTestFail  )
+     autotestresultL += "<p><font color='green'>PASSED OK</font>";
+}
+function testBip49() {
+    // Start...
+    autotestresult = "<font color='gray'>Running...</font>";
+     // Run tests...
+     autotest_bip49(  onTestFail  )
+     autotestresult += "<p><font color='green'>PASSED OK</font>";
+   
+}
+
+
+</script>
+
+</body>
+</html>

@@ -3,13 +3,18 @@
 <head>
     <style>       
         #public {
+          font-family:monospace;
+          font-size: 4.5vw;
           border-radius: 25px;
           border: 2px solid #22310d;
-          background-color: rgb(136, 165, 136);
+          background-color: rgb(217, 223, 167);
           padding: 20px; 
           text-align: center;
+  
         }
         #secret {
+          font-family:monospace;            
+          font-size: 6vw;
           border-radius: 25px;
           border: 2px solid #3f2207;
           background-color: rgb(204, 145, 67);
@@ -23,23 +28,20 @@
 </head>
 
 <body>
-
-<button onclick="createBtcAccountSegwit()">    <h2> create new account </h2> </button>
-
+<button onclick="createBtcAccountSegwit()" id="btnCreate">    <h2> create new account </h2> </button>
 <p><p>
-
 <hr>
 public address :
-<p style="font-family:monospace;font-size:160%" id="public" hidden=true>
+<p id="public" hidden=true>
 </p>
 <hr>
 secret phrase :
-<p style="font-family:monospace;font-size:160%" id="secret" hidden=true>
+<p id="secret" hidden=true>
 </p>
 
 <!----------------------------- javscript code -------------------------------->
 
-<script src='js-bitcoin-lib.js'></script> 
+<script src='../js-bitcoin-lib.js'></script> 
 <script>
 
 // generate a cryto secure random buffer

@@ -284,10 +284,7 @@ function autotest_bip39(fonError) {
           "all hour make first leader extend hole alien behind guard gospel lava path output census museum junior mass reopen famous sing advance salt reform",)
  
 
-
-
 }
-
 
 
 // fonError : callback called if the test fails
@@ -401,7 +398,6 @@ function autotest_bip32( fonError ) {
     _test_error("xprv9s21ZrQH143K4b44oYF6VxMLb")
     _test_error("xprv9s21ZrQH143K4b44oYF6VxMLbBroCaDgiWetWXeDHanBdreeF8bQpUndSvVgHHwQNkifjfwZXgY8Fxub73dLbnJ7we9FSaae5PvXjBTfw4Z")  // CRC
    
-
     // test derivation paths
     _test_derivation( seed, "m/0",    "xprv9uVXYtuVbPpJQFs3ccU7odsG3m6iPp5jsAqXY1NstBEeLB1sj3sh572x8iSo16if7b9DFRXXZdMvHKvSm39oKNR7uXCHKwM9gc8EZgZk3bA" )
     _test_derivation( seed, "m/1",    "xprv9uVXYtuVbPpJSMWKfrQRqWHjqisVFJtWSxgTL1Eejq115SRggWmPVJDvSKWMMWoQvQdXHifwXhpFhzjaydbPghB9VHVagms7PNCruPnU8Co" )
@@ -415,8 +411,6 @@ function autotest_bip32( fonError ) {
     // official test Vectors
     var seed = "000102030405060708090a0b0c0d0e0f";       
     _test_derivation( seed, "m",    "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi" )
-    //_test_derivation( seed, "m",    "xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcet8" )
-
 
 }
 
