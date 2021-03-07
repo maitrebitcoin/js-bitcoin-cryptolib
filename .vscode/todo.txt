@@ -1,4 +1,5 @@
 
+.add word number on sample
 .bech 32 support
 .rename hwallet to HdWallet
 .error as exceptions

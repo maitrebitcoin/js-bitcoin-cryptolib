@@ -1,23 +1,48 @@
 <!DOCTYPE html>
 <html>
 <head>
-       <title> 
-           Sample - Create bitcoin account
-       </title>    
-<head>
+    <title> 
+        Sample - Create bitcoin account
+    </title>    
+    <style>       
+        #public {
+          font-family:monospace;
+          font-size: 4.5vw;
+          border-radius: 4.0vw;
+          border: 2px solid #22310d;
+          background-color: rgb(217, 223, 167);
+          padding: 4.0vw; 
+          text-align: center;
+  
+        }
+        #secret {
+          font-family:monospace;            
+          font-size: 4.5vw;
+          border-radius: 25px;
+          border: 2px solid #3f2207;
+          background-color: rgb(204, 145, 67);
+          padding: 20px; 
+          text-align: center;
+        }       
+        #detail { 
+          font-family:monospace;   
+          font-size: 1.5vw;
+        }
+    </style>
+</head>
 <body>
-
-<h1> js-bitcoin-cryptolib create bictoin account sample page </h1>
-
-<p><hr><p>
-
-<button onclick="createBtcAccount()">    <h2> create new account - legacy </h2> </button>
-
+<button onclick="createBtcAccount()" id="btnCreate">    <h2> create new account </h2> </button>
 <p><p>
-
-<p style="font-family:monospace;font-size:160%" id="result">
-    <!--auto test result here-->
+<hr>
+public address :
+<p id="public" hidden=true>
 </p>
+<hr>
+secret phrase :
+<p id="secret" hidden=true>
+</p>
+<hr>
+<p id="detail"></p>
 
 <!----------------------------- javscript code -------------------------------->
 
@@ -56,17 +81,19 @@ function createBtcAccount(type) {
     var extPrivKey   = bip32Wallet.getExtendedPrivateKeyFromPath(derivationPath)
     var extPubKey    = bip32Wallet.getExtendedPubliceKeyFromPath(derivationPath)
     // get address 0 (1st)
-    var pubKey0      = bip32Wallet.getPublicKeyFromPath(derivationPath, 0)
     var pubAdress0   = bip32Wallet.getLegacyPublicAdressFromPath(derivationPath, 0)
-  
-    // show result
-    var result  = "<p> backup phrase        : "  + phrase
-        result += "<p> Extended private key : "  + extPrivKey.toStringBase58()
-        result += "<p> Extended public key  : "  + extPubKey.toStringBase58()
-        result += "<p> public key 0         : "  + hex(pubKey0.toBuffer())
-        result += "<p> public adress 0      : "  + pubAdress0
 
-    document.getElementById("result").innerHTML = result;    
+    // show result
+    document.getElementById("public").innerHTML = pubAdress0;    
+    document.getElementById("public").hidden    = false
+    document.getElementById("secret").innerHTML = phrase;        
+    document.getElementById("secret").hidden    = false
+    // show advanced results
+    var avResult = ""   
+    avResult += "<p> Extended private key : "  + extPrivKey.toStringBase58()
+    avResult += "<p> Extended public key  : "  + extPubKey.toStringBase58()
+    document.getElementById("detail").innerHTML = avResult    
+    
 }
 
 </script>
