@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title> 
+        Sample - ECDSA
+    </title>    
+    <style>       
+        #publicKey {
+          font-family:monospace;
+          font-size: 2.0vw;
+        }
+        #privateKey {
+          font-family:monospace;
+          font-size: 2.0vw;
+        }      
+        #message {
+          font-family:monospace;
+          font-size: 2.0vw;
+          width: 95%;
+          padding: 2.0vw; 
+          background-color: rgb(220, 228, 220);
+        }            
+        #signature {
+          font-family:monospace;
+          font-size: 1.3vw;
+          width: 95%;
+          padding: 2.0vw; 
+          background-color: rgb(220, 228, 220);
+        }    
+        #check {
+          font-family:monospace;
+          font-size: 4.0vw;
+          
+        }                     
+    </style>
+</head>
+<body>
+<button onclick="ecdsaSample()" id="btnCreate"> <h2> create keys and sign a message </h2> </button>
+<button onclick="ecdsaCheck()"  id="btnCheck" disabled=true > <h2> check signature </h2> </button>
+<p><p>
+<hr>
+publickey :
+<p id="publicKey"> xxxxx </p>
+private key :
+<p id="privateKey">yyyyy</p>
+message :
+<br><textarea id="message">my message to be signed</textarea><br><br>
+signature
+<br><input id="signature" value=""><br><br>
+<hr>
+<p id="check"></p>
+
+<!----------------------------- javscript code -------------------------------->
+
+<script src='../src/js-bitcoin-lib.js'></script> 
+<script>
+function ecdsaSample() {
+
+    var ecdsa = new ECDSA();
+    // create key pair
+    var  privateKey = ecdsa.newPrivateKey();
+    var pubKey      = ecdsa.publicKeyFromPrivateKey(privateKey);
+              
+    // generate signature for <message>
+    var message = document.getElementById("message").value 
+    var signature = ecdsa.signMessage( message, privateKey )
+
+    // show result
+    document.getElementById("publicKey").innerHTML  = hex(pubKey.toBuffer());
+    document.getElementById("privateKey").innerHTML = privateKey.toString();    
+    document.getElementById("message").value        = message
+    document.getElementById("signature").value      = hex( signature.toBuffer() );        
+
+    // check is now available
+    document.getElementById("btnCheck").disabled = false     
+}    
+
+function ecdsaCheck() {
+    var ecdsa = new ECDSA();
+    // read values from dom
+    var message   = document.getElementById("message").value 
+    var bufPubKey = bufferFromHex( document.getElementById("publicKey").innerHTML )
+    var pubKey    = ecdsa.publicKeyFromBuffer(bufPubKey)
+    var bufSignature = bufferFromHex( document.getElementById("signature").value )    
+    var signature = ecdsa.signatureFromBuffer(bufSignature)
+
+    // check signature
+    var checkSignature = ecdsa.verifySignature(message, signature, pubKey )
+
+    if (checkSignature.ok) {
+        document.getElementById("check").innerHTML      = "OK";      
+        document.getElementById("check").style.color    = "green" 
+    }
+    else {
+        document.getElementById("check").innerHTML      = checkSignature.message;    
+        document.getElementById("check").style.color    = "red"
+    }
+}
+
+</script>
+</body>
+</html>

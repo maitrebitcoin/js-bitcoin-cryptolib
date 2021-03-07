@@ -437,21 +437,6 @@ _getPrivateKeyFromPathR( derivationPath ) {
             var buffer =  this.toRawBuffer();
             return base58CheckEncode( buffer )
         }
-        /**
-         * get version header
-         * @returns {int} ex : SIGNATURE_PrivateKey_Legacy
-         */
-        _getVersionHeader()  {
-            if  (this.walletType == WalletType.SEGWIT )  {
-               return this.private  ? SignatureHeader.PrivateKey_segwit  : SignatureHeader.PublicKey_segwit;
-            }
-            if  (this.walletType == WalletType.LEGACY )  {
-                return this.private ? SignatureHeader.PrivateKey_legacy  : SignatureHeader.PublicKey_legacy;
-            }            
-            // if the type of wallet is not set, return legacy values
-            return this.private ? SignatureHeader.PrivateKey_legacy  : SignatureHeader.PublicKey_legacy;
-        }
-
         /** 
         * init from a base58 encoding
         * @param   {sting} str58 a base58 endoded string 
@@ -508,6 +493,20 @@ _getPrivateKeyFromPathR( derivationPath ) {
             }
             // success
         }
+        /**
+         * get version header
+         * @returns {int} ex : SIGNATURE_PrivateKey_Legacy
+         */
+        _getVersionHeader()  {
+            if  (this.walletType == WalletType.SEGWIT )  {
+               return this.private  ? SignatureHeader.PrivateKey_segwit  : SignatureHeader.PublicKey_segwit;
+            }
+            if  (this.walletType == WalletType.LEGACY )  {
+                return this.private ? SignatureHeader.PrivateKey_legacy  : SignatureHeader.PublicKey_legacy;
+            }            
+            // if the type of wallet is not set, return legacy values
+            return this.private ? SignatureHeader.PrivateKey_legacy  : SignatureHeader.PublicKey_legacy;
+        }        
     };// static ExtendedKey = class {
 
 

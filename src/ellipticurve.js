@@ -41,7 +41,7 @@ toBuffer() {
     var res = ""
     // the 1st byte si 0X02 or 0x03 depending of the parity of y
     // 0x02 for even / x03 for odd 
-    if (this.y % BigInt(2) == 0) // if y is even
+    if (this.y % BigInt(2) == BigInt(0)) // if y is even
         res  += '\x02'
     else 
         res  += '\x03'
@@ -170,6 +170,30 @@ pointScalarMult( point, number ) {
 pointGeneratorScalarMult(  number ) {
  
      return this.pointScalarMult( this.G, number ) ;
+}
+/**
+ *  calculates y from x 
+ * 
+ * @param  {BigInt}  x x coordinate of a point on the curve
+ * @param  {boolean} resultIsEven  2 solutions are possible. yIsEven tells which one to choose from
+ * 
+ * @return {BigInt}  y coordinate of a point on the curve
+ */
+calculateYFromX( x, resultIsEven) {
+
+    // y si so that y^2=x^3+7 => y = sqrt( x^3 + 7 )
+    var x3 = this.field.cube(x)
+    var x3plus7 = this.field.add(x3, BigInt(7) )
+    // get the 2 roots
+    var y1 = this.field.sqrt( x3plus7 )
+    var y2 = this.field.negate( y1 )
+    // test if y1 is even    
+    var y1Even = (y1 % BigInt(2) == BigInt(0)) 
+    // return y1 ou y2 depending on the requiered eveness
+    if (y1Even == resultIsEven)
+        return y1
+    else
+        return y2
 }
 
 

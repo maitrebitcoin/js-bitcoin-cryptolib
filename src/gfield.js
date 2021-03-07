@@ -84,6 +84,12 @@ inversion ( x )  {
     console.assert( this.mult(x, invx) == BigInt(1) )
     return invx  ;
 }
-
+// square root :
+sqrt( x ) {
+    // if N==3 mod 4, then sqrt(x) = x^((n+1)/4
+    console.assert( this.N % BigInt(4) == BigInt(3) ); 
+    var pow = (this.N+BigInt(1)) / BigInt(4);
+    return this.exp( x, pow );
+}
 
 }//class GField

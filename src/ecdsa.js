@@ -26,7 +26,6 @@ function getRandomBigInt256() {
     return BigInt(bighex);
 }
 
-
 // Main class
 // ecdsa with secp256k1 parameters
 // ex usage :
@@ -57,9 +56,12 @@ class ECDSA {
             this.point = point;          
         }
         isPublicKey() { return true; }
-        toString() {
-            return hex(this.point.x) + ',' + hex(this.point.y)
-        }        
+        fromString(s) {
+            var tabVal = s.split(",")
+            this.point = new ECPoint(0,0);
+            this.point.x = new BigInt("0x" + tabVal[0])
+            this.point.y = new BigInt("0x" + tabVal[0])
+        }
         // convert to a 33 byte buffer (02+x or 03+x)
         toBuffer() {
             return this.point.toBuffer();
@@ -76,8 +78,9 @@ class ECDSA {
             this.r = r
             this.s = s
         }
-        toString() {
-            return hex(this.r)+':'+ hex(this.s)
+        toBuffer() {
+            return bigEndianBufferFromBigInt256(this.r) 
+                 + bigEndianBufferFromBigInt256(this.s);
         }
     };
     // represente a resul to ECDSA verifySignature    
@@ -158,19 +161,31 @@ publicKeyFromPrivateKey( privateKey ) {
 }
 /**
  * get the public key from a serialised bufffer. 
- * @param  {string} buffer 33 ou 64 bytes buffer
+ * @param  {string} buffer 33 bytes buffer. ex : "0200359924c406998e91d4063fe078c32825e6ac4dce0395666ed54315afa3312d"
  * @returns {ECDSA.PublicKey}
  */
 publicKeyFromBuffer( buffer ) {
-    //@TODO
-    console.assert("TODO")
-    return {error:"not implemented"}
+    if ( buffer.length != 33) {
+        return {error:"buffer must be 33 bytes long.", buffer:hex(buffer) }
+    }
+    // the 1st byte si 0X02 or 0x03 depending of the parity of y
+    // 0x02 for even / x03 for odd 
+    if ( buffer[0] != '\x02' && buffer[0] != '\x03'  ) {
+        return {error:"invalid buffer must start with 02 or 03.", buffer:hex(buffer) }
+    }    
+    var yIsEven = buffer[0] == '\x02'
+    // get the x part
+    var x = bigInt256FromBigEndianBuffer( buffer.substr(1) )
+    // calculates y so that y^2=x^3+7 => y = sqrt( x^3 + 7 )
+    var y = this.ec.calculateYFromX( x, yIsEven );
+    // init point
+    var point     = new ECPoint(x,y);
+    console.assert( this.ec.pointOnCurve(point))   
 
-    var point = new ECPoint(0,0);
+    // init public key  
     var publicKey = new ECDSA.PublicKey(point);
     return publicKey;
 }
-
 /**
  * sign a message
  * 
@@ -199,15 +214,30 @@ signMessage( message, privateKey ) {
     // create result
     var signature = new ECDSA.Signature( pointR.x, s)
     return signature;
-
 }
+/**
+ * get the singature from a serialised bufffer. 
+ * @param {string} buffer 
+ * @TODO -- buffer in DER format :
+ * @see https://bitcoin.stackexchange.com/questions/92680/what-are-the-der-signature-and-sec-format#:~:text=The%20Distinguished%20Encoding%20Rules%20(DER,numbers%20(r%2Cs)%20.
+ */
+signatureFromBuffer( buffer ) {
+    if ( buffer.length != 64) {
+        return {error:"buffer must be 64 bytes long.", buffer:hex(buffer) }
+    }
+    var r = bigInt256FromBigEndianBuffer( buffer )
+    var s = bigInt256FromBigEndianBuffer( buffer.substr(32) )
+    return new ECDSA.Signature( r, s);
+}
+
+
 /**
  * check a signature 
  * 
  * @param {string} message
  * @param {ECDSA.Signature} signature
  * @param {ECDSA.PublicKey} publicKey
- * @returns {bool}
+ * @returns {ECDSA.SignatureCheck} struct with .ok and .message
  */
 verifySignature( message, signature, publicKey ) {
     console.assert( typeof message == 'string' ) 
@@ -250,7 +280,7 @@ verifySignature( message, signature, publicKey ) {
 
     // The signature is valid if r=x mod N, invalid otherwise.
     if ( signature.r != pt1Plus2.x )
-        return new ECDSA.SignatureCheck(false, 'signature and key does not match');
+        return new ECDSA.SignatureCheck(false, 'signature and key do not match');
 
     // OK
     return new ECDSA.SignatureCheck(true,"OK");
