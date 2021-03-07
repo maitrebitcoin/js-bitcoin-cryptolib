@@ -5,7 +5,7 @@
             "type": "chrome",
             "request": "launch",
             "name": "Launch Chrome against file:///S:/Source/github/js-bitcoin-cryptolib/testme.html",
-            "url": "file:///S:/Source/github/js-bitcoin-cryptolib/testme.html",
+            "url": "file:///S:/Source/github/js-bitcoin-cryptolib/sample/debug.html",
             "webRoot": "${workspaceRoot}"
         }
     ]
