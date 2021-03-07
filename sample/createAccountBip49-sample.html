@@ -21,9 +21,14 @@
           border-radius: 25px;
           border: 2px solid #3f2207;
           background-color: rgb(204, 145, 67);
-          padding: 20px; 
-          text-align: center;
+          padding: 5.0vw; 
+          text-align: left;
         }        
+        #numword {
+          color:#383737;     
+          text-align: center;
+          font-size: 3.5vw;
+        }
     </style>
 </head>
 <body>
@@ -74,10 +79,22 @@ function createBtcAccountSegwit(type) {
      // get 1st valid public address . ex : "3BRTnZiug1MdARwxbSw9KDPfxjDDW6D1YZ"
     var pubAdress0   = bip32Wallet.getSegwitPublicAdressFromPath(derivationPath, 0)
 
+    var prettyPhrase = "<table align='center'><tr>"
+    var tabWord = phrase.split(' ')
+    for (var i=0;i<tabWord.length;i++) {
+        var rc = (i>0 && i%2==0)  
+        if (rc) prettyPhrase += "</tr><tr>"          
+        prettyPhrase += "<td id='numword'>&nbsp" + (i+1)+ "&nbsp</td>"   
+        prettyPhrase += "<td>" + tabWord[i] + "</td>"
+        prettyPhrase += "<td>&nbsp&nbsp</td>"
+ 
+    }
+    prettyPhrase+='</tr></table>'
+
     // show result
     document.getElementById("public").innerHTML = pubAdress0 ; 
     document.getElementById("public").hidden    = false   
-    document.getElementById("secret").innerHTML = phrase ;    
+    document.getElementById("secret").innerHTML = prettyPhrase ;    
     document.getElementById("secret").hidden    = false   
 }
 
