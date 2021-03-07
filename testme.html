@@ -178,23 +178,22 @@ function testBip49() {
     
 }
 
-
-
-
-
-
 function ecdsaSample() {
 
     var ecdsa = new ECDSA();
     // create key pair
-    var priv = ecdsa.newPrivateKey();
-    var pub  = ecdsa.publicKeyFormPrivateKey(priv);
+    var privateKey = ecdsa.newPrivateKey();
+    var pubKey     = ecdsa.publicKeyFromPrivateKey(privateKey);
     // show keys
-    var sDump = "private key :<p>" + priv.toString()
+    var sDump =     "private key :<p>" + privateKey.toString()
+               + "<p>public  key :<p>" + pubKey.toString()
 
-        
+    var message = "my message to be signed"
+
+    // generate signature
+    var signature = ecdsa.signMessage( message, privateKey )
     // check signature
-    var res = ecdsa.verifySignature(sMessage, signature, pub )
+    var res = ecdsa.verifySignature(message, signature, pubKey )
     sDump += "<hr>test signature : " + res.message
 
     document.getElementById("resultat").innerHTML = sDump;
@@ -233,8 +232,9 @@ function bip32Sample() {
     // value ok
     //var resOKAsStr =  "xprv9s21ZrQH143K4b44oYF6VxMLbBroCaDgiWetWXeDHanBdreeF8bQpUndSvVgHHwQNkifjfwZXgY8Fxub73dLbnJ7we9FSaae5PvXjBTfw4Y"
     var resOKAsStr =  "xprv9uVXYtuVbPpJQFs3ccU7odsG3m6iPp5jsAqXY1NstBEeLB1sj3sh572x8iSo16if7b9DFRXXZdMvHKvSm39oKNR7uXCHKwM9gc8EZgZk3bA"
-    var resOKM0      = new hdwallet.ExtendedKey() //
-    resOKM0.initFromStringBase58(resOKAsStr)
+    //var resOKM0      = new hdwallet.ExtendedKey() //
+    //resOKM0.initFromStringBase58(resOKAsStr)
+    var resOKM0 = hdwallet.getExtendedKeyFromStringBase58(resOKAsStr)
 
     console.log(   hex( resOKM0.toRawBuffer()) ) 
   

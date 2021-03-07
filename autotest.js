@@ -384,10 +384,9 @@ function autotest_bip32( fonError ) {
     // check tha the value raise an error
     function _test_error( string58  ) 
     {
-       var extKey =  new hdwallet.ExtendedKey() // bip32.getMasterKey();
-       var res= extKey.initFromStringBase58(string58)
-       if (!res.error) {
-        FAILED( fonError, string58, res58, "ERROR expected" )
+       var res=  hdwallet.getExtendedKeyFromStringBase58(string58)
+       if (!res) {
+            FAILED( fonError, string58, res, "ERROR expected" )
        }
 
     }

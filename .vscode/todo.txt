@@ -1,14 +1,16 @@
 
-.QR code generatiop
 .bech 32 support
-.remove new ECDSA()   
-.error as execptions
-.add more test for ecdsa (extpubkey, pubkey, pubadress)
+.rename hwallet to HdWallet
+.error as exceptions
+.add more test for hdwallet (extpubkey, pubkey, pubadress)
 .import pubkey from buffer
 .test encode/decode
 .derivation if we only have pubket
 .samples
 .check all comments format
 .generate a doc
+.node.js integration / sample
 .psbt genration
 .psbt signing
+
+.QR code generation in sample

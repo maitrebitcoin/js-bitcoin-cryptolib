@@ -152,12 +152,12 @@ getLegacyPublicAdressFromPath( derivationPath, index ) {
     return btcAdress
 }
 /**
- *  get a sawigt public adress for a derivation path + index. 
+ *  get a sewigt public adress for a derivation path + index. 
  *  
  * @public
  * @param   {string}  derivationPath the derivation path. ex: "m/49'/0'/0'/0"
  * @param   {int}     index          index of the child key. 0 is the first accout
- * @returns {stringy} P2PKH address = legacy format. ex : "3EktnHQD7RiAE6uzMj2ZifT9YgRrkSgzQX"      
+ * @returns {string} P2PKH address = legacy format. ex : "3EktnHQD7RiAE6uzMj2ZifT9YgRrkSgzQX"      
  */
 getSegwitPublicAdressFromPath( derivationPath, index ) {
     // get the extendede public key
@@ -177,9 +177,21 @@ getSegwitPublicAdressFromPath( derivationPath, index ) {
     var btcAdress          = base58CheckEncode( addressBytes,  PREFIX_P2SH );
     return btcAdress
 }
-
-
-
+/**
+ * create a new extended key (public or private) from the base 58 string format
+ * @param  {string} strBase58  ex "xprv9u5vS4oCRV5L6Jy7K1..."
+ * @return {hdwallet.ExtendedKey} a public or private extended key
+ */
+static getExtendedKeyFromStringBase58( strBase58 )
+{
+    // create a new key
+    var extendeKey = new hdwallet.ExtendedKey() 
+    // init from string
+    var res = extendeKey.initFromStringBase58(strBase58)
+    if (res.error)
+        return res.error; // failed
+    return extendeKey;
+}
 
 /**
  *   internal Child key derivation (CKD) functions for rprivate keys
@@ -475,7 +487,7 @@ _getPrivateKeyFromPathR( derivationPath ) {
                 default:
                     throw  {error:"unknown version header", version:hex(version) }; 
             }
-            console.assert( _getVersionHeader() == version )
+            console.assert( this._getVersionHeader() == version )
             // 1 byte: depth: 
             this.depth      =  buffer.charCodeAt(4)
             // 4 bytes: the fingerprint of the parent's key (0x00000000 if master key)
