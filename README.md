@@ -19,7 +19,7 @@ Sign and verify a message with ECDSA
   if (!res.ok) alert(res.message)
 ```
 
-Generate a BIP-49 compatible Bitcoin Account.  ex : "3BRTnZiug1MdARwxbSw9KDPfxjDDW6D1YZ"
+Generate a BIP-49 compatible Bitcoin account.  ex : "3BRTnZiug1MdARwxbSw9KDPfxjDDW6D1YZ"
 ```
     // generate a random buffer
     var randomBuffer = getRandomBuffer(128)
