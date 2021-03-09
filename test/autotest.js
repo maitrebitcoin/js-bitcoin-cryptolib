@@ -19,7 +19,7 @@
 function autotest_all(fonError, fonStepOK, fonEnd ){
     var tabTestName  = new Array( 'bech32', 
                                   "ripemd160", "sha512", "sha256", "hmac_sha512", 
-                                  "bip39", "pbkdf2_hmac512", "ecdsa","bip32","bip49" )
+                                  "bip39", "pbkdf2_hmac512", "ecdsa","bip32","bip49","bip84" )
     
     var numTest = 0;
 
@@ -80,7 +80,7 @@ function autotest_bech32( fonError ) {
     {
         // calculate hash
         var buffer = bufferFromHex(s)
-        var res    = bech32Encode( buffer, 0, "bc" )
+        var res    = bech32Encode( "bc", 0, buffer  )
         // is it the expected result ?
         if (res != expected) {
             // error
@@ -501,4 +501,69 @@ function autotest_bip49( fonError ) {
           "yprvAM9dMrT1XETGDBxySS599Xk9Y5B1rEaa55vkE156GcvScpyig96eAnKizNa3wzLYzyEeLhSXtaFgT6vLAky9en93YE5Avn7EpFmqFoV43V3",
           "ypub6a8ymMyuMc1ZRg3SYTc9Wfgt671WFhJRSJrM2PUhpxTRVdJsDgQtiaeCqg8HViSzYpLLe4JCRvruh6Z9Pjee32WpoUUXAbvT2mTg4pTBRCd",
           "33jf9oZuoZuySWYATVKbgLRva26f5X9iPG")  
+}
+
+
+/**
+ * 
+ * @param {function } fonError called if one of the test fails
+ * @see https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki
+ */
+function autotest_bip84( fonError ) {
+    /** 
+     * test the  .getMasterKey() method
+     * @param {string}   seedHex  seed buffer in hex forma. ex : "("6e85439607050fad311b71238..."
+     * @param {expected} expected expected result in base 58. ex  "xprv9s21ZrQH143K4b..."
+     * seed            :  seed buffer in hexa.
+     */
+    function _test( mnemonic , expectedExtPrivate0, expectedExtPub0, expectedPrivate0, expectedPublic0, expectedAdress0  ) 
+    {
+        // calculate rood
+        var seed  = seedFromPhrase(mnemonic)
+        // create a new bip32 wallet
+        var bip32Wallet   = new hdwallet( seed, WalletType.SEGWIT_NATIVE );
+        // bip 49 derivation path
+        var derivationPath = DerivationPath.SW_NATIVE_BIP84 
+
+        // check extended keys
+        var extPrivate   = bip32Wallet.getExtendedPrivateKeyFromPath(derivationPath)
+        var extPrivateStr = extPrivate.toStringBase58();
+        if (extPrivateStr != expectedExtPrivate0) {
+            // error
+            FAILED( fonError, mnemonic, extPrivateStr, expectedExtPrivate0 )
+        }
+        var extPublic  = bip32Wallet.getExtendedPubliceKeyFromPath(derivationPath)
+        var extPublicStr = extPublic.toStringBase58();
+        if (extPublicStr != expectedExtPub0) {
+            // error
+            FAILED( fonError, mnemonic, extPublicStr, expectedExtPub0 )
+        }        
+
+        // check private/public ket for adddres 0
+        var privKey = bip32Wallet.getPrivateKeyFromPath(derivationPath +"/0" , 0)   
+        var privKeyStr = privKey.toStringBase58()
+        if (privKeyStr != expectedPrivate0) 
+            FAILED( fonError, mnemonic, privKeyStr, expectedPrivate0 )
+
+        var pubKey = bip32Wallet.getPublicKeyFromPath(derivationPath + "/0",0)
+        var pubKeyStr = hex( pubKey.toBuffer() )
+        if (pubKeyStr != expectedPublic0) 
+            FAILED( fonError, mnemonic, pubKeyStr, expectedPublic0 )    
+   
+        // get 1st valid public address 
+        var pubAdress   = bip32Wallet.getSegwitNativePublicAdressFromPath(derivationPath+ "/0", 0)
+        // is it the expected result ?
+        if (pubAdress != expectedAdress0) {
+            // error
+            FAILED( fonError, mnemonic, pubAdress, expectedAdress0 )
+        }
+    }
+    
+    _test("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
+          "zprvAdG4iTXWBoARxkkzNpNh8r6Qag3irQB8PzEMkAFeTRXxHpbF9z4QgEvBRmfvqWvGp42t42nvgGpNgYSJA9iefm1yYNZKEm7z6qUWCroSQnE",
+          "zpub6rFR7y4Q2AijBEqTUquhVz398htDFrtymD9xYYfG1m4wAcvPhXNfE3EfH1r1ADqtfSdVCToUG868RvUUkgDKf31mGDtKsAYz2oz2AGutZYs",
+          "KyZpNDKnfs94vbrwhJneDi77V6jF64PWPF8x5cdJb8ifgg2DUc9d",
+          "0330d54fd0dd420a6e5f8d3624f5f3482cae350f79d5f0753bf5beef9c2d91af3c",
+          "bc1qcr8te4kr609gcawutmrza0j4xv80jy8z306fyu")
+
 }

@@ -1,4 +1,5 @@
 .bech 32 support : decode
+.exchange param ordrer in getSegwitNativePublicAdressFromPath
 .DER encode/decode
 .remove pubkey.fromString
 .rename hwallet to HdWallet

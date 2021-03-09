@@ -46,6 +46,11 @@ class ECDSA {
         toString() {
             return hex(this.value)
         }
+        toStringBase58() {
+            // WIF format
+            //@See https://en.bitcoin.it/wiki/Wallet_import_format
+            return base58CheckEncode(  bigEndianBufferFromBigInt256(this.value) + '\x01', PREFIX_PRIVATEKEY)
+        }
     };
     // represent a public key for ECDSA
     static PublicKey = class { 

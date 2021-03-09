@@ -98,7 +98,7 @@ function testBech32() {
     // Start...
     document.getElementById("resultat").innerHTML += "<font color='gray'>Running...</font>";
     // Run tests...
-    autotest_ecdsa( onTestFail )
+    autotest_bip84(onTestFail)
     autotest_bech32( onTestFail  )
     // test PASSED OK
     document.getElementById("resultat").innerHTML += "<p><font color='green'>PASSED OK</font>";
@@ -142,44 +142,16 @@ function bip32Sample() {
     console.log( hex(seed) )
     console.assert( seed == seedOK )
     
-    var bip32 = new hdwallet( seed, WalletType.LEGACY );
+    var btcWallet = new hdwallet( seed, WalletType.SEGWIT_NATIVE );
+    var extPub  = btcWallet.getExtendedPubliceKeyFromPath( DerivationPath.SW_NATIVE_BIP84 );
+    console.log(  extPub.toStringBase58() ) 
+  
+    var adress = btcWallet.getSegwitNativePublicAdressFromPath(DerivationPath.SW_NATIVE_BIP84, 0)
 
-    var master   = bip32.getMasterKey()
-    // should be "xprv9uVXYtuVbPpJQFs3ccU7odsG3m6iPp5jsAqXY1NstBEeLB1sj3sh572x8iSo16if7b9DFRXXZdMvHKvSm39oKNR7uXCHKwM9gc8EZgZk3bA"
-    var extKeyM0   = bip32.getExtendedPrivateKeyFromPath("m/0")
-    var extKeyMPub = bip32.getExtendedPubliceKeyFromPath("m/0")
-
-//@temp
-//    var xx= bip32.getPrivateKeyFromPath("bogeyman");
-//    console.log("xx" + xx.toString());
-//    return;
-
-    var res   = master; //bip32.getMasterKey();
-
-    // value ok
-    //var resOKAsStr =  "xprv9s21ZrQH143K4b44oYF6VxMLbBroCaDgiWetWXeDHanBdreeF8bQpUndSvVgHHwQNkifjfwZXgY8Fxub73dLbnJ7we9FSaae5PvXjBTfw4Y"
-    var resOKAsStr =  "xprv9uVXYtuVbPpJQFs3ccU7odsG3m6iPp5jsAqXY1NstBEeLB1sj3sh572x8iSo16if7b9DFRXXZdMvHKvSm39oKNR7uXCHKwM9gc8EZgZk3bA"
-    //var resOKM0      = new hdwallet.ExtendedKey() //
-    //resOKM0.initFromStringBase58(resOKAsStr)
-    var resOKM0 = hdwallet.getExtendedKeyFromStringBase58(resOKAsStr)
-
-    console.log(   hex( resOKM0.toRawBuffer()) ) 
+    console.log(  adress ) 
   
 
-    // dump
-    var sDump  = ""
-    sDump += "<hr>seed :     <p>" + hex( seed )
-    sDump += "<hr>master key signature raw:   <p>" + hex( res.toRawBuffer() )
-    sDump += "<hr>master key signature base58:<p>" + res.toStringBase58() + "<p>" + resOKAsStr
-    sDump += "<p>" //+ hex(base58Decode(resOK))
-    
-    sDump += "<hr>m/0 raw:   <p>" + hex( extKeyM0.toRawBuffer() )
-    sDump += "<p>m/0 base58: " + extKeyM0.toStringBase58() 
-    sDump += "<hr> m/0 OK____: " + resOKAsStr
-    sDump += "<p> m/0 OK raw: " + hex( resOKM0.toRawBuffer() )
-    sDump += "<p> m/0 OK2____: " + resOKM0.toStringBase58() 
-
-    document.getElementById("resultat").innerHTML = sDump;    
+    document.getElementById("resultat").innerHTML = adress;    
 }
 
 </script>

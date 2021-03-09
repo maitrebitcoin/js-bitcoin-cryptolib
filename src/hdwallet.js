@@ -12,21 +12,25 @@
 
  // hd wallet types
 const WalletType = {
-    LEGACY : "legacy-bip44",
-    SEGWIT : "segwit-bip49"
+    LEGACY :        "legacy-bip44",
+    SEGWIT :        "segwit-bip49",
+    SEGWIT_NATIVE : "segwit-bip84"
 }
 //  signature header for extended pub key 
 const SignatureHeader = {
-    PrivateKey_legacy : 0x0488ADE4,  // ex :"xpriv..."
-    PublicKey_legacy  : 0x0488B21E,
-    PrivateKey_segwit : 0x049d7878,  // ex :"ypriv..." 
-    PublicKey_segwit  : 0x049d7cb2
+    PrivateKey_legacy   : 0x0488ADE4,  // ex :"xpriv..."
+    PublicKey_legacy    : 0x0488B21E,
+    PrivateKey_segwit   : 0x049d7878,  // ex :"ypriv..." 
+    PublicKey_segwit    : 0x049d7cb2,
+    PrivateKey_sgNative : 0x04b2430c,  // ex :"zprv..." 
+    PublicKey_sgNative  : 0x04b24746     
  }
  // known derivation path
 const DerivationPath = {
-     MASTERKEY      : "m",
-     LEGACY_BIP44   : "m/44'/0'/0'/0",
-     SEWITG_BIP49   : "m/49'/0'/0'/0"
+     MASTERKEY       : "m",
+     LEGACY_BIP44    : "m/44'/0'/0'/0",
+     SEWITG_BIP49    : "m/49'/0'/0'/0",
+     SW_NATIVE_BIP84 : "m/84'/0'/0'"
 }
 
 
@@ -35,7 +39,7 @@ class hdwallet {
  *  create a new hdwallet from a seed 
  * @public
  * @param {string} seed 128 to 512 bits buffer  
- * @param {WalletType}  walletType WalletType.LEGACY or WalletType.SEGWIT
+ * @param {WalletType}  walletType WalletType.LEGACY, WalletType.SEGWIT or WalletType.SEGWIT_NATIVE
  */
 constructor( seed, walletType ) {
     console.assert( seed.length >= 16 && seed.length <= 64 ,"seed must be between 128 and 512 bits")
@@ -71,7 +75,7 @@ getMasterKey() {
     return masterKey;
 }
 /**
- *  get a private key for a derivation path
+ *  get the extended private key for a derivation path
  * @public
  * @param   {string}  derivationPath the derivation path. ex: "m/0'/1"
  * @returns {hdwallet.ExtendedKey}   the extended private key 
@@ -128,6 +132,22 @@ getPublicKeyFromPath( derivationPath, index ) {
     // get the public key
     console.assert( extPublicKey.publicKey )
     return extPublicKey.publicKey;
+}
+/**
+ *  get a private key for a derivation path + index
+ * @public
+ * @param   {string}  derivationPath the derivation path. ex: "m/44'/0'/0'/0"
+ * @param   {int}     index          index of the child key. 0 is the first accout
+ * @returns {ECDSA.PublicLKey} the extended private key 
+ */
+getPrivateKeyFromPath( derivationPath, index ) {
+    // get the extendede public key
+    var extPrivateKey = this.getExtendedPrivateKeyFromPath(derivationPath + "/" + index );
+    if (extPrivateKey.error) 
+        return extPrivateKey; // failed
+    // get the public key
+    console.assert( extPrivateKey.privateKey )
+    return extPrivateKey.privateKey;
 
 }
 /**
@@ -157,7 +177,7 @@ getLegacyPublicAdressFromPath( derivationPath, index ) {
  * @public
  * @param   {string}  derivationPath the derivation path. ex: "m/49'/0'/0'/0"
  * @param   {int}     index          index of the child key. 0 is the first accout
- * @returns {string} P2PKH address = legacy format. ex : "3EktnHQD7RiAE6uzMj2ZifT9YgRrkSgzQX"      
+ * @returns {string}  address. ex : "3EktnHQD7RiAE6uzMj2ZifT9YgRrkSgzQX"      
  */
 getSegwitPublicAdressFromPath( derivationPath, index ) {
     // get the extendede public key
@@ -177,6 +197,31 @@ getSegwitPublicAdressFromPath( derivationPath, index ) {
     var btcAdress          = base58CheckEncode( addressBytes,  PREFIX_P2SH );
     return btcAdress
 }
+/**
+ *  get a sewigt native adress for a derivation path + index. 
+ *  
+ * @public
+ * @param   {string}  derivationPath the derivation path. ex: "m/84'/0'/0'/0"
+ * @param   {int}     index          index of the child key. 0 is the first accout
+ * @returns {string}  bech 32 address. ex : "bc1qn085dr40dcrhejgve4sky.."      
+ * @see https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki
+ */
+getSegwitNativePublicAdressFromPath( derivationPath, index ) {
+    // get the extendede public key
+    var extPublicKey = this.getExtendedPubliceKeyFromPath(derivationPath + "/" + index );
+    if (extPublicKey.error) 
+        return extPublicKey; // failed
+    console.assert( extPublicKey.publicKey )
+    // serialised public key to raw buffer
+    var publicKeySerialized = extPublicKey.publicKey.toBuffer();
+    // @see https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki#p2wpkh
+    //      https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki
+    //      https://bitcointalk.org/index.php?topic=4992632.0
+    var hashKey            = ripemd160( sha256( publicKeySerialized ) )
+    var btcAdress          = bech32Encode( "bc", 0, hashKey );
+    return btcAdress
+}
+
 /**
  * create a new extended key (public or private) from the base 58 string format
  * @param  {string} strBase58  ex "xprv9u5vS4oCRV5L6Jy7K1..."
@@ -466,9 +511,17 @@ _getPrivateKeyFromPathR( derivationPath ) {
                     this.walletType  =  WalletType.SEGWIT 
                     break;
                 case SignatureHeader.PublicKey_segwit:
-                    this.private    =  false
+                    this.private     =  false
                     this.walletType  =  WalletType.SEGWIT 
-                    break;                    
+                    break;        
+                case SignatureHeader.PrivateKey_sgNative:
+                    this.private     =  true
+                    this.walletType  =  WalletType.SEGWIT_NATIVE 
+                    break;                                   
+                case SignatureHeader.PublicKey_sgNative:
+                    this.private     =  false
+                    this.walletType  =  WalletType.SEGWIT_NATIVE 
+                    break;                                
                 default:
                     throw  {error:"unknown version header", version:hex(version) }; 
             }
@@ -498,11 +551,17 @@ _getPrivateKeyFromPathR( derivationPath ) {
          * @returns {int} ex : SIGNATURE_PrivateKey_Legacy
          */
         _getVersionHeader()  {
+            if  (this.walletType == WalletType.SEGWIT_NATIVE )  {
+                return this.private  ? SignatureHeader.PrivateKey_sgNative  
+                                     : SignatureHeader.PublicKey_sgNative;
+             }            
             if  (this.walletType == WalletType.SEGWIT )  {
-               return this.private  ? SignatureHeader.PrivateKey_segwit  : SignatureHeader.PublicKey_segwit;
+               return this.private  ? SignatureHeader.PrivateKey_segwit  
+                                    : SignatureHeader.PublicKey_segwit;
             }
             if  (this.walletType == WalletType.LEGACY )  {
-                return this.private ? SignatureHeader.PrivateKey_legacy  : SignatureHeader.PublicKey_legacy;
+                return this.private ? SignatureHeader.PrivateKey_legacy  
+                                    : SignatureHeader.PublicKey_legacy;
             }            
             // if the type of wallet is not set, return legacy values
             return this.private ? SignatureHeader.PrivateKey_legacy  : SignatureHeader.PublicKey_legacy;

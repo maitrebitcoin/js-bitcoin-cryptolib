@@ -114,8 +114,7 @@ const _58 = BigInt(58)
 // knonw prefix
 const PREFIX_P2PKH =          "\x00"  //  ex : 17VZNX1SN5NtKa8UQFxwQbFeFc3iqRYhem
 const PREFIX_P2SH =           "\x05"  //  ex : 3EktnHQD7RiAE6uzMj2ZifT9YgRrkSgzQX
-//const PREFIX_BIP32_pubkey    "\x0488B21E"  //  ex : xpub661MyMwAqRbcEYS8w7XLSVeEsBXy79zSzH1J8vCdxAZningWLdN3
-
+const PREFIX_PRIVATEKEY =     "\x80"  //  ex : 5Hwgr3u458GLafKBgxtssHSPqJnYoGrSzgQsPwLFhLNYskDPyyA
 
 /**
  *  decode a string in base58 ta a binary buffer 
@@ -233,9 +232,9 @@ function base58CheckEncode( buffer, prefix ) {
 /**
  *  encode a binary buffer to bech32 + crc
  * 
- * @param   {string} buffer the buffer to encode. ex : "0279be667ef9dcbb.."
- * @param   {string} version version number. from 0 to 31
  * @param   {string} prefix prexif wihtout the "1" separator. ex : "bc"
+ * @param   {string} version version number. from 0 to 31
+ * @param   {string} buffer the buffer to encode. ex : "0279be667ef9dcbb.."
  * @returns {string} a bench32 encoded string. ex: "bc1qw508d6qejxtd..."
  * 
  * reference :
@@ -243,7 +242,7 @@ function base58CheckEncode( buffer, prefix ) {
  * @see https://en.bitcoin.it/wiki/BIP_0173
  * @see https://slowli.github.io/bech32-buffer/
  */
-function bech32Encode( buffer, version, prefix ) {
+function bech32Encode( prefix, version, buffer  ) {
     console.assert(version >=  0);
     console.assert(version <= 31);
 
