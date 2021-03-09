@@ -229,6 +229,101 @@ function base58CheckEncode( buffer, prefix ) {
     // encode un buffer with 4 crc bytes
     return base58Encode( prefix +buffer + sCrc )
 }
+
+/**
+ *  encode a binary buffer to bech32 + crc
+ * 
+ * @param   {string} buffer the buffer to encode. ex : "0279be667ef9dcbb.."
+ * @param   {string} version version number. from 0 to 31
+ * @param   {string} prefix prexif wihtout the "1" separator. ex : "bc"
+ * @returns {string} a bench32 encoded string. ex: "bc1qw508d6qejxtd..."
+ * 
+ * reference :
+ * @see https://bitcointalk.org/index.php?topic=4992632.0
+ * @see https://en.bitcoin.it/wiki/BIP_0173
+ * @see https://slowli.github.io/bech32-buffer/
+ */
+function bech32Encode( buffer, version, prefix ) {
+    console.assert(version >=  0);
+    console.assert(version <= 31);
+
+    var tab5BitValues = []
+
+    // version : 5 bits
+    tab5BitValues.push(version)    
+
+    // split buffer to an aray ou 5 bit integers
+    for (var numbit=0;numbit<buffer.length*8;numbit+=5) {
+        tab5BitValues.push( _get5Bit( buffer, numbit ) )
+    }
+    // add 30 bit checksum = aray if 6 * 5bits int
+    var tabChecksum = _bech32_create_checksum ( prefix, tab5BitValues )
+    tab5BitValues = tab5BitValues.concat(tabChecksum)
+    
+    // convert to string with prefix
+    const BECH32_CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
+    var result = prefix  + "1";
+    tab5BitValues.forEach(element => {
+        result += BECH32_CHARSET[element] 
+    });
+    return result
+
+    // ---- internal functions ------
+
+    /**
+        get 5 bits from a binray buffer at pos <nBit>
+     *  @param {string} buf binary buffer
+     *  @param {int} nBit bit number in the vuffer
+     *  @return{int} a 5 bits integers 
+     */
+    function _get5Bit( buf, numBit ) {
+        var val16Bit = int16FromBigEndianBuffer(buf, numBit/8 )
+        var pos     = numBit % 8 
+        return ((val16Bit << pos) & 0xF800) >>> 11;
+    }
+    /** calc cheksum :
+     *  @param {string} prefix human readable prefix. ex "bc"
+     *  @param {array}  tabVal array of 5 bits integers
+     *  @return {array} array of 5 bits integers with 6 entrie
+     */
+    function _bech32_create_checksum( prefix, tabVal ) {  
+        var tabPrefix  = _bech32_hrp_expand(prefix) 
+        var values = tabPrefix.concat( tabVal )
+            values = values.concat( [0,0,0,0,0,0]  )
+        polymod = _bech32_polymod(values) ^ 1
+        var checksum= []
+        for (var i=0;i<6;i++)
+            checksum[i] = (polymod >> 5 * (5-i)) & 31;
+        return checksum;
+    }        
+    function _bech32_polymod(tabVal) {
+        const GEN = [0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3];
+        var chk = 1
+        tabVal.forEach(value => {
+            var b = (chk >>> 25)
+            chk = (chk & 0x1ffffff) << 5 ^ value
+            for (var i=0;i<5;i++) {
+                // if bit number <i> is set, xor with GEN[i]
+                if (((b >> i) & 1) == 1)
+                    chk ^= GEN[i];
+            }
+        });
+        return chk;
+    }
+    // return a array of 5 bits integers
+    function _bech32_hrp_expand(text) {
+        var res = []
+        for (const charI of text) { 
+            res.push( (charI.charCodeAt(0) >> 5)) 
+        }
+        res.push(0)
+        for (const charI of text)  { 
+            res.push( (charI.charCodeAt(0) & 31))
+        }
+        return res
+    }
+}
+
 /**
  * convert a buffer into BigInt assuming the buffer in big endian format 
  * = most significant byte first
@@ -299,15 +394,27 @@ function int32FromLittleEndianBuffer( buf, pos ) {
     return res  
 }
 /**
-* convert a buffer into 16 bits int assuming the buffer is in liitle endian format
+* convert a buffer into 16 bits int assuming the buffer is in little endian format
 * = least significant byte first (intel for ex.)
 * @param {string} buf
-* @param {int}    pos 1st char to convert in buf. 0 if non set
+* @param {int}    pos 1st char to convert in buf. 0 if not set
 */
 function int16FromLittleEndianBuffer( buf, pos ) {
     if (!pos) pos= 0;
     var res  =    (buf.charCodeAt(pos+1)<<8 )
                 | (buf.charCodeAt(pos  )    )
+    return res  
+}
+/**
+* convert a buffer into 16 bits int assuming the buffer is in big endian format
+*
+* @param {string} buf
+* @param {int}    pos 1st char to convert in buf. 0 if not set
+*/
+function int16FromBigEndianBuffer( buf, pos ) {
+    if (!pos) pos= 0;
+    var res  =    (buf.charCodeAt(pos  )<<8 )
+                | (buf.charCodeAt(pos+1)    )
     return res  
 }
 

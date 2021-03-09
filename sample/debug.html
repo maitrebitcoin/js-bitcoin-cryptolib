@@ -5,13 +5,7 @@
 <h1> js-bitcoin-cryptolib debug page </h1>
 <p><hr><p>
 
-<button onclick="testSha()">       <h2> Test sha256 </h2> </button>
-<button onclick="testSha512()">    <h2> Test sha512 </h2> </button>
-<button onclick="testHmacSha512()"><h2> Test hmac-sha512 </h2> </button>
-<button onclick="testEcdsa()">     <h2> Test ecdsa  </h2> </button>
-<button onclick="testBip32()">     <h2> Test bip32  </h2> </button>
-<button onclick="testBip39()">     <h2> Test bip39  </h2> </button>
-<button onclick="testBip49()">     <h2> Test bip49  </h2> </button>
+<button onclick="testBech32()">    <h2> Test bech32 </h2> </button>
 <p>
 <button onclick="testAll()">     <h2> Test ALL  </h2> </button>
 <hr>
@@ -28,6 +22,7 @@
 
 
 <script src='../src/js-bitcoin-lib.js'></script> 
+<script src='../test/autotest.js'></script> 
 
 <script>
 
@@ -71,7 +66,7 @@ function bench() {
 // called if a test fails
 function onTestFail( s, hashAsHexString, expected, message)
 {
-    var sErr = "test vak = '" + s+ "') => <br>\n" +  hashAsHexString+' != <br>\n'+expected
+    var sErr = "test val = '" + s+ "') => <br>\n" +  hashAsHexString+' != <br>\n'+expected
     console.log(sErr)
 
     document.getElementById("resultat").innerHTML += "<p>"  +sErr + '<hr>' + message + "<p><font color='red'>FAILED</font>";
@@ -94,77 +89,19 @@ function onAllTestFinisedOK()
 
 function testAll() {
     // Start...
-    document.getElementById("resultat").innerHTML += "<font color='gray'>Running...</font>";
+    document.getElementById("resultat").innerHTML = "<font color='gray'>Running...</font>";
     // Run the test async :
     autotest_all( onTestFail, onTestOK, onAllTestFinisedOK  );
 }
 
-function testSha() {
+function testBech32() {
     // Start...
     document.getElementById("resultat").innerHTML += "<font color='gray'>Running...</font>";
-    // Run the test async :
-    setTimeout( () => {
-        
-        // Run tests...
-        autotest_sha256( onTestFail  )
-        // test PASSED OK
-        document.getElementById("resultat").innerHTML += "<p><font color='green'>PASSED OK</font>";
-        },0
-    )
-}
-function testSha512() {
-     // Start...
-    document.getElementById("resultat").innerHTML += "<font color='gray'>Running...</font>";       
-        // Run tests...
-        autotest_sha512( onTestFail  )
-        // test PASSED OK
-        document.getElementById("resultat").innerHTML = "<p><font color='green'>PASSED OK</font>";
-}
-function testHmacSha512() {
-     // Start...
-    document.getElementById("resultat").innerHTML += "<font color='gray'>Running...</font>";       
-        // Run tests...
-        autotest_hmac_sha512( onTestFail  )
-        // test PASSED OK
-        document.getElementById("resultat").innerHTML = "<p><font color='green'>PASSED OK</font>";
-}
-function testEcdsa() {
-    // Start...
-    document.getElementById("resultat").innerHTML += "<font color='gray'>Running...</font>";
-    // Run the test async :
-    setTimeout( () => {
-        
-        // Run tests...
-        autotest_ecdsa(  onTestFail  )
+    // Run tests...
+    autotest_bech32( onTestFail  )
+    // test PASSED OK
+    document.getElementById("resultat").innerHTML += "<p><font color='green'>PASSED OK</font>";
 
-        // test PASSED OK
-        document.getElementById("resultat").innerHTML += "<p><font color='green'>PASSED OK</font>";
-        },0
-    )
-}
-function testBip32() {
-    // Start...
-    document.getElementById("resultat").innerHTML += "<font color='gray'>Running...</font>";
-     // Run tests...
-     autotest_bip32(  onTestFail  )
-     document.getElementById("resultat").innerHTML += "<p><font color='green'>PASSED OK</font>";
-
-}
-function testBip39() {
-    // Start...
-    document.getElementById("resultat").innerHTML += "<font color='gray'>Running...</font>";
-     // Run tests...
-     autotest_bip39(  onTestFail  )
-     document.getElementById("resultat").innerHTML += "<p><font color='green'>PASSED OK</font>";
-}
-function testBip49() {
-    // Start...
-    document.getElementById("resultat").innerHTML += "<font color='gray'>Running...</font>";
-     // Run tests...
-     autotest_bip49(  onTestFail  )
-     document.getElementById("resultat").innerHTML += "<p><font color='green'>PASSED OK</font>";
-
-    
 }
 
 function ecdsaSample() {

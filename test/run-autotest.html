@@ -41,7 +41,7 @@ function testAll() {
 // called if a test fails
 function onTestFail( s, hashAsHexString, expected, message)
 {
-    var sErr = "test vak = '" + s+ "') => <br>\n" +  hashAsHexString+' != <br>\n'+expected
+    var sErr = "test val = '" + s+ "') => <br>\n" +  hashAsHexString+' != <br>\n'+expected
     console.log(sErr)
 
     autotestresult.innerHTML += "<p>"  +sErr + '<hr>' + message + "<p><font color='red'>FAILED</font>";

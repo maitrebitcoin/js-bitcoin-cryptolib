@@ -17,7 +17,9 @@
  * 
 */
 function autotest_all(fonError, fonStepOK, fonEnd ){
-    var tabTestName  = new Array( "ripemd160", "sha512", "sha256", "hmac_sha512",  "bip39", "pbkdf2_hmac512", "ecdsa","bip32","bip49" )
+    var tabTestName  = new Array( 'bech32', 
+                                  "ripemd160", "sha512", "sha256", "hmac_sha512", 
+                                  "bip39", "pbkdf2_hmac512", "ecdsa","bip32","bip49" )
     
     var numTest = 0;
 
@@ -34,6 +36,8 @@ function autotest_all(fonError, fonStepOK, fonEnd ){
             eval("autotest_"+ testName + "(fonError)")
         }
         catch (error)  {
+            if ( error == -2)
+                throw -2
             FAILED( fonError, "", "", testName + ' ERROR - \n' +error)     
         }
 
@@ -57,9 +61,37 @@ function autotest_all(fonError, fonStepOK, fonEnd ){
 
 function FAILED(fonError, valueTested, result, expected, message ) {
      // error
-     fonError( valueTested, result, expected, message )
+     try {
+        fonError( valueTested, result, expected, message )
+     }
+     catch (error)  {
+        // stop the test
+        throw -2;
+    }     
      // stop the test
      throw -1;
+}
+
+// fonError : callback called if the test fails
+function autotest_bech32( fonError ) {
+    // s       :  value to encode. buffer as hex
+    // expeded : "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    function _test_( s, expected  ) 
+    {
+        // calculate hash
+        var buffer = bufferFromHex(s)
+        var res    = bech32Encode( buffer, 0, "bc" )
+        // is it the expected result ?
+        if (res != expected) {
+            // error
+            FAILED( fonError, s, res, expected, "" )
+        }
+    }
+
+    // test some values 
+    _test_( "0e140f070d1a001912060b0d081504140311021d030c1d03040f1814060e1e16",  
+            "bc1qpc2q7pcdrgqpjysxpvxss9gyzsp3zqsaqvxp6qcypuvpgpswrctqtvxys3")
+
 }
 
 // fonError : callback called if the test fails
