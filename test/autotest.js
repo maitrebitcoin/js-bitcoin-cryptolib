@@ -566,4 +566,11 @@ function autotest_bip84( fonError ) {
           "0330d54fd0dd420a6e5f8d3624f5f3482cae350f79d5f0753bf5beef9c2d91af3c",
           "bc1qcr8te4kr609gcawutmrza0j4xv80jy8z306fyu")
 
+    _test("remove movie armor media visit virus emotion wisdom time shine under wheat blossom faculty always",
+          "zprvAdDkXqnuuju4iDBHpcojnUexeyL9P7qoGbY72wAjLrfkYTj1uVuTcsitV4WHopjfcX57Lt6ssUQGcBWRBMyedJdAd4zDpowbc8cCLRpp5Ti",
+          "zpub6rD6wMKok7TMvhFkveLk9cbhD1AdnaZedpThqKaLuCCjRG4AT3DiAg3NLNPWvS2bFBeWYq1yFwXrE36wggbdC1g6je3AGyk6oYvzZ1YVQoN",
+          "L44cV9s8ADP2UYXuKNDk5fqnV57CqY9tDEubFa7daNdZpfyQEjZo",
+          "02acbcfd1fb95a847e1394cbe039c4a024b977b38b007aeb102682275c84e35866",
+          "bc1qzsmjy0whj9r3fl78nlfypxxhvyt0m2g3e7hxja")
+
 }
