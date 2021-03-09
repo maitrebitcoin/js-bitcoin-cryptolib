@@ -503,7 +503,6 @@ function autotest_bip49( fonError ) {
           "33jf9oZuoZuySWYATVKbgLRva26f5X9iPG")  
 }
 
-
 /**
  * 
  * @param {function } fonError called if one of the test fails
@@ -538,7 +537,6 @@ function autotest_bip84( fonError ) {
             // error
             FAILED( fonError, mnemonic, extPublicStr, expectedExtPub0 )
         }        
-
         // check private/public ket for adddres 0
         var privKey = bip32Wallet.getPrivateKeyFromPath(derivationPath +"/0" , 0)   
         var privKeyStr = privKey.toStringBase58()
@@ -572,5 +570,4 @@ function autotest_bip84( fonError ) {
           "L44cV9s8ADP2UYXuKNDk5fqnV57CqY9tDEubFa7daNdZpfyQEjZo",
           "02acbcfd1fb95a847e1394cbe039c4a024b977b38b007aeb102682275c84e35866",
           "bc1qzsmjy0whj9r3fl78nlfypxxhvyt0m2g3e7hxja")
-
 }
