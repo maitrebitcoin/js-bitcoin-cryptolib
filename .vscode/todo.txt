@@ -1,5 +1,6 @@
+.bech 32 support : decode
 .DER encode/decode
-.bech 32 support
+.remove pubkey.fromString
 .rename hwallet to HdWallet
 .ecdsa signature without random
 .error as exceptions

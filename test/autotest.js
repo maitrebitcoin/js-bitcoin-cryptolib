@@ -327,8 +327,9 @@ function autotest_ecdsa( fonError ) {
     var valTest = "0c34cf6a7d24367baa81ef8331c8cb7ffafc0978ff6cf9e5d873de96142bdb86"
     var priv = ecdsa.privateKeyFromHexString(valTest)
     var pub  = ecdsa.publicKeyFromPrivateKey(priv); 
-    var result   = pub.toString()
-    var expected ="3068765c2ab75bcfcbd5ae3ccefbdd25b94f414ab0a58c67a780fd437e35c81e,5fa059f6ecab2e2e11a880130b04697859d75eea77f603c715946ed430ef69a4"
+    var result   = hex( pub.toBuffer() )
+    //var expected ="3068765c2ab75bcfcbd5ae3ccefbdd25b94f414ab0a58c67a780fd437e35c81e,5fa059f6ecab2e2e11a880130b04697859d75eea77f603c715946ed430ef69a4"
+    var expected ="023068765c2ab75bcfcbd5ae3ccefbdd25b94f414ab0a58c67a780fd437e35c81e"
     if (result!=expected) {
         FAILED( fonError, valTest, result,expected)
     }
