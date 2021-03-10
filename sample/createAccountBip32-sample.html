@@ -66,23 +66,22 @@ function getRandomBuffer( nbBit ) {
 
 function createBtcAccount(type) {
 
-    // generate a random buffer
-    var randomBuffer = getRandomBuffer(128)
-    // calculate the mnemonic phrase from this buffer
-    // ex : "pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
-    var phrase       = bip39phraseFromRandomBuffer(randomBuffer)
-    // calculate the seed for a bip32 wallet
-    var seed         = seedFromPhrase(phrase)
-    // create a new bip32 wallet
-    var bip32Wallet   = new hdwallet( seed, WalletType.LEGACY );
+    //  create a new wallet
+    var bitcoinWallet =  new BitcoinWallet(  WalletType.SEGWIT  );
+    bitcoinWallet.initFromRandom()
+     // get 1st valid public address . ex : "3BRTnZiug1MdARwxbSw9KDPfxjDDW6D1YZ"
+    var pubAdress0   =bitcoinWallet.getPublicAddress(0)
+    // get backup phrase
+    phrase = bitcoinWallet.phrase
+
+    // get thes bip32 wallet
+    var bip32Wallet   = bitcoinWallet.hdwallet;
     // bip 44 derivation path
     var derivationPath = "m/44'/0'/0'/0"
     // get extended private and public key
     var extPrivKey   = bip32Wallet.getExtendedPrivateKeyFromPath(derivationPath)
     var extPubKey    = bip32Wallet.getExtendedPubliceKeyFromPath(derivationPath)
-    // get address 0 (1st)
-    var pubAdress0   = bip32Wallet.getLegacyPublicAdressFromPath(derivationPath, 0)
-
+  
     // show result
     document.getElementById("public").innerHTML = pubAdress0;    
     document.getElementById("public").hidden    = false

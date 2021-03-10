@@ -36,7 +36,7 @@ constructor(  walletType ) {
  */
 initFromRandom() {
     // generate a random buffer
-    var randomBuffer = this._getRandomBuffer(128)
+    var randomBuffer = this.getRandomBuffer(128)
     // calculate the mnemonic phrase from this buffer
     // ex : "pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
     this.phrase      = bip39phraseFromRandomBuffer(randomBuffer)
@@ -168,18 +168,8 @@ getLegacyPublicAdressFromPath( derivationPath, index ) {
     return btcAdress
 }
 
-// get the main derivation path from type
- _derivationPathFromType( walletType ) {
-    switch (walletType) {
-        case WalletType.LEGACY:        return DerivationPath.LEGACY_BIP44
-        case WalletType.SEGWIT:        return DerivationPath.SEWITG_BIP49    
-        case WalletType.SEGWIT_NATIVE: return DerivationPath.SW_NATIVE_BIP84      
-        default:
-            throw {error:"invalid wallet type",walletType:walletType}         
-    }
-}
-// generate a cryto secure random buffer
- _getRandomBuffer( nbBit ) {
+// generate a cryto secure random buffer of <nbBit> size
+getRandomBuffer( nbBit ) {
     var nbUint32 = nbBit >> 5;
     // get random 32 bits ints
     var randArray = new Uint32Array(nbUint32);
@@ -192,6 +182,18 @@ getLegacyPublicAdressFromPath( derivationPath, index ) {
     console.assert(buffer.length*8 == nbBit)
     return buffer
 }
+
+// get the main derivation path from type
+ _derivationPathFromType( walletType ) {
+    switch (walletType) {
+        case WalletType.LEGACY:        return DerivationPath.LEGACY_BIP44
+        case WalletType.SEGWIT:        return DerivationPath.SEWITG_BIP49    
+        case WalletType.SEGWIT_NATIVE: return DerivationPath.SW_NATIVE_BIP84      
+        default:
+            throw {error:"invalid wallet type",walletType:walletType}         
+    }
+}
+
 
 
 }

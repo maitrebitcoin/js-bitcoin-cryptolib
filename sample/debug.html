@@ -69,7 +69,8 @@ function onTestFail( s, hashAsHexString, expected, message)
     var sErr = "test val = '" + s+ "') => <br>\n" +  hashAsHexString+' != <br>\n'+expected
     console.log(sErr)
 
-    document.getElementById("resultat").innerHTML += "<p>"  +sErr + '<hr>' + message + "<p><font color='red'>FAILED</font>";
+    document.getElementById("resultat").innerHT
+    ML += "<p>"  +sErr + '<hr>' + message + "<p><font color='red'>FAILED</font>";
     console.assert(false)
     // stop the test
     throw -1;
@@ -101,7 +102,7 @@ function testBech32() {
     //autotest_bip84(onTestFail)
     
     //@test
-    autotest_bip49();
+    autotest_bip84();
     
     autotest_bech32( onTestFail  )
     // test PASSED OK
@@ -132,26 +133,20 @@ function ecdsaSample() {
 
 function createAccountSample() {
 
-
-    var btcWallet = new BitcoinWallet();
-    btcWallet.initFromRandom( )
-
-    var phrase = btcWallet.phrase;//  "pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
-    console.log(  phrase ) 
-    //var seedOK = bufferFromHex("6e85439607050fad311b71238aacdd27d3095329201baa367c43e93869621de213f2c75dac958ecc1a87d55a94baf02e223de1d686c276882c112e841b01a8df");
-    //var seed = seedFromPhrase(phrase)
-    //console.log( hex(seed) )
-    //console.assert( seed == seedOK )
+    // create a new wallet 
+    var myWallet   = new BitcoinWallet(  WalletType.SEGWIT_NATIVE  );
+    // generate a random buffer
+    var randomBuffer = myWallet.getRandomBuffer(128)
+    // calculate the mnemonic phrase from this buffer
+    // ex : "pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
+    var phrase       = bip39phraseFromRandomBuffer(randomBuffer)
+    var seed         = seedFromPhrase(phrase)
+    // use the seed a the base for all adresses calculations
+    myWallet.initFromSeed(seed)
+    // get the 1st public adress. 
+    var pubAdress0   =  myWallet.getPublicAddress(0)
     
-    //var btcWallet = new hdwallet( seed, WalletType.SEGWIT_NATIVE );
-    //var extPub  = btcW/allet.getExtendedPubliceKeyFromPath( DerivationPath.SW_NATIVE_BIP84 );
-    //console.log(  extPub.toStringBase58() ) 
-  
-    var adress = btcWallet.getPublicAddress()
-
-    console.log(  adress ) 
-  
-    document.getElementById("resultat").innerHTML = phrase + "<br>" + adress;    
+    document.getElementById("resultat").innerHTML = phrase + "<br>" + pubAdress0;    
 }
 
 </script>

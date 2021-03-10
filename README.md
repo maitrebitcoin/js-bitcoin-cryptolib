@@ -12,22 +12,25 @@ Examples :
 
 Sign and verify a message with ECDSA
 ```
-  var priv      = ecdsa.newPrivateKey();
-  var pub       = ecdsa.publicKeyFormPrivateKey(priv);
-  var signature = ecdsa.signMessage( "my message", priv )
-  var res       = ecdsa.verifySignature( "my message", signature, pub )
-  if (!res.ok) alert(res.message)
+    var priv      = ecdsa.newPrivateKey();
+    var pub       = ecdsa.publicKeyFormPrivateKey(priv);
+    var signature = ecdsa.signMessage( "my message", priv )
+    var res       = ecdsa.verifySignature( "my message", signature, pub )
+    if (!res.ok) alert(res.message)
 ```
 
 Generate a BIP-49 compatible Bitcoin account.  ex : "3BRTnZiug1MdARwxbSw9KDPfxjDDW6D1YZ"
 ```
+    // create a new wallet 
+    var myWallet   = new BitcoinWallet(  WalletType.SEGWIT_NATIVE  );
     // generate a random buffer
-    var randomBuffer = getRandomBuffer(128)
+    var randomBuffer = myWallet.getRandomBuffer(128)
     // calculate the mnemonic phrase from this buffer
     // ex : "pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
     var phrase       = bip39phraseFromRandomBuffer(randomBuffer)
     var seed         = seedFromPhrase(phrase)
-    // create a new bip32 wallet
-    var bip32Wallet   = new hdwallet( seed, WalletType.SEGWIT  );
-    var pubAdress0   = bip32Wallet.getSegwitPublicAdressFromPath("m/49'/0'/0'/0", 0)
+    // use the seed a the base for all adresses calculations
+    myWallet.initFromSeed(seed)
+    // get the 1st public adress. 
+    var pubAdress0   =  myWallet.getPublicAddress(0)
 ```
