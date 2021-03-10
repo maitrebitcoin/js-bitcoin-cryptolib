@@ -98,7 +98,11 @@ function testBech32() {
     // Start...
     document.getElementById("resultat").innerHTML += "<font color='gray'>Running...</font>";
     // Run tests...
-    autotest_bip84(onTestFail)
+    //autotest_bip84(onTestFail)
+    
+    //@test
+    autotest_bip49();
+    
     autotest_bech32( onTestFail  )
     // test PASSED OK
     document.getElementById("resultat").innerHTML += "<p><font color='green'>PASSED OK</font>";
@@ -128,8 +132,7 @@ function ecdsaSample() {
 
 function createAccountSample() {
 
-    //@test
-    
+
     var btcWallet = new BitcoinWallet();
     btcWallet.initFromRandom( )
 

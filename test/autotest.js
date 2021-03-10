@@ -459,7 +459,9 @@ function autotest_bip49( fonError ) {
         // calculate rood
         var seed  = bufferFromHex(seedHex)
         // create a new bip32 wallet
-        var bip32Wallet   = new hdwallet( seed, WalletType.SEGWIT );
+        var bitcoinWallet   = new BitcoinWallet( WalletType.SEGWIT );
+        bitcoinWallet.initFromSeed(seed)
+        var bip32Wallet = bitcoinWallet.hdwallet;
         // bip 49 derivation path
         var derivationPath = "m/49'/0'/0'/0"
 
@@ -478,7 +480,7 @@ function autotest_bip49( fonError ) {
         }        
 
         // get 1st valid public address 
-        var pubAdress   = bip32Wallet.getSegwitPublicAdressFromPath(derivationPath, 0)
+        var pubAdress   = bitcoinWallet.getSegwitPublicAdressFromPath(derivationPath + "/0")
         // is it the expected result ?
         if (pubAdress != expectedAdress0) {
             // error

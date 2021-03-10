@@ -19,14 +19,22 @@ const WalletType = {
 
 class BitcoinWallet {
 /** 
- *  create a new wallet from the system random generator ( window.crypto.getRandomValues )
+ *   constructor
  * @public
  * @param {WalletType}  [walletType=WalletType.SEGWIT_NATIVE] type of wallet to create. 
  */
-initFromRandom(walletType) {
+constructor(  walletType ) {
     if (!walletType)
         walletType = WalletType.SEGWIT_NATIVE
-    this.walletType = walletType;
+    this.walletType = walletType;    
+    // init derivation path to main account. ex : "m/84'/0'/0'"
+    this.mainDerivationPath = this._derivationPathFromType( this.walletType )        
+}    
+/** 
+ *  create a new wallet from the system random generator ( window.crypto.getRandomValues )
+ * @public
+ */
+initFromRandom() {
     // generate a random buffer
     var randomBuffer = this._getRandomBuffer(128)
     // calculate the mnemonic phrase from this buffer
@@ -35,7 +43,7 @@ initFromRandom(walletType) {
     // calculate the seed for a bip32 wallet (can be slow)
     var seed         = seedFromPhrase(this.phrase)
     // init the wallet from the seed
-    this.initFromSeed(seed,walletType)
+    this.initFromSeed(seed,this.walletType)
 }
 /** 
  *  init the wallet from a seed 
@@ -43,14 +51,11 @@ initFromRandom(walletType) {
  * @param {string}     seed       128 to 512 bits buffer  
  * @param {WalletType} walletType WalletType.LEGACY, WalletType.SEGWIT or WalletType.SEGWIT_NATIVE
  */
-initFromSeed(seed, walletType ) {
+initFromSeed(seed ) {
     console.assert( seed.length >= 16 && seed.length <= 64 ,"seed must be between 128 and 512 bits")
-    console.assert(walletType)
-
+ 
     // init a hd wallet
-    this.hdwallet = new hdwallet(seed, walletType )
-    // init derivation path to main account. ex : "m/84'/0'/0'"
-    this.mainDerivationPath = this._derivationPathFromType( walletType )
+    this.hdwallet = new hdwallet(seed, this.walletType )
 
 }
 /**
