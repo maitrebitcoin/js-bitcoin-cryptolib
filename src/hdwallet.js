@@ -10,12 +10,7 @@
  ******************************************************
  */
 
- // hd wallet types
-const WalletType = {
-    LEGACY :        "legacy-bip44",
-    SEGWIT :        "segwit-bip49",
-    SEGWIT_NATIVE : "segwit-bip84"
-}
+ 
 //  signature header for extended pub key 
 const SignatureHeader = {
     PrivateKey_legacy   : 0x0488ADE4,  // ex :"xpriv..."
@@ -26,11 +21,11 @@ const SignatureHeader = {
     PublicKey_sgNative  : 0x04b24746     
  }
  // known derivation path
-const DerivationPath = {
-     MASTERKEY       : "m",
-     LEGACY_BIP44    : "m/44'/0'/0'/0",
-     SEWITG_BIP49    : "m/49'/0'/0'/0",
-     SW_NATIVE_BIP84 : "m/84'/0'/0'"
+ const DerivationPath = {
+    MASTERKEY       : "m",
+    LEGACY_BIP44    : "m/44'/0'/0'",
+    SEWITG_BIP49    : "m/49'/0'/0'",
+    SW_NATIVE_BIP84 : "m/84'/0'/0'"
 }
 
 
@@ -150,77 +145,9 @@ getPrivateKeyFromPath( derivationPath, index ) {
     return extPrivateKey.privateKey;
 
 }
-/**
- *  get a legacy public adress for a derivation path + index. 
- *  
- * @public
- * @param   {string}  derivationPath the derivation path. ex: "m/44'/0'/0'/0"
- * @param   {int}     index          index of the child key. 0 is the first accout
- * @returns {stringy} P2PKH address = legacy format. ex : "1E3B4m6BSw7v2A7TiA2YxDTXBZjFEpBmPN"      
- */
-getLegacyPublicAdressFromPath( derivationPath, index ) {
-    // get the extendede public key
-    var extPublicKey = this.getExtendedPubliceKeyFromPath(derivationPath + "/" + index );
-    if (extPublicKey.error) 
-        return extPublicKey; // failed
-    console.assert( extPublicKey.publicKey )
-    // serialised public key to raw buffer
-    var publicKeySerialized = extPublicKey.publicKey.toBuffer();
-    // legacy bitcoin format :
-    var hash               = ripemd160( sha256( publicKeySerialized ) ) 
-    var btcAdress          = base58CheckEncode( hash,  PREFIX_P2PKH );
-    return btcAdress
-}
-/**
- *  get a sewigt public adress for a derivation path + index. 
- *  
- * @public
- * @param   {string}  derivationPath the derivation path. ex: "m/49'/0'/0'/0"
- * @param   {int}     index          index of the child key. 0 is the first accout
- * @returns {string}  address. ex : "3EktnHQD7RiAE6uzMj2ZifT9YgRrkSgzQX"      
- */
-getSegwitPublicAdressFromPath( derivationPath, index ) {
-    // get the extendede public key
-    var extPublicKey = this.getExtendedPubliceKeyFromPath(derivationPath + "/" + index );
-    if (extPublicKey.error) 
-        return extPublicKey; // failed
-    console.assert( extPublicKey.publicKey )
-    // serialised public key to raw buffer
-    var publicKeySerialized = extPublicKey.publicKey.toBuffer();
-    // bitcoin P2WPKH format :
-    // If the version byte is 0, and the witness program is 20 bytes:
-    // It is interpreted as a pay-to-witness-script-hash (P2WSH) program. 
-    // NB : OP_HASH160 is ripemd160( sha256( x ) )
-    var hashKey            = ripemd160( sha256( publicKeySerialized ) )
-    var scriptSig          = '\x00\x14' + hashKey // \x00 : version byte, \x14=20   witness program
-    var addressBytes       = ripemd160( sha256( scriptSig)  )       
-    var btcAdress          = base58CheckEncode( addressBytes,  PREFIX_P2SH );
-    return btcAdress
-}
-/**
- *  get a sewigt native adress for a derivation path + index. 
- *  
- * @public
- * @param   {string}  derivationPath the derivation path. ex: "m/84'/0'/0'/0"
- * @param   {int}     index          index of the child key. 0 is the first accout
- * @returns {string}  bech 32 address. ex : "bc1qn085dr40dcrhejgve4sky.."      
- * @see https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki
- */
-getSegwitNativePublicAdressFromPath( derivationPath, index ) {
-    // get the extendede public key
-    var extPublicKey = this.getExtendedPubliceKeyFromPath(derivationPath + "/" + index );
-    if (extPublicKey.error) 
-        return extPublicKey; // failed
-    console.assert( extPublicKey.publicKey )
-    // serialised public key to raw buffer
-    var publicKeySerialized = extPublicKey.publicKey.toBuffer();
-    // @see https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki#p2wpkh
-    //      https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki
-    //      https://bitcointalk.org/index.php?topic=4992632.0
-    var hashKey            = ripemd160( sha256( publicKeySerialized ) )
-    var btcAdress          = bech32Encode( "bc", 0, hashKey );
-    return btcAdress
-}
+
+
+
 
 /**
  * create a new extended key (public or private) from the base 58 string format

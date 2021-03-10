@@ -33,3 +33,4 @@ include_js('hash.js');
 include_js('encodedecode.js');
 include_js('hdwallet.js');
 include_js('bip39.js');
+include_js('bitcoinwallet.js');

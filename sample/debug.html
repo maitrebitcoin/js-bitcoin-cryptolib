@@ -9,9 +9,9 @@
 <p>
 <button onclick="testAll()">     <h2> Test ALL  </h2> </button>
 <hr>
-<button onclick="ecdsaSample()">   <h2> Ecdsa sample</h2> </button>
-<button onclick="bip32Sample()">    <h2> bip32 sample</h2> </button>
-<button onclick="bench()">    <h2> sha512 bench</h2> </button>
+
+<button onclick="createAccountSample()">    <h2> bip32 sample</h2> </button>
+
 <p><p>
 
 <p style="font-family:monospace;font-size:160%" id="resultat">
@@ -126,32 +126,29 @@ function ecdsaSample() {
     document.getElementById("resultat").innerHTML = sDump;
 }
 
-function bip32Sample() {
+function createAccountSample() {
 
     //@test
-    // https://stuff.birkenstab.de/pbkdf2/
-
-    var test4 =      PBKDF2_512( hmac_sha512, "password","salt", 4 )
-    //    "a3e4e33fc661f01e0a0824950576713fca8c6c27971aff4c3088b3d41442e723d4b603f204e07129f54e7f9a26456eab8ed8406b7a7a0c7917a7635abde2b1b7"
-    console.log( hex(test4) )  
-
-
-    var phrase ="pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
-    var seedOK = bufferFromHex("6e85439607050fad311b71238aacdd27d3095329201baa367c43e93869621de213f2c75dac958ecc1a87d55a94baf02e223de1d686c276882c112e841b01a8df");
-    var seed = seedFromPhrase(phrase)
-    console.log( hex(seed) )
-    console.assert( seed == seedOK )
     
-    var btcWallet = new hdwallet( seed, WalletType.SEGWIT_NATIVE );
-    var extPub  = btcWallet.getExtendedPubliceKeyFromPath( DerivationPath.SW_NATIVE_BIP84 );
-    console.log(  extPub.toStringBase58() ) 
+    var btcWallet = new BitcoinWallet();
+    btcWallet.initFromRandom( )
+
+    var phrase = btcWallet.phrase;//  "pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
+    console.log(  phrase ) 
+    //var seedOK = bufferFromHex("6e85439607050fad311b71238aacdd27d3095329201baa367c43e93869621de213f2c75dac958ecc1a87d55a94baf02e223de1d686c276882c112e841b01a8df");
+    //var seed = seedFromPhrase(phrase)
+    //console.log( hex(seed) )
+    //console.assert( seed == seedOK )
+    
+    //var btcWallet = new hdwallet( seed, WalletType.SEGWIT_NATIVE );
+    //var extPub  = btcW/allet.getExtendedPubliceKeyFromPath( DerivationPath.SW_NATIVE_BIP84 );
+    //console.log(  extPub.toStringBase58() ) 
   
-    var adress = btcWallet.getSegwitNativePublicAdressFromPath(DerivationPath.SW_NATIVE_BIP84, 0)
+    var adress = btcWallet.getPublicAddress()
 
     console.log(  adress ) 
   
-
-    document.getElementById("resultat").innerHTML = adress;    
+    document.getElementById("resultat").innerHTML = phrase + "<br>" + adress;    
 }
 
 </script>
