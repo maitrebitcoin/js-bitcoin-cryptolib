@@ -1,8 +1,8 @@
+.error as exceptions
 .bech 32 support : decode
 .DER encode/decode
-.remove pubkey.fromString
+.add ECDSA privateKeyFromString58() (WIF)
 .ecdsa signature without random
-.error as exceptions
 .add more test for hdwallet (extpubkey, pubkey, pubadress)
 .import pubkey from buffer
 .test encode/decode

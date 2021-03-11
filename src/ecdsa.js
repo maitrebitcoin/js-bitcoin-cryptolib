@@ -36,68 +36,6 @@ function getRandomBigInt256() {
 //    if (!res.ok) alert(res.message)
 
 class ECDSA { 
-// ------ types -----
-    // represent a private key for ECDSA
-    static PrivateKey = class { 
-        constructor( bigint ) {
-            console.assert( typeof bigint == 'bigint' )
-            this.value = bigint;
-        }
-        toString() {
-            return hex(this.value)
-        }
-        toStringBase58() {
-            // WIF format
-            //@See https://en.bitcoin.it/wiki/Wallet_import_format
-            return base58CheckEncode(  bigEndianBufferFromBigInt256(this.value) + '\x01', PREFIX_PRIVATEKEY)
-        }
-    };
-    // represent a public key for ECDSA
-    static PublicKey = class { 
-        constructor( point ) {
-            console.assert( typeof point == 'object' )           
-            console.assert(  point.x )       
-            console.assert(  point.y )               
-            this.point = point;          
-        }
-        isPublicKey() { return true; }
-        fromString(s) {
-            var tabVal = s.split(",")
-            this.point = new ECPoint(0,0);
-            this.point.x = new BigInt("0x" + tabVal[0])
-            this.point.y = new BigInt("0x" + tabVal[0])
-        }
-        // convert to a 33 byte buffer (02+x or 03+x)
-        toBuffer() {
-            return this.point.toBuffer();
-        }
-        isZero() {
-            return this.point.isZero();
-        }
-    };
-    // represent a signature for ECDSA
-    static Signature = class { 
-        constructor( r, s ) {
-            console.assert( typeof r == 'bigint' )
-            console.assert( typeof s == 'bigint' )
-            this.r = r
-            this.s = s
-        }
-        toBuffer() {
-            return bigEndianBufferFromBigInt256(this.r) 
-                 + bigEndianBufferFromBigInt256(this.s);
-        }
-    };
-    // represente a resul to ECDSA verifySignature    
-   static SignatureCheck = class { 
-       constructor( ok, message ) {
-            this.ok      = ok
-            this.message = message
-       }
-     
-   }
-
-// ------ methods -----
 
 // constructor
 constructor(  ) {
@@ -109,7 +47,7 @@ constructor(  ) {
 }
 
 /**
- *  generate a private key
+ *  generate a new private key
  * @returns {ECDSA.PrivateKey}
  */
 newPrivateKey(  ) {
@@ -117,18 +55,6 @@ newPrivateKey(  ) {
     var rand256 =getRandomBigInt256()
     // conversion to privateKey
     var privateKey = new ECDSA.PrivateKey( rand256 );
-    return privateKey
-}
-/**
- *  generate a private key from a hexadecimal string.
-  * @param   {string} hexString  ex : "0c34cf6a7d24367baa81ef8331c8cb7ffafc0978ff6cf9e5d873de96142bdb86"
- * @returns {ECDSA.PrivateKey}
- */
-privateKeyFromHexString( hexString ) {
-    console.assert( typeof hexString == 'string' ) 
-    console.assert( hexString.length == 64 ) 
-    var bigI = BigInt( "0x" + hexString)
-    var privateKey = new ECDSA.PrivateKey( bigI );
     return privateKey
 }
 /**
@@ -290,5 +216,66 @@ verifySignature( message, signature, publicKey ) {
     // OK
     return new ECDSA.SignatureCheck(true,"OK");
 }
+
+// ------ types -----
+    // represent a private key for ECDSA
+    static PrivateKey = class { 
+        constructor( bigint ) {
+            console.assert( typeof bigint == 'bigint' )
+            this.value = bigint;
+        }
+        toBuffer() {
+            return bigEndianBufferFromBigInt256(this.value) 
+        }
+        toStringBase58() {
+            // WIF format
+            //@See https://en.bitcoin.it/wiki/Wallet_import_format
+            return base58CheckEncode(  this.toBuffer() + '\x01', PREFIX_PRIVATEKEY)
+        }
+    };
+    // represent a public key for ECDSA
+    static PublicKey = class { 
+        constructor( point ) {
+            console.assert( typeof point == 'object' )           
+            console.assert(  point.x )       
+            console.assert(  point.y )               
+            this.point = point;          
+        }
+        isPublicKey() { return true; }
+        fromString(s) {
+            var tabVal = s.split(",")
+            this.point = new ECPoint(0,0);
+            this.point.x = new BigInt("0x" + tabVal[0])
+            this.point.y = new BigInt("0x" + tabVal[0])
+        }
+        // convert to a 33 byte buffer (02+x or 03+x)
+        toBuffer() {
+            return this.point.toBuffer();
+        }
+        isZero() {
+            return this.point.isZero();
+        }
+    };
+    // represent a signature for ECDSA
+    static Signature = class { 
+        constructor( r, s ) {
+            console.assert( typeof r == 'bigint' )
+            console.assert( typeof s == 'bigint' )
+            this.r = r
+            this.s = s
+        }
+        toBuffer() {
+            return bigEndianBufferFromBigInt256(this.r) 
+                 + bigEndianBufferFromBigInt256(this.s);
+        }
+    };
+    // represente a resul to ECDSA verifySignature    
+    static SignatureCheck = class { 
+       constructor( ok, message ) {
+            this.ok      = ok
+            this.message = message
+       }
+     
+   }//PublicKey
 
 };//class ECDSA
