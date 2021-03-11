@@ -1,7 +1,7 @@
 /**
  ****************************************************** 
  * @file    bip39.js
- * @file    Bitcoin bip39 implementation : mnemonic phrase <=> seed for bip32 hdwallet
+ * @file    Bitcoin bip39 implementation : mnemonic phrase <=> seed for bip32 HdWallet
  * @author  pad@maitrebitcoin.com
  * @module  js-bitcoin-criptolib
  * @see https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki

@@ -75,13 +75,14 @@ function createBtcAccount(type) {
     phrase = bitcoinWallet.phrase
 
     // get thes bip32 wallet
-    var bip32Wallet   = bitcoinWallet.hdwallet;
+    var bip32Wallet   = bitcoinWallet.HdWallet;
     // bip 44 derivation path
     var derivationPath = "m/44'/0'/0'/0"
     // get extended private and public key
     var extPrivKey   = bip32Wallet.getExtendedPrivateKeyFromPath(derivationPath)
     var extPubKey    = bip32Wallet.getExtendedPubliceKeyFromPath(derivationPath)
   
+
     // show result
     document.getElementById("public").innerHTML = pubAdress0;    
     document.getElementById("public").hidden    = false

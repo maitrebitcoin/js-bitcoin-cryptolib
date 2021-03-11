@@ -55,7 +55,7 @@ initFromSeed(seed ) {
     console.assert( seed.length >= 16 && seed.length <= 64 ,"seed must be between 128 and 512 bits")
  
     // init a hd wallet
-    this.hdwallet = new hdwallet(seed, this.walletType )
+    this.HdWallet = new HdWallet(seed, this.walletType )
 
 }
 /**
@@ -64,9 +64,9 @@ initFromSeed(seed ) {
  * @returns {string} the master key. ex "xprv9s21ZrQH143K2H2..."
  */
 getMasterKey() {
-    if (!this.hdwallet) 
+    if (!this.HdWallet) 
         throw {error:"wallet not initalized."}
-    return this.hdwallet.getMasterKey().toStringBase58()
+    return this.HdWallet.getMasterKey().toStringBase58()
 }
 /**
  *  get a public bitcoin address
@@ -76,7 +76,7 @@ getMasterKey() {
  * @returns {string} the bitcoin address. ex : "bc1qn085dr40dcrhejgve4sky.." 
  */
 getPublicAddress( index, change ) {
-    if (!this.hdwallet) 
+    if (!this.HdWallet) 
         throw {error:"wallet not initalized."}    
     // calculates derivation path
     var derivationPath = this.mainDerivationPath 
@@ -109,7 +109,7 @@ getPublicAddress( index, change ) {
  */
 getSegwitNativePublicAdressFromPath( derivationPath ) {
     // get the extendede public key
-    var extPublicKey = this.hdwallet.getExtendedPubliceKeyFromPath(derivationPath);
+    var extPublicKey = this.HdWallet.getExtendedPubliceKeyFromPath(derivationPath);
     if (extPublicKey.error) 
         return extPublicKey; // failed
     console.assert( extPublicKey.publicKey )
@@ -131,7 +131,7 @@ getSegwitNativePublicAdressFromPath( derivationPath ) {
  */
 getSegwitPublicAdressFromPath( derivationPath ) {
     // get the extendede public key
-    var extPublicKey = this.hdwallet.getExtendedPubliceKeyFromPath(derivationPath );
+    var extPublicKey = this.HdWallet.getExtendedPubliceKeyFromPath(derivationPath );
     if (extPublicKey.error) 
         return extPublicKey; // failed
     console.assert( extPublicKey.publicKey )
@@ -156,7 +156,7 @@ getSegwitPublicAdressFromPath( derivationPath ) {
  */
 getLegacyPublicAdressFromPath( derivationPath, index ) {
     // get the extendede public key
-    var extPublicKey = this.hdwallet.getExtendedPubliceKeyFromPath(derivationPath );
+    var extPublicKey = this.HdWallet.getExtendedPubliceKeyFromPath(derivationPath );
     if (extPublicKey.error) 
         return extPublicKey; // failed
     console.assert( extPublicKey.publicKey )

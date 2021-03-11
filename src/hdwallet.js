@@ -1,6 +1,6 @@
 /**
  ****************************************************** 
- * @file    hdwallet.js 
+ * @file    HdWallet.js 
  * @file    bip32  bitcoin hierarchical deterministic wallet support.
  * @author  pad@maitrebitcoin.com
  * @module  js-bitcoin-criptolib
@@ -29,9 +29,9 @@ const SignatureHeader = {
 }
 
 
-class hdwallet {
+class HdWallet {
 /** 
- *  create a new hdwallet from a seed 
+ *  create a new HdWallet from a seed 
  * @public
  * @param {string} seed 128 to 512 bits buffer  
  * @param {WalletType}  walletType WalletType.LEGACY, WalletType.SEGWIT or WalletType.SEGWIT_NATIVE
@@ -48,7 +48,7 @@ constructor( seed, walletType ) {
 /**
  *  get the master key
  * @public
- * @returns {hdwallet.ExtendedKey} the master key (private key)
+ * @returns {HdWallet.ExtendedKey} the master key (private key)
  */
 getMasterKey() {
     // avail in cache ?
@@ -61,7 +61,7 @@ getMasterKey() {
     var IR = hash512.substring(32,64) 
     // init the extended private key :  key, chainCode
     var key =  bigInt256FromBigEndianBuffer( IL )
-    var masterKey = new hdwallet.ExtendedKey();
+    var masterKey = new HdWallet.ExtendedKey();
     masterKey.initAsPrivate( key, IR, undefined, this.ecdsa, this.walletType  );
     masterKey.depth       = 0;
     masterKey.childNumber = 0;
@@ -73,7 +73,7 @@ getMasterKey() {
  *  get the extended private key for a derivation path
  * @public
  * @param   {string}  derivationPath the derivation path. ex: "m/0'/1"
- * @returns {hdwallet.ExtendedKey}   the extended private key 
+ * @returns {HdWallet.ExtendedKey}   the extended private key 
  */
 getExtendedPrivateKeyFromPath( derivationPath ) {
     // avail in cache ?
@@ -96,7 +96,7 @@ getExtendedPrivateKeyFromPath( derivationPath ) {
  *  get a extended public key for a derivation path
  * @public
  * @param   {string}  derivationPath the derivation path. ex: "m/0'/1"
- * @returns {hdwallet.ExtendedKey}   the extended private key 
+ * @returns {HdWallet.ExtendedKey}   the extended private key 
  */
 getExtendedPubliceKeyFromPath( derivationPath ) {
     // avail in cache ?
@@ -152,12 +152,12 @@ getPrivateKeyFromPath( derivationPath, index ) {
 /**
  * create a new extended key (public or private) from the base 58 string format
  * @param  {string} strBase58  ex "xprv9u5vS4oCRV5L6Jy7K1..."
- * @return {hdwallet.ExtendedKey} a public or private extended key
+ * @return {HdWallet.ExtendedKey} a public or private extended key
  */
 static getExtendedKeyFromStringBase58( strBase58 )
 {
     // create a new key
-    var extendeKey = new hdwallet.ExtendedKey() 
+    var extendeKey = new HdWallet.ExtendedKey() 
     // init from string
     var res = extendeKey.initFromStringBase58(strBase58)
     if (res.error)
@@ -168,9 +168,9 @@ static getExtendedKeyFromStringBase58( strBase58 )
 /**
  *   internal Child key derivation (CKD) functions for rprivate keys
  * @protected
- * @param  {hdwallet.ExtendedKey} extendedKey parent key
+ * @param  {HdWallet.ExtendedKey} extendedKey parent key
  * @param  {integer} i key index (childNumber)
- * @return {hdwallet.ExtendedKey} child key
+ * @return {HdWallet.ExtendedKey} child key
  */
 _ckdPrivatr( extendedKey, i ) {
     console.assert( extendedKey.isExtendedKey() )
@@ -213,7 +213,7 @@ _ckdPrivatr( extendedKey, i ) {
    var IR = hash512.substring(32, 64) 
    var childPrivateKey =  this.ecdsa.gField.add( IL, extendedKey.privateKey.value )
 
-   var res = new hdwallet.ExtendedKey()
+   var res = new HdWallet.ExtendedKey()
    res.initAsPrivate( childPrivateKey, IR, extendedKey, this.ecdsa, this.walletType );
    res.childNumber = i
    return res;
@@ -270,7 +270,7 @@ _ckdPrivatr( extendedKey, i ) {
  *  recursive internal function
  * @protected
  * @param   {string}  derivationPath  the derivation path. ex: "0'/1"
- * @returns {hdwallet.ExtendedKey}   the extended private key 
+ * @returns {HdWallet.ExtendedKey}   the extended private key 
  */
 _getPrivateKeyFromPathR( derivationPath ) {
     // if derivationPath is the master key
@@ -294,7 +294,7 @@ _getPrivateKeyFromPathR( derivationPath ) {
 }
 
 // ------ types -----
-    // represent a extended key for a hdwallet
+    // represent a extended key for a HdWallet
     static ExtendedKey = class { 
         /**
          * basic constructeur. to be completed with a call to initAsPrivate() or initFromStringBase58()
@@ -306,7 +306,7 @@ _getPrivateKeyFromPathR( derivationPath ) {
          *  init as a private key
          *  @param {bigInt} key        256 bits ecdsa private key
          *  @param {buffer} chainCode  256 bits chain code
-         *  @param {hdwallet.ExtendedKey} parentKey, optionnal (for mastker key only)
+         *  @param {HdWallet.ExtendedKey} parentKey, optionnal (for mastker key only)
          *  @param {ECDSA} ecdsa                     an instance of the ECDSA class to calculate keys. required.
          */
         initAsPrivate( key, chainCode, parentKey, ecdsa, walletType) {
@@ -352,7 +352,7 @@ _getPrivateKeyFromPathR( derivationPath ) {
         /**
          * returns the extended public key if we are a private key
          * @param  {ECDSA} ecdsa  an instance of the ECDSA class to calculate keys. 
-         * @return {hdwallet.ExtendedKey} the corresponding public extended key 
+         * @return {HdWallet.ExtendedKey} the corresponding public extended key 
         */
         getExtendedPublicKey(ecdsa) {
             console.assert( ecdsa, "ecdsa must be present" )
@@ -360,7 +360,7 @@ _getPrivateKeyFromPathR( derivationPath ) {
             // calculate  cdsa public key
             var publicKey  = ecdsa.publicKeyFromPrivateKey( this.privateKey )
             // create an extended key
-            var resKey = new hdwallet.ExtendedKey();
+            var resKey = new HdWallet.ExtendedKey();
             resKey.initAsPublicKey(  publicKey,  this.chainCode,  this.walletType );
             resKey.parentFingerprint = this.parentFingerprint 
             resKey.depth             = this.depth
@@ -496,4 +496,4 @@ _getPrivateKeyFromPathR( derivationPath ) {
     };// static ExtendedKey = class {
 
 
-}; // class hdwallet
+}; // class HdWallet

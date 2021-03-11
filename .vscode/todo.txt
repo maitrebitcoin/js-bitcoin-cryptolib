@@ -1,21 +1,18 @@
 .bech 32 support : decode
-.exchange param ordrer in getSegwitNativePublicAdressFromPath
 .DER encode/decode
 .remove pubkey.fromString
-.rename hwallet to HdWallet
 .ecdsa signature without random
 .error as exceptions
 .add more test for hdwallet (extpubkey, pubkey, pubadress)
 .import pubkey from buffer
 .test encode/decode
-.derivation if we only have pubket
+.derivation if we only have pubkey
 .samples
 .check all comments format
 .generate a doc
 .node.js integration / sample
-.psbt genration
+.psbt generation
 .psbt signing
 .use lib with WD lib to double-check
-
 
 .QR code generation in sample

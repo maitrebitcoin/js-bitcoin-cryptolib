@@ -364,7 +364,7 @@ function autotest_bip32( fonError ) {
     {
         // calculate rood
         var seed  = bufferFromHex(seedHex)
-        var bip32 = new hdwallet( seed, WalletType.LEGACY );
+        var bip32 = new HdWallet( seed, WalletType.LEGACY );
         var res   = bip32.getMasterKey();
         var res58 = res.toStringBase58()
 
@@ -384,7 +384,7 @@ function autotest_bip32( fonError ) {
     {
         // calculate rood
         var seed  = bufferFromHex(seedHex)
-        var bip32 = new hdwallet( seed, WalletType.LEGACY );
+        var bip32 = new HdWallet( seed, WalletType.LEGACY );
         var res   = bip32.getExtendedPrivateKeyFromPath(deivationPath)
         if (res.error) {
              FAILED( fonError, seedHex, res58, expected, deivationPath + '\n' +res.error )
@@ -414,7 +414,7 @@ function autotest_bip32( fonError ) {
     // check tha the value raise an error
     function _test_error( string58  ) 
     {
-       var res=  hdwallet.getExtendedKeyFromStringBase58(string58)
+       var res=  HdWallet.getExtendedKeyFromStringBase58(string58)
        if (!res) {
             FAILED( fonError, string58, res, "ERROR expected" )
        }
@@ -461,7 +461,7 @@ function autotest_bip49( fonError ) {
         // create a new bip32 wallet
         var bitcoinWallet   = new BitcoinWallet( WalletType.SEGWIT );
         bitcoinWallet.initFromSeed(seed)
-        var bip32Wallet = bitcoinWallet.hdwallet;
+        var bip32Wallet = bitcoinWallet.HdWallet;
         // bip 49 derivation path
         var derivationPath = "m/49'/0'/0'/0"
 
@@ -524,7 +524,7 @@ function autotest_bip84( fonError ) {
         // create a new bip32 wallet
         var bitcoinWallet  = new BitcoinWallet(  WalletType.SEGWIT_NATIVE );
         bitcoinWallet.initFromSeed(seed)
-        var bip32Wallet    = bitcoinWallet.hdwallet
+        var bip32Wallet    = bitcoinWallet.HdWallet
         // bip 49 derivation path
         var derivationPath = DerivationPath.SW_NATIVE_BIP84 
 
