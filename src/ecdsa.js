@@ -47,7 +47,7 @@ constructor(  ) {
 }
 
 /**
- *  generate a new private key
+ *  generate a new private key from random generator : window.crypto.getRandomValues()
  * @returns {ECDSA.PrivateKey}
  */
 newPrivateKey(  ) {
@@ -76,6 +76,29 @@ privateKeyFromBuffer( buffer ) {
     console.assert( typeof buffer == 'string' ) 
     console.assert( buffer.length == 32 ) 
     var  number = bigInt256FromBigEndianBuffer( buffer )
+    var privateKey = new ECDSA.PrivateKey( number );
+    return privateKey
+}
+/**
+ *  import a private key from base58 encoded string (WIF)
+ * @param   {string} stringBase58  string in WIF format. ex "5HueCGU8rMjxEXxiPuD5BDk...""
+ * @returns {ECDSA.PrivateKey} the imported private key
+ */
+privateKeyFromStringBase58( stringBase58 ) {
+    console.assert( typeof stringBase58 == 'string' ) 
+    console.assert( stringBase58.length == 52 )  
+    // decode buffer anbd check crc.
+    var buf = base58CheckDecode(stringBase58);
+    // check buffer vality
+    if (buf.length!=34)
+        throw {error:"invalid key length. should be 34", length:buf.length }
+    if (buf[0] != PREFIX_PRIVATEKEY)
+        throw {error:"invalid key header. should be 05", header:hex(buf[0]) }    
+    if (buf[33] != '\x01')
+        throw {error:"invalid key format. la byte should be 01", lastbyte:hex(buf[33]) }    
+    // convert to bigint
+    var bufferBigInt = buf.substr(1,32)
+    var number = bigInt256FromBigEndianBuffer( bufferBigInt )
     var privateKey = new ECDSA.PrivateKey( number );
     return privateKey
 }
@@ -227,9 +250,9 @@ verifySignature( message, signature, publicKey ) {
         toBuffer() {
             return bigEndianBufferFromBigInt256(this.value) 
         }
+        // export private key to WIF format
+        //@See https://en.bitcoin.it/wiki/Wallet_import_format        
         toStringBase58() {
-            // WIF format
-            //@See https://en.bitcoin.it/wiki/Wallet_import_format
             return base58CheckEncode(  this.toBuffer() + '\x01', PREFIX_PRIVATEKEY)
         }
     };

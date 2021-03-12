@@ -10,7 +10,7 @@
 <button onclick="testAll()">     <h2> Test ALL  </h2> </button>
 <hr>
 
-<button onclick="createAccountSample()">    <h2> bip32 sample</h2> </button>
+<button onclick="debug()">    <h2> debug </h2> </button>
 
 <p><p>
 
@@ -110,7 +110,7 @@ function testBech32() {
 
 }
 
-function ecdsaSample() {
+function debug() {
 
     var ecdsa = new ECDSA();
     // create key pair
@@ -119,6 +119,12 @@ function ecdsaSample() {
     // show keys
     var sDump =     "private key :<p>" + privateKey.toString()
                + "<p>public  key :<p>" + pubKey.toString()
+
+
+    var sWIF =     privateKey.toStringBase58()            
+    console.log( sWIF )                
+    var privateKeyImported = ecdsa.privateKeyFromStringBase58(sWIF)
+    console.log( privateKeyImported.toStringBase58() )         
 
     var message = "my message to be signed"
 
@@ -131,23 +137,6 @@ function ecdsaSample() {
     document.getElementById("resultat").innerHTML = sDump;
 }
 
-function createAccountSample() {
-
-    // create a new wallet 
-    var myWallet   = new BitcoinWallet(  WalletType.SEGWIT_NATIVE  );
-    // generate a random buffer
-    var randomBuffer = myWallet.getRandomBuffer(128)
-    // calculate the mnemonic phrase from this buffer
-    // ex : "pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
-    var phrase       = bip39phraseFromRandomBuffer(randomBuffer)
-    var seed         = seedFromPhrase(phrase)
-    // use the seed a the base for all adresses calculations
-    myWallet.initFromSeed(seed)
-    // get the 1st public adress. 
-    var pubAdress0   =  myWallet.getPublicAddress(0)
-    
-    document.getElementById("resultat").innerHTML = phrase + "<br>" + pubAdress0;    
-}
 
 </script>
 
