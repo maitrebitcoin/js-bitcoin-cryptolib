@@ -74,20 +74,15 @@ getMasterKey() {
  * @public
  * @param   {string}  derivationPath the derivation path. ex: "m/0'/1"
  * @returns {HdWallet.ExtendedKey}   the extended private key 
+ * @throws  {struct} if <derivationPath> is invalid
  */
 getExtendedPrivateKeyFromPath( derivationPath ) {
-    // avail in cache ?
+    // available in cache ?
     if (this.extPrivateKey_cache[derivationPath] )
         return this.extPrivateKey_cache[derivationPath];    
-
     // call internal recursive method
     var extPrivateKey = this._getPrivateKeyFromPathR(  derivationPath );
-    if (extPrivateKey.error) {
-        // error
-        extPrivateKey.derivationPath = derivationPath;
-        return extPrivateKey;
-    }
-     // keep in cache
+    // add to cache
     this.extPrivateKey_cache[derivationPath] = extPrivateKey;
     // success
     return extPrivateKey
@@ -97,6 +92,7 @@ getExtendedPrivateKeyFromPath( derivationPath ) {
  * @public
  * @param   {string}  derivationPath the derivation path. ex: "m/0'/1"
  * @returns {HdWallet.ExtendedKey}   the extended private key 
+ * @throws  {struct} if <derivationPath> is invalid
  */
 getExtendedPubliceKeyFromPath( derivationPath ) {
     // avail in cache ?
@@ -104,11 +100,9 @@ getExtendedPubliceKeyFromPath( derivationPath ) {
         return this.extPublicKey_cache[derivationPath];    
     // get the extendede private key
     var extPrivateKey = this.getExtendedPrivateKeyFromPath(derivationPath);
-    if (extPrivateKey.error) 
-        return extPrivateKey; // failed
     // get the public key
     var  extPublicKey = extPrivateKey.getExtendedPublicKey(this.ecdsa);
-    // keep in cache
+    // add to cache
     this.extPublicKey_cache[derivationPath] = extPublicKey;
     return extPublicKey;
 }
@@ -118,12 +112,11 @@ getExtendedPubliceKeyFromPath( derivationPath ) {
  * @param   {string}  derivationPath the derivation path. ex: "m/44'/0'/0'/0"
  * @param   {int}     index          index of the child key. 0 is the first accout
  * @returns {ECDSA.PublicLKey} the extended private key 
+ * @throws  {struct} if <derivationPath> is invalid
  */
 getPublicKeyFromPath( derivationPath, index ) {
     // get the extendede public key
     var extPublicKey = this.getExtendedPubliceKeyFromPath(derivationPath + "/" + index );
-    if (extPublicKey.error) 
-        return extPublicKey; // failed
     // get the public key
     console.assert( extPublicKey.publicKey )
     return extPublicKey.publicKey;
@@ -134,25 +127,21 @@ getPublicKeyFromPath( derivationPath, index ) {
  * @param   {string}  derivationPath the derivation path. ex: "m/44'/0'/0'/0"
  * @param   {int}     index          index of the child key. 0 is the first accout
  * @returns {ECDSA.PublicLKey} the extended private key 
+ * @throws  {struct}           if <derivationPath> is invalid
  */
 getPrivateKeyFromPath( derivationPath, index ) {
     // get the extendede public key
     var extPrivateKey = this.getExtendedPrivateKeyFromPath(derivationPath + "/" + index );
-    if (extPrivateKey.error) 
-        return extPrivateKey; // failed
     // get the public key
     console.assert( extPrivateKey.privateKey )
     return extPrivateKey.privateKey;
-
 }
-
-
-
 
 /**
  * create a new extended key (public or private) from the base 58 string format
  * @param  {string} strBase58  ex "xprv9u5vS4oCRV5L6Jy7K1..."
  * @return {HdWallet.ExtendedKey} a public or private extended key
+ * @throws {struct} if <derivationPath> is invalid
  */
 static getExtendedKeyFromStringBase58( strBase58 )
 {
@@ -160,8 +149,6 @@ static getExtendedKeyFromStringBase58( strBase58 )
     var extendeKey = new HdWallet.ExtendedKey() 
     // init from string
     var res = extendeKey.initFromStringBase58(strBase58)
-    if (res.error)
-        return res.error; // failed
     return extendeKey;
 }
 
@@ -171,6 +158,7 @@ static getExtendedKeyFromStringBase58( strBase58 )
  * @param  {HdWallet.ExtendedKey} extendedKey parent key
  * @param  {integer} i key index (childNumber)
  * @return {HdWallet.ExtendedKey} child key
+ * @throws  {struct} if the operation is not possible
  */
 _ckdPrivatr( extendedKey, i ) {
     console.assert( extendedKey.isExtendedKey() )
@@ -181,7 +169,7 @@ _ckdPrivatr( extendedKey, i ) {
     if (bHardenedKey) {
        // the extended key mut be a private key
        if (!extendedKey.isPrivateKey()) {
-           return {error:"hardened derivation of a public key is not possible."}
+           throw {error:"hardened derivation of a public key is not possible."}
        }
        var key = extendedKey.privateKey.value
        // hardened child
@@ -224,6 +212,7 @@ _ckdPrivatr( extendedKey, i ) {
  * @protected
  * @param   {string}  derivationPath  the derivation path. ex: "0'/1/2"
  * @returns {struct}  ex : { leftPath='0'/1',index:2,hardened:false  }
+ * @throws  {struct} if <derivationPath> is invalid
  */
  _parseDerivationPath( derivationPath ) {
     // must start with "m/"
@@ -412,16 +401,14 @@ _getPrivateKeyFromPathR( derivationPath ) {
         /** 
         * init from a base58 encoding
         * @param   {sting} str58 a base58 endoded string 
-        * @returns {error} undefined if no error. a  objet with an error member otherwise
+        * @throws  {struct} if <str58> is invalid
         */
         initFromStringBase58( str58 ) {
-            // decocode string to buffer
+            // decocode string to buffer. throw execption if <str58> is invalid
             var buffer =  base58CheckDecode(str58)
-            if (buffer.error)
-                return buffer; // failed
             // must be 78 bytes
             if (buffer.length!=78) 
-                return {error:"invalid buffer length, must be 78", length:buffer.length }; // failed
+                throw {error:"invalid buffer length, must be 78", length:buffer.length }; // failed
             // 4 byte: version bytes
             var version    = int32FromBigEndianBuffer( buffer.substring(0,4) )
             switch (version) {

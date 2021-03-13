@@ -67,7 +67,7 @@ function ecdsaSample() {
 
     // show result
     document.getElementById("publicKey").innerHTML  = hex(pubKey.toBuffer());
-    document.getElementById("privateKey").innerHTML = privateKey.toString();    
+    document.getElementById("privateKey").innerHTML = privateKey.toStringBase58();   // WIF
     document.getElementById("message").value        = message
     document.getElementById("signature").value      = hex( signature.toBuffer() );        
 

@@ -62,6 +62,7 @@ initFromSeed(seed ) {
  *  get the extend master key as a string
  * @public
  * @returns {string} the master key. ex "xprv9s21ZrQH143K2H2..."
+ * @throws  {struct} if the wallet is non initialised
  */
 getMasterKey() {
     if (!this.HdWallet) 
@@ -74,6 +75,7 @@ getMasterKey() {
  * @param   {int}    [index=0]      index of the child key. 0 is the first accout
  * @param   {bool}   [change=false] is the adress for change ?
  * @returns {string} the bitcoin address. ex : "bc1qn085dr40dcrhejgve4sky.." 
+ * @throws  {struct} if the wallet is non initialised, or invalid
  */
 getPublicAddress( index, change ) {
     if (!this.HdWallet) 
@@ -105,35 +107,33 @@ getPublicAddress( index, change ) {
  * @public
  * @param   {string}  derivationPath the derivation path. ex: "m/84'/0'/0'/0/0"
  * @returns {string}  bech 32 address. ex : "bc1qn085dr40dcrhejgve4sky.."      
+  * @throws  {struct} if <derivationPath> is invalid
  * @see https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki
  */
 getSegwitNativePublicAdressFromPath( derivationPath ) {
     // get the extendede public key
     var extPublicKey = this.HdWallet.getExtendedPubliceKeyFromPath(derivationPath);
-    if (extPublicKey.error) 
-        return extPublicKey; // failed
     console.assert( extPublicKey.publicKey )
     // serialised public key to raw buffer
     var publicKeySerialized = extPublicKey.publicKey.toBuffer();
     // @see https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki#p2wpkh
     //      https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki
     //      https://bitcointalk.org/index.php?topic=4992632.0
-    var hashKey            = ripemd160( sha256( publicKeySerialized ) )
-    var btcAdress          = bech32Encode( "bc", 0, hashKey );
+    var hashKey       = ripemd160( sha256( publicKeySerialized ) )
+    var btcAdress     = bech32Encode( "bc", 0, hashKey );
     return btcAdress
 }    
 /**
  *  get a sewigt public adress for a derivation path + index. 
  *  
  * @public
- * @param   {string}  derivationPath the derivation path. ex: "m/49'/0'/0'/0/0"
- * @returns {string}  address. ex : "3EktnHQD7RiAE6uzMj2ZifT9YgRrkSgzQX"      
+ * @param  {string}  derivationPath the derivation path. ex: "m/49'/0'/0'/0/0"
+ * @returns {string} address. ex : "3EktnHQD7RiAE6uzMj2ZifT9YgRrkSgzQX"      
+ * @throws  {struct} if <derivationPath> is invalid
  */
 getSegwitPublicAdressFromPath( derivationPath ) {
-    // get the extendede public key
+    // get the extended public key
     var extPublicKey = this.HdWallet.getExtendedPubliceKeyFromPath(derivationPath );
-    if (extPublicKey.error) 
-        return extPublicKey; // failed
     console.assert( extPublicKey.publicKey )
     // serialised public key to raw buffer
     var publicKeySerialized = extPublicKey.publicKey.toBuffer();
@@ -141,10 +141,10 @@ getSegwitPublicAdressFromPath( derivationPath ) {
     // If the version byte is 0, and the witness program is 20 bytes:
     // It is interpreted as a pay-to-witness-script-hash (P2WSH) program. 
     // NB : OP_HASH160 is ripemd160( sha256( x ) )
-    var hashKey            = ripemd160( sha256( publicKeySerialized ) )
-    var scriptSig          = '\x00\x14' + hashKey // \x00 : version byte, \x14=20   witness program
-    var addressBytes       = ripemd160( sha256( scriptSig)  )       
-    var btcAdress          = base58CheckEncode( addressBytes,  PREFIX_P2SH );
+    var hashKey      = ripemd160( sha256( publicKeySerialized ) )
+    var scriptSig    = '\x00\x14' + hashKey // \x00 : version byte, \x14=20   witness program
+    var addressBytes = ripemd160( sha256( scriptSig)  )       
+    var btcAdress    = base58CheckEncode( addressBytes,  PREFIX_P2SH );
     return btcAdress
 }
 /**
@@ -152,19 +152,18 @@ getSegwitPublicAdressFromPath( derivationPath ) {
  *  
  * @public
  * @param   {string}  derivationPath the derivation path. ex: "m/44'/0'/0'/0/0"
- * @returns {stringy} P2PKH address = legacy format. ex : "1E3B4m6BSw7v2A7TiA2YxDTXBZjFEpBmPN"      
+ * @returns {stringy} P2PKH address = legacy format. ex : "1E3B4m6BSw7v2A7TiA2YxDTXBZjFEpBmPN"    
+ * @throws  {struct}  if <derivationPath> is invalid  
  */
 getLegacyPublicAdressFromPath( derivationPath, index ) {
-    // get the extendede public key
+    // get the extended public key
     var extPublicKey = this.HdWallet.getExtendedPubliceKeyFromPath(derivationPath );
-    if (extPublicKey.error) 
-        return extPublicKey; // failed
     console.assert( extPublicKey.publicKey )
     // serialised public key to raw buffer
     var publicKeySerialized = extPublicKey.publicKey.toBuffer();
     // legacy bitcoin format :
-    var hash               = ripemd160( sha256( publicKeySerialized ) ) 
-    var btcAdress          = base58CheckEncode( hash,  PREFIX_P2PKH );
+    var hash      = ripemd160( sha256( publicKeySerialized ) ) 
+    var btcAdress = base58CheckEncode( hash,  PREFIX_P2PKH );
     return btcAdress
 }
 
@@ -182,8 +181,11 @@ getRandomBuffer( nbBit ) {
     console.assert(buffer.length*8 == nbBit)
     return buffer
 }
-
-// get the main derivation path from type
+/**
+/* get the main derivation path from type
+ * @returns {string} the mains derivation path.
+ * @throws {struct} if the wallet type is invalid
+*/
  _derivationPathFromType( walletType ) {
     switch (walletType) {
         case WalletType.LEGACY:        return DerivationPath.LEGACY_BIP44

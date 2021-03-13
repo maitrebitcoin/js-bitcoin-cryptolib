@@ -385,9 +385,11 @@ function autotest_bip32( fonError ) {
         // calculate rood
         var seed  = bufferFromHex(seedHex)
         var bip32 = new HdWallet( seed, WalletType.LEGACY );
-        var res   = bip32.getExtendedPrivateKeyFromPath(deivationPath)
-        if (res.error) {
-             FAILED( fonError, seedHex, res58, expected, deivationPath + '\n' +res.error )
+        var res;
+        try {
+           res   = bip32.getExtendedPrivateKeyFromPath(deivationPath)
+        } catch( err ) {
+            FAILED( fonError, seedHex, res58, expected, deivationPath + '\n' +res.error )
         }
         var res58 = res.toStringBase58()
         // is it the expected result ?
@@ -397,9 +399,9 @@ function autotest_bip32( fonError ) {
             FAILED( fonError, seedHex, res58, expected, deivationPath )
         }
         if (!expectedPub) return; // OK
-        res   = bip32.getExtendedPubliceKeyFromPath(deivationPath)
-        if (res.error) {
-             FAILED( fonError, seedHex, res58, expected, deivationPath + '\n' +res.error )
+        try { res   = bip32.getExtendedPubliceKeyFromPath(deivationPath) }
+        catch( err ) {
+             FAILED( fonError, seedHex, res58, expected, deivationPath + '\n' +err.error )
         }
         var res58pub = res.toStringBase58()
         // is it the expected result ?
@@ -414,8 +416,13 @@ function autotest_bip32( fonError ) {
     // check tha the value raise an error
     function _test_error( string58  ) 
     {
-       var res=  HdWallet.getExtendedKeyFromStringBase58(string58)
-       if (!res) {
+        var errFound;
+        try {
+            var res=  HdWallet.getExtendedKeyFromStringBase58(string58)
+        } catch (err) {
+            errFound = err;
+        }
+       if (!errFound) {
             FAILED( fonError, string58, res, "ERROR expected" )
        }
 

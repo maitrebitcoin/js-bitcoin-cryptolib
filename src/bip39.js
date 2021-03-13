@@ -28,6 +28,7 @@ function seedFromPhrase(  mnemonicPhrase,  password ) {
  * convert a random buffer into a bip39 compatible phrase.
  * @param {string} randomBffer 128, 160,192,224 or 256 byte buffer
  * @return {string} mnemonic phrase. ex : "pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
+ * @throws {struct} if <randomBffer> is invalid
  */
 function bip39phraseFromRandomBuffer( randomBffer ) {
     var nbBit = randomBffer.length*8

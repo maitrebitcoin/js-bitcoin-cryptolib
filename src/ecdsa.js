@@ -83,6 +83,7 @@ privateKeyFromBuffer( buffer ) {
  *  import a private key from base58 encoded string (WIF)
  * @param   {string} stringBase58  string in WIF format. ex "5HueCGU8rMjxEXxiPuD5BDk...""
  * @returns {ECDSA.PrivateKey} the imported private key
+ * @throws {struct} if <stringBase58> is invalid
  */
 privateKeyFromStringBase58( stringBase58 ) {
     console.assert( typeof stringBase58 == 'string' ) 
@@ -117,15 +118,16 @@ publicKeyFromPrivateKey( privateKey ) {
  * get the public key from a serialised bufffer. 
  * @param  {string} buffer 33 bytes buffer. ex : "0200359924c406998e91d4063fe078c32825e6ac4dce0395666ed54315afa3312d"
  * @returns {ECDSA.PublicKey}
+ * @throws {struct} if <buffer> is invalid
  */
 publicKeyFromBuffer( buffer ) {
     if ( buffer.length != 33) {
-        return {error:"buffer must be 33 bytes long.", buffer:hex(buffer) }
+        throw {error:"buffer must be 33 bytes long.", buffer:hex(buffer) }
     }
     // the 1st byte si 0X02 or 0x03 depending of the parity of y
     // 0x02 for even / x03 for odd 
     if ( buffer[0] != '\x02' && buffer[0] != '\x03'  ) {
-        return {error:"invalid buffer must start with 02 or 03.", buffer:hex(buffer) }
+        throw {error:"invalid buffer must start with 02 or 03.", buffer:hex(buffer) }
     }    
     var yIsEven = buffer[0] == '\x02'
     // get the x part
@@ -170,14 +172,16 @@ signMessage( message, privateKey ) {
     return signature;
 }
 /**
- * get the singature from a serialised bufffer. 
+ * get the signature from a serialised bufffer. 
  * @param {string} buffer 
+ * @return {ECDSA.Signature} 
+ * @throws {struct} if <buffer> is invalid
  * @TODO -- buffer in DER format :
  * @see https://bitcoin.stackexchange.com/questions/92680/what-are-the-der-signature-and-sec-format#:~:text=The%20Distinguished%20Encoding%20Rules%20(DER,numbers%20(r%2Cs)%20.
  */
 signatureFromBuffer( buffer ) {
     if ( buffer.length != 64) {
-        return {error:"buffer must be 64 bytes long.", buffer:hex(buffer) }
+        throw {error:"buffer must be 64 bytes long.", buffer:hex(buffer) }
     }
     var r = bigInt256FromBigEndianBuffer( buffer )
     var s = bigInt256FromBigEndianBuffer( buffer.substr(32) )
@@ -234,7 +238,7 @@ verifySignature( message, signature, publicKey ) {
 
     // The signature is valid if r=x mod N, invalid otherwise.
     if ( signature.r != pt1Plus2.x )
-        return new ECDSA.SignatureCheck(false, 'signature and key do not match');
+        return new ECDSA.SignatureCheck(false, 'signature for message does not match public key');
 
     // OK
     return new ECDSA.SignatureCheck(true,"OK");
@@ -265,6 +269,10 @@ verifySignature( message, signature, publicKey ) {
             this.point = point;          
         }
         isPublicKey() { return true; }
+        // for sample purposes
+        toString() {
+            return hex(this.point.x)+","+hex(this.point.y)
+        }
         fromString(s) {
             var tabVal = s.split(",")
             this.point = new ECPoint(0,0);

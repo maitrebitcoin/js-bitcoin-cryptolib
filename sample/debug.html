@@ -102,7 +102,7 @@ function testBech32() {
     //autotest_bip84(onTestFail)
     
     //@test
-    autotest_bip84();
+    //autotest_bip8();
     
     autotest_bech32( onTestFail  )
     // test PASSED OK
@@ -117,7 +117,7 @@ function debug() {
     var privateKey = ecdsa.newPrivateKey();
     var pubKey     = ecdsa.publicKeyFromPrivateKey(privateKey);
     // show keys
-    var sDump =     "private key :<p>" + privateKey.toString()
+    var sDump =     "private key :<p>" + privateKey.toStringBase58()
                + "<p>public  key :<p>" + pubKey.toString()
 
 

@@ -121,6 +121,7 @@ const PREFIX_PRIVATEKEY =     "\x80"  //  ex : 5Hwgr3u458GLafKBgxtssHSPqJnYoGrSz
  *
  * @param   {string} base58encoded ex : "xprv9s21ZrQH143K.."
  * @returns {string}               ex : "0488ade4000000000000000000fe0abe524e..."
+ * @throws  {struct} if <base58encoded> is invalid
  */
 function base58Decode( base58encoded ) {
     if (base58encoded=="") return "";
@@ -135,12 +136,11 @@ function base58Decode( base58encoded ) {
         // get char <i> and convert it to a number in [0-57]
         var cI = base58encoded[i];
         var n = sBASE58_CHARSET.indexOf(cI);
-        // if invalid char
+        // error if invalid char
         if (n==-1) {
-            //console.assert(false,"invalid base 58 char : " + cI);
-            return { error:"invalid base 58 char ", char:cI};
+            throw { error:"invalid base 58 char ", char:cI, pos:n};
         }
-        // calc résul
+        // calc résult
         numBuf  = numBuf * _58 + BigInt(n)
     }
     // convert numBuf to buffer
@@ -156,29 +156,26 @@ function base58Decode( base58encoded ) {
 /**
  *  decode a string in base58 ta a binary buffer with crc
  *
- * @param   {string} base58encoded ex : "xprv9s21ZrQH143K.."
- * @returns {string}        in case on sucess. ex : "0488ade4000000000000000000fe0abe524e..."
- * @returns {object.error}  in case on failure. 
+ * @param   {string} base58encoded   ex : "xprv9s21ZrQH143K.."
+ * @returns {string} decoded buffer. ex : "0488ade4000000000000000000fe0abe524e..."
+ * @throws  {struct} if <base58encoded> is invalid
  */
 function base58CheckDecode(base58encoded) {
     // decode to raw buffer
     var bufferAndCrc = base58Decode(base58encoded)
-    if (bufferAndCrc.error) 
-        return bufferAndCrc // failed
-    // get resulb
+    // check buffer validity
     var nLen = bufferAndCrc.length
     if (nLen<=3)
-        return { error:"bad legnth, must be greater than 3", legnth:nLen, source:base58encoded }
+        throw { error:"bad legnth, must be greater than 3", legnth:nLen, source:base58encoded }
     var buffer = bufferAndCrc.substring(0,nLen-4)
     // get crc
     var crc = bufferAndCrc.substring(nLen-4,nLen)
     // calculate crc
     var calcCrc    = sha256(sha256( buffer )).substr(0,4)
     if (calcCrc != crc) 
-        return { error:"bad crc", crc:hex(crc), expectedCrc:hex(calcCrc) } // bad crc
+        throw { error:"bad crc", calculatedCrc:hex(crc), expectedCrc:hex(calcCrc) } 
     // sucess
     return buffer
-
 }
 
 /**
