@@ -112,6 +112,8 @@ function testBech32() {
 
 function debug() {
 
+    autotest_bech32();
+
     var ecdsa = new ECDSA();
     // create key pair
     var privateKey = ecdsa.newPrivateKey();

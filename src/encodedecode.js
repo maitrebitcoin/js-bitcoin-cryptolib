@@ -226,10 +226,85 @@ function base58CheckEncode( buffer, prefix ) {
     return base58Encode( prefix +buffer + sCrc )
 }
 
+const BECH32_CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
+/**
+ *  decode a bech32 string into a binary buffer
+ * 
+ * @param   {string} bench32string string to decode. ex "bc1qw508d6qejxtdg4y5r3zar..."
+ * @returns {struct.prefix}  prefix wihtout the "1" separator. ex : "bc"
+ * @returns {struct.version} version version number. from 0 to 31
+ * @returns {struct.buffer}  data
+ * @throws  {struct.error} if <bench32string> is invalid
+ * 
+ * reference :
+ * @see https://en.bitcoin.it/wiki/BIP_0173
+ */
+function bech32Decode( bench32string  ) {
+    var result={};
+    // extract prefix
+    var posSeparator = bench32string.search('1')
+    if (posSeparator<=0) 
+        throw {error:"Invalid bench32 string : separator not found", string:bench32string}
+    // "bc1qw508d6.." => "bc"
+    result.prefix = bench32string.substr(0,posSeparator)
+    // "bc1qw508d6.." => "w508d6.."
+    var bech32data =  bench32string.substr(posSeparator+1)
+    // convert data to an arry of 5bits integers
+    var tab5BitValues = []
+    for (const charI of bech32data)  { 
+        var valueI = BECH32_CHARSET.search(charI);
+        if (valueI==-1)
+            throw {error:"Invalid bench32 string : bad char", char:charI}
+        tab5BitValues.push( valueI )
+    } 
+    // must hase at least 6 elements : +1 version, +6 checksum
+    if (tab5BitValues.length<7)
+        throw {error:"Invalid bench32 string : no enougth data", string:bench32string}
+    // the 1st int is the version number
+    result.version = tab5BitValues[0];
+    // calc checksum = array if 6 * 5bits integers
+    var tabData         = tab5BitValues.slice(0,tab5BitValues.length-6) 
+    var tabChecksum     = tab5BitValues.slice(tab5BitValues.length-6) 
+    var tabCalcChecksum = _bech32_create_checksum ( result.prefix, tabData )
+    // check 
+    for (var i=0;i<6;i++) {
+        if (tabChecksum[i] != tabCalcChecksum[i])
+            throw {error:"Invalid bench32 string : bad checksum", string:bench32string}
+    }
+    // calc data
+    var resBuffer=""
+    var nPosBit= 0;
+    for (var i=1;i<tabData.length;i++) { 
+        resBuffer = _add5Bit( resBuffer, nPosBit, tabData[i]  )
+        nPosBit  += 5 
+    }
+    // remove the '\x00' added at the end for calculation purposes
+    result.buffer = resBuffer.substr(0,resBuffer.length-1)
+    return result;
+
+//---------------------------
+    // internal func : add 5 bits at pos <numBit> in buffer <buf>. 
+    function _add5Bit( buf, numBit, value ) {
+        var posInByte =  (numBit/8)>>>0
+        while (buf.length<posInByte+2)
+            buf+="\x00"
+        // get current value
+        var val16Bit  = int16FromBigEndianBuffer(buf, posInByte )
+        // add 5 bits
+        var pos  = numBit % 8 
+        val16Bit = val16Bit | (value << (11-pos))
+        // calc final buffer
+        buf = buf.substr(0,posInByte)
+        buf += String.fromCharCode( (val16Bit&0xFF00)>>>8 );
+        buf += String.fromCharCode( (val16Bit&0x00FF) ); 
+        return buf
+    }
+}   
+
 /**
  *  encode a binary buffer to bech32 + crc
  * 
- * @param   {string} prefix prexif wihtout the "1" separator. ex : "bc"
+ * @param   {string} prefix prefix wihtout the "1" separator. ex : "bc"
  * @param   {string} version version number. from 0 to 31
  * @param   {string} buffer the buffer to encode. ex : "0279be667ef9dcbb.."
  * @returns {string} a bench32 encoded string. ex: "bc1qw508d6qejxtd..."
@@ -257,7 +332,6 @@ function bech32Encode( prefix, version, buffer  ) {
     tab5BitValues = tab5BitValues.concat(tabChecksum)
     
     // convert to string with prefix
-    const BECH32_CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
     var result = prefix  + "1";
     tab5BitValues.forEach(element => {
         result += BECH32_CHARSET[element] 
@@ -277,47 +351,50 @@ function bech32Encode( prefix, version, buffer  ) {
         var pos     = numBit % 8 
         return ((val16Bit << pos) & 0xF800) >>> 11;
     }
-    /** calc cheksum :
-     *  @param {string} prefix human readable prefix. ex "bc"
-     *  @param {array}  tabVal array of 5 bits integers
-     *  @return {array} array of 5 bits integers with 6 entrie
-     */
-    function _bech32_create_checksum( prefix, tabVal ) {  
-        var tabPrefix  = _bech32_hrp_expand(prefix) 
-        var values = tabPrefix.concat( tabVal )
-            values = values.concat( [0,0,0,0,0,0]  )
-        polymod = _bech32_polymod(values) ^ 1
-        var checksum= []
-        for (var i=0;i<6;i++)
-            checksum[i] = (polymod >> 5 * (5-i)) & 31;
-        return checksum;
-    }        
-    function _bech32_polymod(tabVal) {
-        const GEN = [0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3];
-        var chk = 1
-        tabVal.forEach(value => {
-            var b = (chk >>> 25)
-            chk = (chk & 0x1ffffff) << 5 ^ value
-            for (var i=0;i<5;i++) {
-                // if bit number <i> is set, xor with GEN[i]
-                if (((b >> i) & 1) == 1)
-                    chk ^= GEN[i];
-            }
-        });
-        return chk;
-    }
-    // return a array of 5 bits integers
-    function _bech32_hrp_expand(text) {
-        var res = []
-        for (const charI of text) { 
-            res.push( (charI.charCodeAt(0) >> 5)) 
+
+}
+
+/** calc cheksum :
+ * @private
+ *  @param {string} prefix human readable prefix. ex "bc"
+ *  @param {array}  tabVal array of 5 bits integers
+ *  @return {array} array of 5 bits integers with 6 entrie
+ */
+function _bech32_create_checksum( prefix, tabVal ) {  
+    var tabPrefix  = _bech32_hrp_expand(prefix) 
+    var values = tabPrefix.concat( tabVal )
+        values = values.concat( [0,0,0,0,0,0]  )
+    polymod = _bech32_polymod(values) ^ 1
+    var checksum= []
+    for (var i=0;i<6;i++)
+        checksum[i] = (polymod >> 5 * (5-i)) & 31;
+    return checksum;
+}        
+function _bech32_polymod(tabVal) {
+    const GEN = [0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3];
+    var chk = 1
+    tabVal.forEach(value => {
+        var b = (chk >>> 25)
+        chk = (chk & 0x1ffffff) << 5 ^ value
+        for (var i=0;i<5;i++) {
+            // if bit number <i> is set, xor with GEN[i]
+            if (((b >> i) & 1) == 1)
+                chk ^= GEN[i];
         }
-        res.push(0)
-        for (const charI of text)  { 
-            res.push( (charI.charCodeAt(0) & 31))
-        }
-        return res
+    });
+    return chk;
+}
+// return a array of 5 bits integers
+function _bech32_hrp_expand(text) {
+    var res = []
+    for (const charI of text) { 
+        res.push( (charI.charCodeAt(0) >> 5)) 
     }
+    res.push(0)
+    for (const charI of text)  { 
+        res.push( (charI.charCodeAt(0) & 31))
+    }
+    return res
 }
 
 /**

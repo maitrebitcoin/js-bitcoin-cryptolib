@@ -76,7 +76,7 @@ function FAILED(fonError, valueTested, result, expected, message ) {
 function autotest_bech32( fonError ) {
     // s       :  value to encode. buffer as hex
     // expeded : "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    function _test_( s, expected  ) 
+    function _test( s, expected  ) 
     {
         // calculate hash
         var buffer = bufferFromHex(s)
@@ -86,11 +86,25 @@ function autotest_bech32( fonError ) {
             // error
             FAILED( fonError, s, res, expected, "" )
         }
-    }
+        // check decodinf
+        try {
+            var decoded = bech32Decode( res )
+            if (decoded.prefix != "bc")   
+                FAILED( fonError, s, decoded.prefix , "bc", "" )
+            if (decoded.version != 0)   
+                FAILED( fonError, s, decoded.version , "0", "" )                
+            if (hex(decoded.buffer) != s)   
+                FAILED( fonError, s, hex(decoded.buffer), expected, "" )
+        }
+        catch( err )  {
+            if (err==-2) throw -2;
+            FAILED( fonError, s, res, expected, err )
+        }_test
+    }//
 
     // test some values 
-    _test_( "0e140f070d1a001912060b0d081504140311021d030c1d03040f1814060e1e16",  
-            "bc1qpc2q7pcdrgqpjysxpvxss9gyzsp3zqsaqvxp6qcypuvpgpswrctqtvxys3")
+    _test( "0e140f070d1a001912060b0d081504140311021d030c1d03040f1814060e1e16",  
+           "bc1qpc2q7pcdrgqpjysxpvxss9gyzsp3zqsaqvxp6qcypuvpgpswrctqtvxys3")
 
 }
 
