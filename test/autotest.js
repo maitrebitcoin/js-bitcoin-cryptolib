@@ -105,7 +105,17 @@ function autotest_bech32( fonError ) {
     // test some values 
     _test( "0e140f070d1a001912060b0d081504140311021d030c1d03040f1814060e1e16",  
            "bc1qpc2q7pcdrgqpjysxpvxss9gyzsp3zqsaqvxp6qcypuvpgpswrctqtvxys3")
-
+    _test( "0000000000000000000000000000000000000000000000000000000000000000",  
+           "bc1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqthqst8")
+    _test( "8888888888888888888888888888888888888888888888888888888888888888",  
+           "bc1q3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyquddz7w")
+    _test( "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",  
+           "bc1qlllllllllllllllllllllllllllllllllllllllllllllllllllsffrpzs")        
+    _test( "bc1fbc1fbc1fbc1fbc1fbc1fbc1fbc1fbc1fbc1fbc1fbc1fbc1fbc1fbc1fbc1f",  
+           "bc1qhs0mc8aur77pl0qlhs0mc8aur77pl0qlhs0mc8aur77pl0qlhs0se2mha8")   
+    _test( "ddddddddddddddddddddddddddd7777777777777777777777777777777777777",  
+           "bc1qmhwamhwamhwamhwamhwam4mhwamhwamhwamhwamhwamhwamhwamsa66n94")
+           
 }
 
 // fonError : callback called if the test fails

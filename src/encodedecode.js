@@ -278,6 +278,7 @@ function bech32Decode( bench32string  ) {
         resBuffer = _add5Bit( resBuffer, nPosBit, tabData[i]  )
         nPosBit  += 5 
     }
+    result.buffer = resBuffer.substring(0, resBuffer.length-1 );
     return result;
 
 //---------------------------
@@ -292,8 +293,7 @@ function bech32Decode( bench32string  ) {
         // calc final buffer
         buf = buf.substr(0,posInByte)
         buf += String.fromCharCode( (val16Bit&0xFF00)>>>8 );
-        if (pos+5>=8)
-            buf += String.fromCharCode( (val16Bit&0x00FF) ); 
+        buf += String.fromCharCode( (val16Bit&0x00FF) ); 
         return buf
     }
 }   
