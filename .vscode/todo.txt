@@ -1,4 +1,4 @@
-.add ECDSA privateKeyFromString58() (WIF)
+
 .ecdsa signature without random
 .add more test for hdwallet (extpubkey, pubkey, pubadress)
 .import pubkey from buffer
