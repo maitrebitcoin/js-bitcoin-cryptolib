@@ -152,17 +152,32 @@ publicKeyFromBuffer( buffer ) {
  * 
  * @param {string} message
  * @param {ECDSA.PrivateKey} privateKey
+ * @param {string,optionnal} "" or "rfc6979" : https://tools.ietf.org/html/rfc6979
  * @returns {ECDSA.Signature}
  */
-signMessage( message, privateKey ) {
+signMessage( message, privateKey, option ) {
     console.assert( typeof message == 'string' ) 
     // calc message hash
     var hashbuffer    = sha256(sha256( message ));
     // convert to 256 Bits integer
     var h      = bigInt256FromBigEndianBuffer(hashbuffer)
-    // generate random number k
-    // TOOD : deterministic-ECDSA, the value k is HMAC-derived from h + privKey (see RFC 6979)
-    var k      = getRandomBigInt256()
+    // generate k
+    var k;
+    if (option=="rfc6979")
+    {
+        //  deterministic-ECDSA, the value k is HMAC-derived from h + privKey (see RFC 6979)
+        //  https://tools.ietf.org/html/rfc6979
+        var hk = hmac_sha256(privateKey, message)
+        k = bigInt256FromBigEndianBuffer(hk);
+    }
+    else {
+        // generate random number k
+        k = getRandomBigInt256()
+    }
+    // K must be in [1,N]
+    k = this.gField.modulo( k );    
+    if (k==0)
+        throw {error:"internal error. k is 0"};
     // Calculate the random point R = k * G and take its x-coordinate: r = R.x
     var pointR = this.ec.pointGeneratorScalarMult( k );
     var r      = this.gField.modulo( pointR.x );

@@ -130,7 +130,7 @@ function debug() {
     var message = "my message to be signed"
 
     // generate signature
-    var signature = ecdsa.signMessage( message, privateKey )
+    var signature = ecdsa.signMessage( message, privateKey, "rfc6979" )
 
     var DER = ecdsa.bufferFromSignature( signature );
     console.trace(hex(DER)) 

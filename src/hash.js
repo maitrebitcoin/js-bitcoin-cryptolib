@@ -404,6 +404,18 @@ function hmac_sha512( key, message ) {
     console.assert( hash.length == 64 )    
     return hash
 }
+/**
+ * hash a message + key using the hmac-sha-256 algoritmh
+ * 
+ * @param   {string} key buffer
+ * @param   {string} message buffer
+ * @returns {string} 256 bits digest
+ */
+function hmac_sha256( key, message ) {
+    var hash =  hmac( key,message, sha256, 64, 32 )
+    console.assert( hash.length == 32 )    
+    return hash
+}
 
 
 
