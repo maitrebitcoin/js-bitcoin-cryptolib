@@ -1,4 +1,3 @@
-.bech 32 support : decode
 .DER encode/decode : see signatureFromBuffer
 .add ECDSA privateKeyFromString58() (WIF)
 .ecdsa signature without random
