@@ -112,8 +112,7 @@ function testBech32() {
 
 function debug() {
 
-    autotest_bech32();
-
+  
     var ecdsa = new ECDSA();
     // create key pair
     var privateKey = ecdsa.newPrivateKey();
@@ -132,6 +131,15 @@ function debug() {
 
     // generate signature
     var signature = ecdsa.signMessage( message, privateKey )
+
+    var DER = ecdsa.bufferFromSignature( signature );
+    console.trace(hex(DER)) 
+    var signature2 = ecdsa.signatureFromBuffer( DER );
+    console.trace(hex(signature.r)) 
+    console.trace(hex(signature.s)) 
+    console.trace(hex(signature2.r)) 
+    console.trace(hex(signature2.s)) 
+
     // check signature
     var res = ecdsa.verifySignature(message, signature, pubKey )
     sDump += "<hr>test signature : " + res.message

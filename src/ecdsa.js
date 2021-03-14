@@ -26,6 +26,11 @@ function getRandomBigInt256() {
     return BigInt(bighex);
 }
 
+const DERHeader = {
+    HEAD_INT    : "\x02",
+    HEAD_STRUCT : "\x30"
+};
+
 // Main class
 // ecdsa with secp256k1 parameters
 // ex usage :
@@ -171,6 +176,40 @@ signMessage( message, privateKey ) {
     var signature = new ECDSA.Signature( pointR.x, s)
     return signature;
 }
+
+/**
+ * convert a signature to a DER encoded buffer
+ * @param {ECDSA.Signature} signature 
+ * @return {string} DER encoded buffer. ex  :"3042021E...."
+ * @throws {struct} if <signature> is invalid
+ * @see https://bitcoin.stackexchange.com/questions/92680/what-are-the-der-signature-and-sec-format#:~:text=The%20Distinguished%20Encoding%20Rules%20(DER,numbers%20(r%2Cs)%20.
+ */
+bufferFromSignature( signature ) {
+    if (!signature.r) throw {error:"invalid signature : r is missing"}
+    if (!signature.s) throw {error:"invalid signature : s is missing"}
+
+    // DER encoding for a big integer
+    function _DerEncodeBigInt( val ) {
+        const DER_HEADER_INT    = "\x02"; // header byte indicating an integer
+        // 32 bytes
+        var buffer = bigEndianBufferFromBigInt256( val )
+        //  value must be prepended with 0x00 if  first byte is greater than 0x7F
+        if ( buffer.charAt(0) > 0x7F )
+            buffer ="\x00" + buffer
+        var bufLen = String.fromCharCode( buffer.length )
+        var res = DERHeader.HEAD_INT + bufLen + buffer
+        return res
+    }
+
+    // encode R and S 
+    var bufferRS = _DerEncodeBigInt( signature.r )
+    bufferRS    += _DerEncodeBigInt( signature.s )   
+    // encode struct R + S
+    return    DERHeader.HEAD_STRUCT                   
+            + String.fromCharCode(bufferRS.length) // one byte to encode the length of the following data  
+            + bufferRS
+}
+
 /**
  * get the signature from a serialised bufffer. 
  * @param {string} buffer 
@@ -179,14 +218,42 @@ signMessage( message, privateKey ) {
  * @TODO -- buffer in DER format :
  * @see https://bitcoin.stackexchange.com/questions/92680/what-are-the-der-signature-and-sec-format#:~:text=The%20Distinguished%20Encoding%20Rules%20(DER,numbers%20(r%2Cs)%20.
  */
-signatureFromBuffer( buffer ) {
-    if ( buffer.length != 64) {
-        throw {error:"buffer must be 64 bytes long.", buffer:hex(buffer) }
+signatureFromBuffer( bufferDER ) {
+    
+    // DER decoding for a big integer
+    function _DerDecodeBigInt( buffer, pos ) {   
+        // check header
+        if (buffer.substr(pos,1) != DERHeader.HEAD_INT ) 
+            throw {error:"invalid DER BigInt buffer",  pos:pos, buffer:hex(buffer) }
+        var lenR = buffer.charCodeAt(pos+1)
+        if (lenR!=0x20 && lenR!=0x21) 
+            throw {error:"invalid DER buffer",  pos:1, buffer:hex(buffer) }
+        var lenR = buffer.charCodeAt(pos+2)
+        if (lenR==0x21) {
+            // skip "00"
+            pos++
+            if (buffer.charCodeAt(pos+3) != 0 ) 
+                 throw {error:"invalid DER BigInt buffer. 0 expected",  pos:3, buffer:hex(buffer)}
+        }
+        var buffer256Bits = buffer.substr(pos+2)        
+        // decode 256 bits
+        var res = bigInt256FromBigEndianBuffer( buffer.substr(pos+2), pos )
+        return { bigint:res, newpos:pos+2+32 }
     }
-    var r = bigInt256FromBigEndianBuffer( buffer )
-    var s = bigInt256FromBigEndianBuffer( buffer.substr(32) )
-    return new ECDSA.Signature( r, s);
+    const DER_HEADER_STRUCT = "\x30"; // header byte indicating compound structure
+    // check buffer
+    if (bufferDER.substr(0,1) != DERHeader.HEAD_STRUCT ) 
+        throw {error:"invalid DER buffer", pos:0, buffer:hex(bufferDER) }
+    var len = bufferDER.charCodeAt(1)
+    if (len<60)
+        throw {error:"invalid DER buffer", pos:1, buffer:hex(bufferDER) }
+    // decode R and S
+    var decodeR = _DerDecodeBigInt( bufferDER, 2 )
+    var decodeS = _DerDecodeBigInt( bufferDER, decodeR.newpos )
+    // build signature
+    return new ECDSA.Signature( decodeR.bigint,  decodeS.bigint);
 }
+
 
 
 /**
@@ -287,7 +354,7 @@ verifySignature( message, signature, publicKey ) {
             return this.point.isZero();
         }
     };
-    // represent a signature for ECDSA
+    // represents a signature for ECDSA
     static Signature = class { 
         constructor( r, s ) {
             console.assert( typeof r == 'bigint' )
@@ -295,12 +362,8 @@ verifySignature( message, signature, publicKey ) {
             this.r = r
             this.s = s
         }
-        toBuffer() {
-            return bigEndianBufferFromBigInt256(this.r) 
-                 + bigEndianBufferFromBigInt256(this.s);
-        }
     };
-    // represente a resul to ECDSA verifySignature    
+    // represents a result from the ECDSA verifySignature()
     static SignatureCheck = class { 
        constructor( ok, message ) {
             this.ok      = ok

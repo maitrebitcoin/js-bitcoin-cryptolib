@@ -65,11 +65,14 @@ function ecdsaSample() {
     var message = document.getElementById("message").value 
     var signature = ecdsa.signMessage( message, privateKey )
 
+    var DERbufSignature = ecdsa.bufferFromSignature( signature );
+
+
     // show result
     document.getElementById("publicKey").innerHTML  = hex(pubKey.toBuffer());
     document.getElementById("privateKey").innerHTML = privateKey.toStringBase58();   // WIF
     document.getElementById("message").value        = message
-    document.getElementById("signature").value      = hex( signature.toBuffer() );        
+    document.getElementById("signature").value      = hex( DERbufSignature );        
 
     // check is now available
     document.getElementById("btnCheck").disabled = false     
@@ -81,8 +84,8 @@ function ecdsaCheck() {
     var message   = document.getElementById("message").value 
     var bufPubKey = bufferFromHex( document.getElementById("publicKey").innerHTML )
     var pubKey    = ecdsa.publicKeyFromBuffer(bufPubKey)
-    var bufSignature = bufferFromHex( document.getElementById("signature").value )    
-    var signature = ecdsa.signatureFromBuffer(bufSignature)
+    var DERbufSignature = bufferFromHex( document.getElementById("signature").value )     
+    var signature = ecdsa.signatureFromBuffer(DERbufSignature)
 
     // check signature
     var checkSignature = ecdsa.verifySignature(message, signature, pubKey )
