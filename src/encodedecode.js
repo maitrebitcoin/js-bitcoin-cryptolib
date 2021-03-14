@@ -278,16 +278,12 @@ function bech32Decode( bench32string  ) {
         resBuffer = _add5Bit( resBuffer, nPosBit, tabData[i]  )
         nPosBit  += 5 
     }
-    // remove the '\x00' added at the end for calculation purposes
-    result.buffer = resBuffer.substr(0,resBuffer.length-1)
     return result;
 
 //---------------------------
     // internal func : add 5 bits at pos <numBit> in buffer <buf>. 
     function _add5Bit( buf, numBit, value ) {
         var posInByte =  (numBit/8)>>>0
-        while (buf.length<posInByte+2)
-            buf+="\x00"
         // get current value
         var val16Bit  = int16FromBigEndianBuffer(buf, posInByte )
         // add 5 bits
@@ -296,7 +292,8 @@ function bech32Decode( bench32string  ) {
         // calc final buffer
         buf = buf.substr(0,posInByte)
         buf += String.fromCharCode( (val16Bit&0xFF00)>>>8 );
-        buf += String.fromCharCode( (val16Bit&0x00FF) ); 
+        if (pos+5>=8)
+            buf += String.fromCharCode( (val16Bit&0x00FF) ); 
         return buf
     }
 }   
