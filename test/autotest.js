@@ -624,6 +624,7 @@ function autotest_bip84( fonError ) {
         }
     }
     
+    // mnemonic , expectedExtPrivate0, expectedExtPub0, expectedPrivate0, expectedPublic0, expectedAdress0 
     _test("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
           "zprvAdG4iTXWBoARxkkzNpNh8r6Qag3irQB8PzEMkAFeTRXxHpbF9z4QgEvBRmfvqWvGp42t42nvgGpNgYSJA9iefm1yYNZKEm7z6qUWCroSQnE",
           "zpub6rFR7y4Q2AijBEqTUquhVz398htDFrtymD9xYYfG1m4wAcvPhXNfE3EfH1r1ADqtfSdVCToUG868RvUUkgDKf31mGDtKsAYz2oz2AGutZYs",
@@ -637,4 +638,18 @@ function autotest_bip84( fonError ) {
           "L44cV9s8ADP2UYXuKNDk5fqnV57CqY9tDEubFa7daNdZpfyQEjZo",
           "02acbcfd1fb95a847e1394cbe039c4a024b977b38b007aeb102682275c84e35866",
           "bc1qzsmjy0whj9r3fl78nlfypxxhvyt0m2g3e7hxja")
+
+      _test("insane fiction smile add angry lesson guitar bargain simple this slide upper episode insane color now off spread maple glide meat violin once fade",
+          "zprvAdqnoecVWYZMVyfy42q4xCyp3P3YbHtCoaSDQe1VjC7CkzgmZGqXPc8LXtK5ZvMWgoBuCFwh6BbNCuwm59gjTx8D933NWJPMysYef67eA1t",
+          "zpub6rq9DA9PLv7eiTkSA4N5KLvYbQt2zkc4AoMpD2R7HXeBdo1v6p9mwQSpPC481b2YaBKWHcP8tbQEY93mj4soSosb1nNSKzcoZzu9Zqvujgz",
+          "L4GcZcYxTNc5L3TTUUNxZG1AXRtLgG2e7mwMD4DVTUawk71gCU4E",
+          "03e8db2d7d93791e7693e3eebe98eb8e63595f49000e74cf359e07a4af2e47e448",
+          "bc1qnkeur7kg9qkenhlkwtkmgepx9qwhxywj8se682")
+
+    _test("situate before sell found usage useful caution banner stem autumn decrease melt",
+          "zprvAdDppLFvZ2qNbJXHk1mKz6L3LWkAma3UZVmnZ9cBHtQdMznnmRZqHPdaWaoiGKnko45eHrjqrA1VbS6sN1Xqe2iAeS22A2RtBGADQ2sokQ8",
+          "zpub6rDBDqnpPQPfonbkr3JLMEGmtYafB2mKvihPMY1nrDwcEo7wJxt5qBx4MteUGCsYHBFUpQisyXuFkiyi5wcau8oKjdMnfgRtYdaSi2zruqg",
+          "KxJyAXFHCfj38gvQLsPPUibW6kTzGDUVmXdbFQSdEH1JxpDk86id",
+          "0255868ee72b99229153dd1ca1e357a4ef03fa9419f8895cf4e272b2f7d1a837e2",
+          "bc1q2rw2yugvcux0dn5jk3a9l85up3z6tcdqjqq3ch")          
 }

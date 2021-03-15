@@ -1,5 +1,5 @@
 
-.add more test for hdwallet (extpubkey, pubkey, pubadress)
+
 .import pubkey from buffer
 .test encode/decode
 .derivation if we only have pubkey
