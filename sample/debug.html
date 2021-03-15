@@ -69,8 +69,7 @@ function onTestFail( s, hashAsHexString, expected, message)
     var sErr = "test val = '" + s+ "') => <br>\n" +  hashAsHexString+' != <br>\n'+expected
     console.log(sErr)
 
-    document.getElementById("resultat").innerHT
-    ML += "<p>"  +sErr + '<hr>' + message + "<p><font color='red'>FAILED</font>";
+    document.getElementById("resultat").innerHTML += "<p>"  +sErr + '<hr>' + message + "<p><font color='red'>FAILED</font>";
     console.assert(false)
     // stop the test
     throw -1;
@@ -102,6 +101,7 @@ function testBech32() {
     //autotest_bip84(onTestFail)
     
     //@test
+    autotest_ecdsa(onTestFail);
     //autotest_bip8();
     
     autotest_bech32( onTestFail  )

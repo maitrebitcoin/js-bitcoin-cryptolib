@@ -147,6 +147,50 @@ publicKeyFromBuffer( buffer ) {
     var publicKey = new ECDSA.PublicKey(point);
     return publicKey;
 }
+
+/** 
+/*  construct  a deterministic value k for signing.
+/*  HMAC-derived from h + privKey (see RFC 6979)
+* @see https://tools.ietf.org/html/rfc6979
+* @protected
+* @param {string} message
+* @param {ECDSA.PrivateKey} privateKey
+**/
+_rfc6979( privateKey, message ) {
+    console.assert( privateKey.isPrivateKey() )
+    console.assert( typeof message == 'string' ) 
+    // convert to big endian 256 bit buffer
+    var bufferPrivateKeyBE = privateKey.toBuffer(); 
+
+    //  h1 = H(m)
+    var h1    = sha256( message )
+    // =  8*ceil(hlen/8).
+    var lenH1 = h1.length
+    // Set:  V = 0x01 0x01 0x01 ... 0x01
+    var V     = "\x01".repeat(lenH1)
+    // Set: K = 0x00 0x00 0x00 ... 0x00
+    var K     = "\x00".repeat(lenH1)
+    // K = HMAC_K(V || 0x00 || int2octets(x) || bits2octets(h1))
+    K = hmac_sha256( K, V + "\x00" + bufferPrivateKeyBE + h1 )
+    //   V = HMAC_K(V)
+    V = hmac_sha256( K, V )
+    //  K = HMAC_K(V || 0x01 || int2octets(x) || bits2octets(h1))
+    K = hmac_sha256( K, V + "\x01" + bufferPrivateKeyBE + h1 )
+    //   V = HMAC_K(V)
+    V = hmac_sha256( K, V )
+    //h.1 - Set T to the empty sequence
+    var T = ""
+    //h.2 While tlen < qlen,
+    while (T.length*8<256) {
+        //  V = HMAC_K(V)
+        V = hmac_sha256( K, V )
+        T = T + V
+    }
+    // k = bits2int(T)
+    var k =  bigInt256FromBigEndianBuffer(T)
+    return k
+}
+
 /**
  * sign a message
  * 
@@ -156,22 +200,21 @@ publicKeyFromBuffer( buffer ) {
  * @returns {ECDSA.Signature}
  */
 signMessage( message, privateKey, option ) {
+    console.assert( privateKey.isPrivateKey() )
     console.assert( typeof message == 'string' ) 
     // calc message hash
-    var hashbuffer    = sha256(sha256( message ));
+    var hashbuffer    = sha256( message );
     // convert to 256 Bits integer
     var h      = bigInt256FromBigEndianBuffer(hashbuffer)
     // generate k
     var k;
     if (option=="rfc6979")
     {
-        //  deterministic-ECDSA, the value k is HMAC-derived from h + privKey (see RFC 6979)
-        //  https://tools.ietf.org/html/rfc6979
-        var hk = hmac_sha256(privateKey, message)
-        k = bigInt256FromBigEndianBuffer(hk);
+        //  k is HMAC-derived from privateKey + message
+        k = this._rfc6979(privateKey, message)
     }
     else {
-        // generate random number k
+        // k is a random generated number 
         k = getRandomBigInt256()
     }
     // K must be in [1,N]
@@ -186,9 +229,12 @@ signMessage( message, privateKey, option ) {
     var rpk    = this.gField.mult(   r,     privateKey.value ); // r*privKey
     var h_rpk  = this.gField.add(    h,     rpk );              // h + r*privKey
     var s      = this.gField.mult(   invK,  h_rpk );
-    //var minuss = this.oField.negate( s ); //@TODO, use it if < s 
+    var minuss = this.gField .negate( s ); 
+
+    // use the smallest s
+    var smalls = s < minuss ? s : minuss;
     // create result
-    var signature = new ECDSA.Signature( pointR.x, s)
+    var signature = new ECDSA.Signature( pointR.x, smalls)
     return signature;
 }
 
@@ -301,7 +347,7 @@ verifySignature( message, signature, publicKey ) {
         return new ECDSA.SignatureCheck(false, 'invalid signature : s is > N');
 
     // calc message hash
-    var hashbuffer    = sha256(sha256( message ));
+    var hashbuffer    = sha256( message );
     // convert to 256 Bits integer
     var h      = bigInt256FromBigEndianBuffer(hashbuffer)
 
@@ -333,6 +379,7 @@ verifySignature( message, signature, publicKey ) {
             console.assert( typeof bigint == 'bigint' )
             this.value = bigint;
         }
+        isPrivateKey() {return true;}
         toBuffer() {
             return bigEndianBufferFromBigInt256(this.value) 
         }
