@@ -1,8 +1,4 @@
-
-
-.import pubkey from buffer
 .test encode/decode
-.derivation if we only have pubkey
 .samples
 .check all comments format
 .generate a doc
@@ -10,5 +6,6 @@
 .psbt generation
 .psbt signing
 .use lib with WD lib to double-check
+.derivation if we only have pubkey
 
 .QR code generation in sample
