@@ -727,6 +727,14 @@ function autotest_encodeDecode( fonError ) {
     _test( _bech32Encodev1, _bech32Decodev1,   "934b1ea10a4b3c17",  "bc1pjd93agg2fv7pwpzecmg" ) 
     _test( _bech32Encodev1, _bech32Decodev1,   "7777777777777777777777777777777777777d",  "bc1pwamhwamhwamhwamhwamhwamhwamhwlgw55uld" ) 
 
-    // bech 32 - TODO
-
+    // integer
+    _test( bigEndianBufferFromBigInt256, bigInt256FromBigEndianBuffer, BigInt(1),           "0000000000000000000000000000000000000000000000000000000000000001", bufferFromHex )
+    _test( bigEndianBufferFromBigInt256, bigInt256FromBigEndianBuffer, BigInt(0xAABBCCDD),  "00000000000000000000000000000000000000000000000000000000aabbccdd", bufferFromHex )    
+    _test( bigEndianBufferFromBigInt256, bigInt256FromBigEndianBuffer, BigInt("0x123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0"),
+                                                                                         "123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0", bufferFromHex )
+    _test( bigEndianBufferFromBigInt256, bigInt256FromBigEndianBuffer, BigInt("0x6d4ef6f419f31d1c4ef5de5582c09a542e5e1005cec33bacf1d7d0550c45fcc1"),
+                                                                                         "6d4ef6f419f31d1c4ef5de5582c09a542e5e1005cec33bacf1d7d0550c45fcc1", bufferFromHex )
+    _test( bigEndianBufferFromInt32, int32FromBigEndianBuffer,  1,          "00000001", bufferFromHex )
+    _test( bigEndianBufferFromInt32, int32FromBigEndianBuffer,  0x7ABBCCDD, "7abbccdd", bufferFromHex )                                                                                       
+    _test( bigEndianBufferFromInt32, int32FromBigEndianBuffer,  0x12345678, "12345678", bufferFromHex )
 }
