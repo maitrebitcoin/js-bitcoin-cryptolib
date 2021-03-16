@@ -5,7 +5,7 @@
 <h1> js-bitcoin-cryptolib debug page </h1>
 <p><hr><p>
 
-<button onclick="testBech32()">    <h2> Test bech32 </h2> </button>
+<button onclick="test1()">    <h2> Test 1 </h2> </button>
 <p>
 <button onclick="testAll()">     <h2> Test ALL  </h2> </button>
 <hr>
@@ -94,17 +94,11 @@ function testAll() {
     autotest_all( onTestFail, onTestOK, onAllTestFinisedOK  );
 }
 
-function testBech32() {
+function test1() {
     // Start...
     document.getElementById("resultat").innerHTML += "<font color='gray'>Running...</font>";
-    // Run tests...
-    //autotest_bip84(onTestFail)
     
-    //@test
-    autotest_ecdsa(onTestFail);
-    //autotest_bip8();
-    
-    autotest_bech32( onTestFail  )
+    autotest_encodeDecode( onTestFail  )
     // test PASSED OK
     document.getElementById("resultat").innerHTML += "<p><font color='green'>PASSED OK</font>";
 

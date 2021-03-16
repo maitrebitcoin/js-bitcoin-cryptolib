@@ -1,5 +1,7 @@
-.test encode/decode
-.samples
+.test encode/decode bech32
+.more samples 
+  .last word from 13
+  .recover account from menominc phrase
 .check all comments format
 .generate a doc
 .node.js integration / sample

@@ -17,7 +17,7 @@
  * 
 */
 function autotest_all(fonError, fonStepOK, fonEnd ){
-    var tabTestName  = new Array( 'bech32', 
+    var tabTestName  = new Array( 'encodeDecode', 'bech32', 
                                   "ripemd160", "sha512", "sha256", "hmac_sha512", 
                                   "bip39", "pbkdf2_hmac512", "ecdsa","bip32","bip49","bip84" )
     
@@ -569,7 +569,7 @@ function autotest_bip49( fonError ) {
 }
 
 /**
- * 
+ * test BitcoinlWallet in bip 84 mode.
  * @param {function } fonError called if one of the test fails
  * @see https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki
  */
@@ -652,4 +652,59 @@ function autotest_bip84( fonError ) {
           "KxJyAXFHCfj38gvQLsPPUibW6kTzGDUVmXdbFQSdEH1JxpDk86id",
           "0255868ee72b99229153dd1ca1e357a4ef03fa9419f8895cf4e272b2f7d1a837e2",
           "bc1q2rw2yugvcux0dn5jk3a9l85up3z6tcdqjqq3ch")          
+}
+
+
+/**
+ * test various encoding/decoding function.
+ * @param {function } fonError called if one of the test fails
+ */
+function autotest_encodeDecode( fonError ) {
+    // test 1 func 
+    function _test( fnEncode , fnDecode, input, expectedOutputParam, fnConvertOuput  ) 
+    {
+        // check encode
+        var output = fnEncode( input )
+        var expectedOutput;
+        if (fnConvertOuput)
+            expectedOutput = fnConvertOuput(expectedOutputParam)
+        else 
+            expectedOutput = expectedOutputParam
+        // check encoding
+        if (output != expectedOutput) {
+               // error
+               FAILED( fonError, input, fnConvertOuput ?  fnConvertOuput(output):output, expectedOutputParam, "encode" )
+        }        
+        if (!fnDecode)
+            return;
+        // check decode
+        var inputDecoded = fnDecode( output )
+        if (inputDecoded != input) {
+            // error
+            FAILED( fonError, input, inputDecoded, inputDecoded, "decode" )
+        }       
+    }
+
+    // hex to/from buffer
+    _test( hex, undefined, 0x10203,    "10203" )
+    _test( hex, undefined, 0xFF,       "ff"    )  
+    _test( hex, undefined, 0x12345678, "12345678"    )  
+    _test( hex, undefined, BigInt("0xabcdef0123456789"), "abcdef0123456789")  
+    _test( hex, undefined, "\x00\xab\xcd\xef\x01\x23\x45\x67\x89", "00abcdef0123456789")  
+    _test( bufferFromHex, hex,  "010203",             "010203", bufferFromHex )
+    _test( bufferFromHex, hex,  "abcdef0123456789",   "abcdef0123456789", bufferFromHex )
+    _test( bufferFromHex, undefined,  "FFDD",         "\xFF\xDD" )
+
+    // base58
+    _test( base58Encode, base58Decode, "",  "" )
+    _test( base58Encode, base58Decode, "test",  "3yZe7d" )
+    _test( base58Encode, base58Decode, "test Me Please !",  "FNe9LCh9EQnyhK2kbhNqhA" )  
+    _test( base58Encode, base58Decode, sha256("test Me Please !"),  "Gje4fyjU9c9Pz3Dr8PvW9e5xQeq4CGUAaxNy3NsxTRx3" )
+    _test( base58CheckEncode, base58CheckDecode, "",  "3QJmnh" )
+    _test( base58CheckEncode, base58CheckDecode, "test",  "LUC1eAJa5jW" )
+    _test( base58CheckEncode, base58CheckDecode, bufferFromHex("05343769f026e918bad7b3c01ca1983f82707c9605"),  "36T7SjoDy8t2PgBfZrtNFSqBXeiTc5uw1X" )
+    _test( base58CheckEncode, base58CheckDecode, bufferFromHex("05f78c9ecfc84f9f3d71844f7ccf752f51f1223420"),  "3QFwHQ8cENtVBZWUjzaFE6vgaSTv5p7B6Q" )
+
+    // bech 32 - TODO
+
 }

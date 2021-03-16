@@ -187,9 +187,12 @@ function base58CheckDecode(base58encoded) {
 function base58Encode( buffer, prefix ) {
     if (!prefix)
         prefix = ''
-
+    // encode of "" returns ""
+    if (prefix+buffer=="")
+        return ""
     // convert to hexa
     var hexaBuf= hex(  prefix + buffer )
+
     // convert to number
     var numBufAndCrc = BigInt( "0x" + hexaBuf )
     // main loop : divive by 58 until numBuf go to 0.
