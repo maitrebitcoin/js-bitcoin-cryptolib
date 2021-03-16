@@ -1,4 +1,4 @@
-.test encode/decode bech32
+.test encode/decode big int <=> buffer
 .more samples 
   .last word from 13
   .recover account from menominc phrase

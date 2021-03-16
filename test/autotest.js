@@ -681,9 +681,10 @@ function autotest_encodeDecode( fonError ) {
         var inputDecoded = fnDecode( output )
         if (inputDecoded != input) {
             // error
-            FAILED( fonError, input, inputDecoded, inputDecoded, "decode" )
+            FAILED( fonError, input, inputDecoded, input, "decode" )
         }       
     }
+
 
     // hex to/from buffer
     _test( hex, undefined, 0x10203,    "10203" )
@@ -704,6 +705,27 @@ function autotest_encodeDecode( fonError ) {
     _test( base58CheckEncode, base58CheckDecode, "test",  "LUC1eAJa5jW" )
     _test( base58CheckEncode, base58CheckDecode, bufferFromHex("05343769f026e918bad7b3c01ca1983f82707c9605"),  "36T7SjoDy8t2PgBfZrtNFSqBXeiTc5uw1X" )
     _test( base58CheckEncode, base58CheckDecode, bufferFromHex("05f78c9ecfc84f9f3d71844f7ccf752f51f1223420"),  "3QFwHQ8cENtVBZWUjzaFE6vgaSTv5p7B6Q" )
+
+    // bech32
+    function _bech32Encode( bufferHex ) {  return bech32Encode("bc",0, bufferFromHex(bufferHex))   }
+    function _bech32Decode( str ) {  var decoded = bech32Decode(str); console.assert(decoded.version==0);  return hex(decoded.buffer)  }
+    _test( _bech32Encode, _bech32Decode,   "05f78c9ecfc84f9f3d71844f7ccf752f51f12234200000000000000000000000",  "bc1qqhmce8k0ep8e70t3s38henm49aglzg35yqqqqqqqqqqqqqqqqqqqtqhxc7" )
+    _test( _bech32Encode, _bech32Decode,   "0000000000000000000000000000000000000000000000000000000000000000",  "bc1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqthqst8" )
+    _test( _bech32Encode, _bech32Decode,   "8888888888888888888888888888888888888888888888888888888888888888",  "bc1q3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyquddz7w" )
+    _test( _bech32Encode, _bech32Decode,   "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",  "bc1qlllllllllllllllllllllllllllllllllllllllllllllllllllsffrpzs" )
+    _test( _bech32Encode, _bech32Decode,   "123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0",  "bc1qzg69v7y6hn00qy352euf40x77qfrg4ncn27dauqjx3t83x4ummcqnqn5n5" )
+    _test( _bech32Encode, _bech32Decode,   "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",  "bc1qamhwamhwamhwamhwamhwamhwamhwamhwamhwamhwamhwamhwamhqju0vg7" )
+    _test( _bech32Encode, _bech32Decode,   "7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f",  "bc1q0alh7lml0alh7lml0alh7lml0alh7lml0alh7lml0alh7lml0alshl5zfy" )
+    _test( _bech32Encode, _bech32Decode,   "1111111111111111111111111111111111111111111111111111111111111111",  "bc1qzyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zygsszvapf" )
+    _test( _bech32Encode, _bech32Decode,   "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",  "bc1qenxvenxvenxvenxvenxvenxvenxvenxvenxvenxvenxvenxvenxq6aa5mu" )
+    _test( _bech32Encode, _bech32Decode,   "5555555555555555555555555555555555555555555555555555555555555555",  "bc1q242424242424242424242424242424242424242424242424242skjutym" )
+    _test( _bech32Encode, _bech32Decode,   "6d4ef6f419f31d1c4ef5de5582c09a542e5e1005cec33bacf1d7d0550c45fcc1",  "bc1qd480daqe7vw3cnh4me2c9sy62sh9uyq9empnht836lg92rz9lnqsuwm3up" )
+    function _bech32Encodev1( bufferHex ) {  return bech32Encode("bc",1, bufferFromHex(bufferHex))   }
+    function _bech32Decodev1( str ) {  var decoded = bech32Decode(str); console.assert(decoded.version==1);  return hex(decoded.buffer)  }
+    _test( _bech32Encodev1, _bech32Decodev1,   "0000",  "bc1pqqqq4yr79j" )
+    _test( _bech32Encodev1, _bech32Decodev1,   "abcd",  "bc1p40xscd3an0" ) 
+    _test( _bech32Encodev1, _bech32Decodev1,   "934b1ea10a4b3c17",  "bc1pjd93agg2fv7pwpzecmg" ) 
+    _test( _bech32Encodev1, _bech32Decodev1,   "7777777777777777777777777777777777777d",  "bc1pwamhwamhwamhwamhwamhwamhwamhwlgw55uld" ) 
 
     // bech 32 - TODO
 
