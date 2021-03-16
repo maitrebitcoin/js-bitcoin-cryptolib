@@ -1,7 +1,8 @@
-.test encode/decode big int <=> buffer
+
 .more samples 
   .last word from 12 / 24
   .recover account from menominc phrase
+  .adresses from extPub or extPriv key
 .check all comments format
 .generate a doc
 .node.js integration / sample
