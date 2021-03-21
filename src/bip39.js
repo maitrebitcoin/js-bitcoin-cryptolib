@@ -30,10 +30,12 @@ function seedFromPhrase(  mnemonicPhrase,  password ) {
 
 /**
  *  check if a phrase is valid 
- * @param {mnemonicPhrase} mnemonicPhrase  UTF-8 NFKD phrase. ex : "pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
+ * @param {string} mnemonicPhrase  UTF-8 NFKD phrase. ex : "pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
+ * @param {boolean} ignoreCrc  if true, the fuction does not raise execption on crc errors
+ * @return {boolean} true if <mnemonicPhrase> is valid. false if crc test fails and <ignoreCrc> is true
  * @throws {struct} if <mnemonicPhrase> is invalid
  */
-function checkPhrase( mnemonicPhrase  )
+function checkPhrase( mnemonicPhrase, ignoreCrc  )
 {
     // split into words
     var tabWord = mnemonicPhrase.split(" ");
@@ -75,6 +77,8 @@ function checkPhrase( mnemonicPhrase  )
     var crcData = buffer.charCodeAt(nbByteData) & maskBit
     // compare CRC
     if (crcCalc!=crcData) {
+        if (ignoreCrc)
+            return false;
         throw {error:"Invalid crc.", crcCalc:crcCalc, crcData:crcData }
     }
 
@@ -95,7 +99,29 @@ function checkPhrase( mnemonicPhrase  )
         buf += bigEndianBufferFromInt32(val32bit);
         return buf
     }
+}
 
+/**
+ * get a list of all valid words to end a bip39 compatible phrase.
+ * @param {string} incompletePhrase  phrase minus 1 word. ex : "pistol thunder want public animal educate laundry all churn federal slab behind media front"
+ * @return {array of string} all valid  word. ex : 
+ * @throws {struct} if <randomBffer> is invalid
+ */
+function getAllValidLastWord( incompletePhrase ) {
+    // test if the beginning is correct
+    checkPhrase( incompletePhrase + " " + getBip39WordFromIndice(0), true);
+
+    var WordOK = []
+    // test all 2048 possible words
+    for (var i=0;i<2048;i++) {
+        var wordI = getBip39WordFromIndice(i);
+        // is the phare ok with this word ?
+        var bWordOK =  checkPhrase( incompletePhrase + " " + wordI, true );
+        if (bWordOK)
+            WordOK.push(wordI);
+    }
+    console.assert( WordOK.length > 0 )
+    return WordOK;
 }
 
 /**
@@ -135,7 +161,7 @@ function bip39phraseFromRandomBuffer( randomBffer ) {
         var val11bit = (val32bit & mask) >>> (32-11-remBit);
         // get the word
         console.assert(val11bit >= 0 && val11bit < 2048);
-        var wordI = _getBip39WordFromIndice(  val11bit )
+        var wordI = getBip39WordFromIndice(  val11bit )
         // build phrase
         if (result!="") result += " ";
         result += wordI
@@ -250,7 +276,7 @@ var WordList_english = [
  * @param {int} index  word number
  * @return {string} an english word. ex : "reward"
  */
-function _getBip39WordFromIndice( index ) {
+function getBip39WordFromIndice( index ) {
     return WordList_english[index]     
 }
 /**
