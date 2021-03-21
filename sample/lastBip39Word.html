@@ -2,17 +2,23 @@
 <html>
 <head>
     <title> 
-        Sample - get last bip 49 word
+        Sample - get last mnemonic word
     </title>    
+    <style>
+        textarea {
+            width: 300px;
+            height: 150px;
+        }
+    </style>
 </head>
 <body>
-    <p>enter 11 yout words :</p>
-    <br><textarea id="word"></textarea><br><br>
+    <p>Enter 11, 15 oe 23 words :</p>
+    <br><textarea id="word"  ></textarea><br><br>
 
 
-    <button onclick="GetWords()"> <h2> get words </h2> </button>
+    <button onclick="GetWords()"> <h2> get valid words </h2> </button>
     <hr>
-    <p id="lastWord" hidden=true>
+    <p id="result" hidden=true>
     </p>
 
     <!----------------------------- javscript code -------------------------------->
@@ -24,18 +30,23 @@
     
         //get words
         var words  = document.getElementById("word").value 
-        var TabWord = str.split(" ");
-        if (TabWord.length != 11)
-        {
-            alert("Invalid : 11 words required")
+        // get possible words
+        var tabWord;
+        try {
+            var tabWord = getAllValidLastWord( words );
+
+        }
+        catch (err) {
+            document.getElementById("result").innerHTML = err.error;    
+            document.getElementById("result").hidden    = false                      
             return;
         }
-        // get all possibles last word
+        var htmlWords = ""
+        tabWord.forEach( word => htmlWords+= word + "<br>\n" );
         
-
-
-
-
+        // result OK
+        document.getElementById("result").innerHTML = htmlWords;
+        document.getElementById("result").hidden    = false                
     }
     
     </script>

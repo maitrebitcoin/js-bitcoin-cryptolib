@@ -56,10 +56,20 @@ function checkPhrase( mnemonicPhrase, ignoreCrc  )
     var nbByteData = nbBitData/8;
     // check each word and convert it to int
     tabIndex = []
+    var numWord = 0;
     tabWord.forEach( word => {
         // thow an error if the index
-        var index = _getBip39IndiceFromWord( word )
+        var index = 0;
+        try {
+            index = _getBip39IndiceFromWord( word )
+        }
+        catch (err) {
+            err.error   = 'Invalid word n°${index} : <$word>.' 
+            err.numWord = index
+            throw err;
+        }
         tabIndex.push( index );
+        numWord++;
     })
     // convert to buffer
     var buffer=""
@@ -114,6 +124,7 @@ function getAllValidLastWord( incompletePhrase ) {
     var WordOK = []
     // test all 2048 possible words
     for (var i=0;i<2048;i++) {
+        // word to test. ex "abandon"
         var wordI = getBip39WordFromIndice(i);
         // is the phare ok with this word ?
         var bWordOK =  checkPhrase( incompletePhrase + " " + wordI, true );

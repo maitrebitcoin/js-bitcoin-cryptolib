@@ -340,6 +340,23 @@ function autotest_bip39(fonError) {
           "all hour make first leader extend hole alien behind guard gospel lava path output census museum junior mass reopen famous sing advance salt reform",)
  
 
+    function _test2( incomplePhrase , expected  ) 
+    {
+        // calculate hash
+        var tabWord  = getAllValidLastWord( incomplePhrase  )
+        var result = tabWord.join(" ")
+        // is it the expected result ?
+        if (result != expected) {
+            // error
+            FAILED( fonError, incomplePhrase, result, expected )
+        }
+    }          
+    // test getAllValidLastWord function
+    var testOK = "account advance again alcohol angry arctic artefact attack awesome beach belt blood book brief bubble bundle call carry century chapter choice clay clump cool course crazy curious daring degree dentist devote direct dose dragon dust eight embody enroll erosion execute explain fatal festival film flock fortune fringe gap gas glue gown guitar hamster helmet hollow human immune include inspire island join kingdom lamp leader lift logic lyrics mail master melt mirror monitor motor must neither now object onion outside panic patient pear piece plug pool prison proud quantum ramp recall remain require reward riot sadness salt scrap seat shallow sibling size slide social sock spell squirrel stand stomach supply swear system test they together torch tree trigger twice unknown upset valve vendor vote warrior web window wire wrestle"
+    _test2("situate before sell found usage useful caution banner stem autumn decrease", testOK )
+    testOK = "armed camp focus identify leopard protect soap toe"
+    _test2("crystal desk major produce chunk boil core mushroom tattoo wedding subway swallow crush shock caution wide hat music fury length powder release desk", testOK)
+
 }
 
 
