@@ -6,7 +6,7 @@
 .check all comments format
 .generate a doc
 .node.js integration / sample
-.psbt generation
+.psbt generation. bip 174
 .psbt signing
 .use lib with WD lib to double-check
 .derivation if we only have pubkey

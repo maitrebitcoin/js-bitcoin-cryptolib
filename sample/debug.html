@@ -98,7 +98,7 @@ function test1() {
     // Start...
     document.getElementById("resultat").innerHTML += "<font color='gray'>Running...</font>";
     
-    autotest_encodeDecode( onTestFail  )
+    autotest_bip39( onTestFail  )
     // test PASSED OK
     document.getElementById("resultat").innerHTML += "<p><font color='green'>PASSED OK</font>";
 
@@ -106,7 +106,9 @@ function test1() {
 
 function debug() {
 
-  
+//    checkPhrase("situate before sell found usage useful caution banner stem autumn decrease melt")
+test1();
+
     var ecdsa = new ECDSA();
     // create key pair
     var privateKey = ecdsa.newPrivateKey();

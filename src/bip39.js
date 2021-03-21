@@ -18,10 +18,84 @@
  * @return {string} 512 bits seed
  */
 function seedFromPhrase(  mnemonicPhrase,  password ) {
+    // check for validity
+    checkPhrase(mnemonicPhrase)
+
+    // calc seed
     var salt =  "mnemonic"
     if (password)
         salt += password
     return PBKDF2_512( hmac_sha512, mnemonicPhrase,  salt, 2048  )
+}
+
+/**
+ *  check if a phrase is valid 
+ * @param {mnemonicPhrase} mnemonicPhrase  UTF-8 NFKD phrase. ex : "pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
+ * @throws {struct} if <mnemonicPhrase> is invalid
+ */
+function checkPhrase( mnemonicPhrase  )
+{
+    // split into words
+    var tabWord = mnemonicPhrase.split(" ");
+    // get number on bits in data and crc
+    var nbWord = tabWord.length;
+    var nbBitDataAndCrc = nbWord*11;
+    var nbBitCrc  = 0;
+    switch (nbWord) {
+        case 12: nbBitCrc=4;console.assert(nbBitDataAndCrc-nbBitCrc == 128); break;
+        case 15: nbBitCrc=5;console.assert(nbBitDataAndCrc-nbBitCrc == 160); break;
+        case 18: nbBitCrc=6;console.assert(nbBitDataAndCrc-nbBitCrc == 192); break;
+        case 21: nbBitCrc=7;console.assert(nbBitDataAndCrc-nbBitCrc == 224); break;        
+        case 24: nbBitCrc=8;console.assert(nbBitDataAndCrc-nbBitCrc == 256); break;  
+        default:
+            throw {error:"Invalid number of words.", nbWord:nbWord }
+    }
+    var nbBitData = nbBitDataAndCrc-nbBitCrc;
+    var nbByteData = nbBitData/8;
+    // check each word and convert it to int
+    tabIndex = []
+    tabWord.forEach( word => {
+        // thow an error if the index
+        var index = _getBip39IndiceFromWord( word )
+        tabIndex.push( index );
+    })
+    // convert to buffer
+    var buffer=""
+    var index=0;
+    for (var posBit=0;posBit<nbBitData+nbBitCrc;posBit+=11) {
+        var value   = tabIndex[index]; // to be added in buffer
+        buffer = _add11Bit( buffer, posBit, value);
+        index++;
+    }
+    // calc CRC
+    var maskBit = (0xFF << ( 8-nbBitCrc )) & 0xFF;
+    var bufferData = buffer.substr( 0, nbByteData);
+    var hash = sha256(bufferData)
+    var crcCalc = hash.charCodeAt(0) & maskBit
+    var crcData = buffer.charCodeAt(nbByteData) & maskBit
+    // compare CRC
+    if (crcCalc!=crcData) {
+        throw {error:"Invalid crc.", crcCalc:crcCalc, crcData:crcData }
+    }
+
+    // Check OK
+    return true;
+
+//---------------------------
+    // internal func : add 11 bits at pos <numBit> in buffer <buf>. 
+    function _add11Bit( buf, numBit, value ) {
+        var posInByte =  (numBit/8)>>>0
+        // get current value
+        var val32bit  = int32FromBigEndianBuffer(buf, posInByte )
+        // add 11 bits
+        var pos  = numBit % 8 
+        val32bit = val32bit | (value << (32-11-pos))
+        // calc final buffer
+        buf = buf.substr(0,posInByte)
+        buf += bigEndianBufferFromInt32(val32bit);
+        return buf
+    }
+
 }
 
 /**
@@ -179,4 +253,25 @@ var WordList_english = [
 function _getBip39WordFromIndice( index ) {
     return WordList_english[index]     
 }
+/**
+ * get a word index from its value 
+ * @param {string} word an english word. ex : "reward"
+ * @return {int} index. start at 0
+ * @throws {struct} if <word> is invalid
+ */
+var wordToInt=[]; // global hash table
+function _getBip39IndiceFromWord( word ) {
+    // init at 1s call
+    if (wordToInt.length==0) {
+        for (var i=0;i<2048;i++)
+        wordToInt[WordList_english[i]] = i;
+    }
+    // get index
+    var index = wordToInt[word];
+    if (index === undefined)  {
+        throw {error:"invalid word",word:word };
+    }
+    return index;
+}
+
 
