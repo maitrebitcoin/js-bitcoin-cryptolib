@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sample - Create native segwit bitcoin account </title>    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<button onclick="onClicCreate()" id="btnCreate">  <h2> Create native segwit bitcoin account </h2> </button>
+<p><p>
+<hr>
+public address :
+ <p id="public" hidden=true>
+    <span id="publicAdress"></span>
+    <br>
+    <br>
+    <button onclick="onCopy()"><h2>copy</h2>  </button>    
+</p>
+<hr>
+secret phrase :
+<p id="secret" hidden=true>
+</p>
+
+<!----------------------------- javscript code -------------------------------->
+
+<script src='../src/js-bitcoin-lib.js'></script> 
+<script>
+
+
+async function onClicCreate() {
+    document.getElementById("btnCreate").hidden = true
+    await createBtcAccountSegwit();
+    document.getElementById("btnCreate").hidden = false
+}
+
+async function createBtcAccountSegwit(type) {
+
+    // create a new wallet 
+    var myWallet   = new BitcoinWallet(  WalletType.SEGWIT_NATIVE  );
+    // generate a random buffer
+    var randomBuffer = myWallet.getRandomBuffer(128)
+    // calculate the mnemonic phrase from this buffer
+    // ex : "pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
+    var phrase       = bip39phraseFromRandomBuffer(randomBuffer)
+    var seed         = seedFromPhrase(phrase)
+    // use the seed a the base for all adresses calculations
+    myWallet.initFromSeed(seed)
+    // get the 1st public adress. 
+    var pubAdress0   =  myWallet.getPublicAddress(0)
+    
+
+    var prettyPhrase = "<table align='center'><tr>"
+    var tabWord = phrase.split(' ')
+    for (var i=0;i<tabWord.length;i++) {
+        var rc = (i>0 && i%2==0)  
+        if (rc) prettyPhrase += "</tr><tr>"          
+        prettyPhrase += "<td id='numword'>&nbsp" + (i+1)+ "&nbsp</td>"   
+        prettyPhrase += "<td>" + tabWord[i] + "</td>"
+        prettyPhrase += "<td>&nbsp&nbsp</td>"
+ 
+    }
+    prettyPhrase+='</tr></table>'
+
+    // show result
+    document.getElementById("publicAdress").innerHTML = pubAdress0 ; 
+    document.getElementById("public").hidden    = false   
+    document.getElementById("secret").innerHTML = prettyPhrase ;    
+    document.getElementById("secret").hidden    = false   
+}
+
+function onCopy() {
+    var publicAdress =  document.getElementById("publicAdress").innerHTML
+    // can we write into the clipboard ?
+    navigator.permissions.query({name: "clipboard-write"}).then(result => {
+        if (result.state == "granted" || result.state == "prompt") {
+            navigator.clipboard.writeText(publicAdress)
+            alert("public adress :\n\n" + publicAdress + "\n\nsucessfully copied to the clipboard"  )
+        }
+        else {
+            alert("acces to the clipboard denied\n"  + result.state  )
+        }
+    });
+
+
+}
+
+</script>
+
+</body>
+</html>

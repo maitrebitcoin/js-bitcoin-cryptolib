@@ -1,0 +1,58 @@
+:root { 
+    /* color palette */
+    --PubText:            #22310d;
+    --PubBackground:      rgb(217, 223, 167);    
+    --text2:              #3f2207;
+    --BtnText:            #ffffff;
+    --Background:         #f0f0f0;
+
+} 
+/* style for public adress */
+#public {
+  font-family:monospace;
+  font-size: 3.3vw;
+  border-radius: 4.0vw;
+  border: 0.3vw solid var( --PubText);
+  background-color:var( --PubBackground);
+  padding: 4.0vw; 
+  text-align: center;
+  color : var( --PubText);
+  margin-left: 3vw;
+  margin-right: 3vw;          
+}
+/* style for private keys, private extended keys, secret bip49 phareses, ... */
+#secret {
+  font-family:monospace;            
+  font-size: 4.5vw;
+  border-radius: 4.0vw;
+  border: 0.3vw solid var( --text2);
+  color : var( --text2);
+  background-color: rgb(204, 145, 67);
+  padding: 5.0vw; 
+  text-align: left;
+  margin-left: 3vw;
+  margin-right: 3vw;
+}        
+#numword {
+  color:#383737;     
+  text-align: center;
+  font-size: 3.5vw;
+}
+button {
+    background: #76B3FA;
+    border-radius: 1.0vw;
+    border-width: 0;
+    color : var(--BtnText);
+    outline: none;
+    padding-left:  3.0vw; 
+    padding-right: 3.0vw;
+}
+button:hover {
+    background: #98aec7;
+
+}        
+button:active {
+    background: #627488;
+
+}            
+body { background-color: var(--Background); }

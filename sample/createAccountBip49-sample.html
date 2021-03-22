@@ -1,45 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title> 
-        Sample - Create bitcoin account
-    </title>    
-    <style>       
-        #public {
-          font-family:monospace;
-          font-size: 4.5vw;
-          border-radius: 4.0vw;
-          border: 2px solid #22310d;
-          background-color: rgb(217, 223, 167);
-          padding: 4.0vw; 
-          text-align: center;
-          margin-left: 3vw;
-          margin-right: 3vw;          
-        }
-        #secret {
-          font-family:monospace;            
-          font-size: 4.5vw;
-          border-radius: 25px;
-          border: 2px solid #3f2207;
-          background-color: rgb(204, 145, 67);
-          padding: 5.0vw; 
-          text-align: left;
-          margin-left: 3vw;
-          margin-right: 3vw;
-        }        
-        #numword {
-          color:#383737;     
-          text-align: center;
-          font-size: 3.5vw;
-        }
-    </style>
-</head>
+    <title>Sample - Create segwit bitcoin account </title>   
+    <link rel="stylesheet" href="style.css">
+ </head>
 <body>
-<button onclick="createBtcAccountSegwit()" id="btnCreate">    <h2> create new account </h2> </button>
+<button onclick="createBtcAccountSegwit()" id="btnCreate"> <h2> Create segwit bitcoin account </h2> </button>
 <p><p>
 <hr>
 public address :
-<p id="public" hidden=true>
+ <p id="public" hidden=true>
+    <span id="publicAdress"></span>
+    <br>
+    <br>
+    <button onclick="onCopy()"><h2>copy</h2>  </button>    
 </p>
 <hr>
 secret phrase :
