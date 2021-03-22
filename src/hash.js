@@ -200,12 +200,13 @@ function sha512( buffer ) {
         }
         return tab;
     }
-    function ui64NewArrayFromBigUint64Array( srcArry ) {
+    function ui64NewArrayFromBigIntArray( srcArry ) {
         var tab = []
         for (var i=0;i<srcArry.length;i++) {
-            var res =  {}                   
-            res.high = Number(srcArry[i] / _2pow32) 
-            res.low  = Number(srcArry[i] % _2pow32) 
+            var res =  {}    
+            var numI = BigInt(srcArry[i]);
+            res.high = Number(numI / _2pow32) 
+            res.low  = Number(numI % _2pow32) 
             tab.push(res)
         }
         return tab
@@ -248,11 +249,11 @@ function sha512( buffer ) {
     }  
     // sha2 constants :
     //  (first 64 bits of the fractional parts of the square roots of the first 8 primes 2..19):
-    const  H_ = new BigUint64Array( ["0x6a09e667f3bcc908", "0xbb67ae8584caa73b", "0x3c6ef372fe94f82b", "0xa54ff53a5f1d36f1", 
-                                    "0x510e527fade682d1", "0x9b05688c2b3e6c1f", "0x1f83d9abfb41bd6b", "0x5be0cd19137e2179" ] );     
-    var H = ui64NewArrayFromBigUint64Array(H_)
+    const  H_ =   ["0x6a09e667f3bcc908", "0xbb67ae8584caa73b", "0x3c6ef372fe94f82b", "0xa54ff53a5f1d36f1", 
+                   "0x510e527fade682d1", "0x9b05688c2b3e6c1f", "0x1f83d9abfb41bd6b", "0x5be0cd19137e2179" ] ;     
+    var H = ui64NewArrayFromBigIntArray(H_)
     //  (first 64 bits of the fractional parts of the cube roots of the first 64 primes 2..311): 
-    const K_ = new BigUint64Array( ["0x428a2f98d728ae22", "0x7137449123ef65cd", "0xb5c0fbcfec4d3b2f", "0xe9b5dba58189dbbc", "0x3956c25bf348b538", 
+    const K_ =    ["0x428a2f98d728ae22", "0x7137449123ef65cd", "0xb5c0fbcfec4d3b2f", "0xe9b5dba58189dbbc", "0x3956c25bf348b538", 
                                     "0x59f111f1b605d019", "0x923f82a4af194f9b", "0xab1c5ed5da6d8118", "0xd807aa98a3030242", "0x12835b0145706fbe", 
                                     "0x243185be4ee4b28c", "0x550c7dc3d5ffb4e2", "0x72be5d74f27b896f", "0x80deb1fe3b1696b1", "0x9bdc06a725c71235", 
                                     "0xc19bf174cf692694", "0xe49b69c19ef14ad2", "0xefbe4786384f25e3", "0x0fc19dc68b8cd5b5", "0x240ca1cc77ac9c65", 
@@ -267,8 +268,8 @@ function sha512( buffer ) {
                                     "0x90befffa23631e28", "0xa4506cebde82bde9", "0xbef9a3f7b2c67915", "0xc67178f2e372532b", "0xca273eceea26619c", 
                                     "0xd186b8c721c0c207", "0xeada7dd6cde0eb1e", "0xf57d4f7fee6ed178", "0x06f067aa72176fba", "0x0a637dc5a2c898a6", 
                                     "0x113f9804bef90dae", "0x1b710b35131c471b", "0x28db77f523047d84", "0x32caab7b40c72493", "0x3c9ebe0a15c9bebc", 
-                                    "0x431d67c49c100d4c", "0x4cc5d4becb3e42b6", "0x597f299cfc657e2a", "0x5fcb6fab3ad6faec", "0x6c44198c4a475817" ] )
-    var K =    ui64NewArrayFromBigUint64Array(K_)                                 
+                                    "0x431d67c49c100d4c", "0x4cc5d4becb3e42b6", "0x597f299cfc657e2a", "0x5fcb6fab3ad6faec", "0x6c44198c4a475817" ] 
+    var K =    ui64NewArrayFromBigIntArray(K_)                                 
 
     // message length in bits
     var L  = buffer.length * 8
