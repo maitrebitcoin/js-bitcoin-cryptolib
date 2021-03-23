@@ -364,6 +364,10 @@ function autotest_bip39(fonError) {
 
 // fonError : callback called if the test fails
 function autotest_ecdsa( fonError ) {
+
+    var f = new GField()
+    var ec = new EllipticCurveSecp256k1();
+
     var ecdsa = new ECDSA();
 
     // test public key derivation
