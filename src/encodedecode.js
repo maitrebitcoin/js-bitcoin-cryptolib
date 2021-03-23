@@ -548,19 +548,3 @@ function bigEndianBufferFromUInt128(x) {
     var low  = (x % _2pow64);     
     return bigEndianBufferFromUInt64(high) + bigEndianBufferFromUInt64(low)
 }   
-/** 
- *  convert a buffer into uint64 assuming the buffer in ins big endian
- * = most significant byte first
- * @param  {string} buf 
- * @param  {Number} pos postiion of the 1st char to convert in buf
- * @return {BigInt} 64 bits unsigned int
- */ 
-function UInt64FrombigEndianBuffer( buf, pos ) {
-    var temp = new BigUint64Array( 1 )
-    var nRes = temp[0];
-    for (var i=0;i<8;i++) {
-        nRes = nRes * BigInt(256);
-        nRes += BigInt( buf.charCodeAt(pos+i) );
-    }
-    return nRes  
-}

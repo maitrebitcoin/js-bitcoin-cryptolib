@@ -38,7 +38,9 @@ function autotest_all(fonError, fonStepOK, fonEnd ){
         catch (error)  {
             if ( error == -2)
                 throw -2
-            FAILED( fonError, "", "", testName + ' ERROR - \n' +error)     
+            var stack = error.stack;                
+            stack = stack.replace(/\n/g,"<br>\n")
+            FAILED( fonError, "", "", testName + ' ERROR - \n' +error+"<br>\n"+stack)     
         }
 
         // test <testName> is OK
