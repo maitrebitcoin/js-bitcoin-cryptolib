@@ -53,41 +53,41 @@ constructor(  ) {
 
 /**
  *  generate a new private key from random generator : window.crypto.getRandomValues()
- * @returns {ECDSA.PrivateKey}
+ * @returns {ECDSAPrivateKey}
  */
 newPrivateKey(  ) {
     // get 256 bits random number
     var rand256 =getRandomBigInt256()
     // conversion to privateKey
-    var privateKey = new ECDSA.PrivateKey( rand256 );
+    var privateKey = new ECDSAPrivateKey( rand256 );
     return privateKey
 }
 /**
  *  generate a private key from a BigInt.
  * @param   {bigInt} number  ex : 66622949934292052565325515457306921084360285924745542237609076927686267856258n
- * @returns {ECDSA.PrivateKey}
+ * @returns {ECDSAPrivateKey}
  */
 privateKeyFromBigInt( number ) {
     console.assert( typeof number == 'bigint' ) 
-    var privateKey = new ECDSA.PrivateKey( number );
+    var privateKey = new ECDSAPrivateKey( number );
     return privateKey
 }
 /**
  *  generate a private key from a buffer
  * @param   {string} buffer   256 bits big endian format
- * @returns {ECDSA.PrivateKey}
+ * @returns {ECDSAPrivateKey}
  */
 privateKeyFromBuffer( buffer ) {
     console.assert( typeof buffer == 'string' ) 
     console.assert( buffer.length == 32 ) 
     var  number = bigInt256FromBigEndianBuffer( buffer )
-    var privateKey = new ECDSA.PrivateKey( number );
+    var privateKey = new ECDSAPrivateKey( number );
     return privateKey
 }
 /**
  *  import a private key from base58 encoded string (WIF)
  * @param   {string} stringBase58  string in WIF format. ex "5HueCGU8rMjxEXxiPuD5BDk...""
- * @returns {ECDSA.PrivateKey} the imported private key
+ * @returns {ECDSAPrivateKey} the imported private key
  * @throws {struct} if <stringBase58> is invalid
  */
 privateKeyFromStringBase58( stringBase58 ) {
@@ -105,24 +105,24 @@ privateKeyFromStringBase58( stringBase58 ) {
     // convert to bigint
     var bufferBigInt = buf.substr(1,32)
     var number = bigInt256FromBigEndianBuffer( bufferBigInt )
-    var privateKey = new ECDSA.PrivateKey( number );
+    var privateKey = new ECDSAPrivateKey( number );
     return privateKey
 }
 
 /**
  * get the public key associated to a private key
- * @param  {ECDSA.PrivateKey} privateKey
- * @returns {ECDSA.PublicKey}
+ * @param  {ECDSAPrivateKey} privateKey
+ * @returns {ECDSAPublicKey}
  */
 publicKeyFromPrivateKey( privateKey ) {
     var point = this.ec.pointScalarMult( this.ec.G, privateKey.value );
-    var publicKey = new ECDSA.PublicKey(point);
+    var publicKey = new ECDSAPublicKey(point);
     return publicKey;
 }
 /**
  * get the public key from a serialised bufffer. 
  * @param  {string} buffer 33 bytes buffer. ex : "0200359924c406998e91d4063fe078c32825e6ac4dce0395666ed54315afa3312d"
- * @returns {ECDSA.PublicKey}
+ * @returns {ECDSAPublicKey}
  * @throws {struct} if <buffer> is invalid
  */
 publicKeyFromBuffer( buffer ) {
@@ -144,7 +144,7 @@ publicKeyFromBuffer( buffer ) {
     console.assert( this.ec.pointOnCurve(point))   
 
     // init public key  
-    var publicKey = new ECDSA.PublicKey(point);
+    var publicKey = new ECDSAPublicKey(point);
     return publicKey;
 }
 
@@ -154,7 +154,7 @@ publicKeyFromBuffer( buffer ) {
 * @see https://tools.ietf.org/html/rfc6979
 * @protected
 * @param {string} message
-* @param {ECDSA.PrivateKey} privateKey
+* @param {ECDSAPrivateKey} privateKey
 **/
 _rfc6979( privateKey, message ) {
     console.assert( privateKey.isPrivateKey() )
@@ -195,9 +195,9 @@ _rfc6979( privateKey, message ) {
  * sign a message
  * 
  * @param {string} message
- * @param {ECDSA.PrivateKey} privateKey
+ * @param {ECDSAPrivateKey} privateKey
  * @param {string,optionnal} "" or "rfc6979" : https://tools.ietf.org/html/rfc6979
- * @returns {ECDSA.Signature}
+ * @returns {ECDSASignature}
  */
 signMessage( message, privateKey, option ) {
     console.assert( privateKey.isPrivateKey() )
@@ -234,7 +234,7 @@ signMessage( message, privateKey, option ) {
     // use the smallest s
     var smalls = s < minuss ? s : minuss;
     // create result
-    var signature = new ECDSA.Signature( pointR.x, smalls)
+    var signature = new ECDSASignature( pointR.x, smalls)
     return signature;
 }
 
@@ -274,7 +274,7 @@ bufferFromSignature( signature ) {
 /**
  * get the signature from a serialised bufffer. 
  * @param {string} buffer 
- * @return {ECDSA.Signature} 
+ * @return {ECDSASignature} 
  * @throws {struct} if <buffer> is invalid
  * @TODO -- buffer in DER format :
  * @see https://bitcoin.stackexchange.com/questions/92680/what-are-the-der-signature-and-sec-format#:~:text=The%20Distinguished%20Encoding%20Rules%20(DER,numbers%20(r%2Cs)%20.
@@ -312,18 +312,16 @@ signatureFromBuffer( bufferDER ) {
     var decodeR = _DerDecodeBigInt( bufferDER, 2 )
     var decodeS = _DerDecodeBigInt( bufferDER, decodeR.newpos )
     // build signature
-    return new ECDSA.Signature( decodeR.bigint,  decodeS.bigint);
+    return new ECDSASignature( decodeR.bigint,  decodeS.bigint);
 }
-
-
 
 /**
  * check a signature 
  * 
  * @param {string} message
- * @param {ECDSA.Signature} signature
- * @param {ECDSA.PublicKey} publicKey
- * @returns {ECDSA.SignatureCheck} struct with .ok and .message
+ * @param {ECDSASignature} signature
+ * @param {ECDSAPublicKey} publicKey
+ * @returns {ECDSASignatureCheck} struct with .ok and .message
  */
 verifySignature( message, signature, publicKey ) {
     console.assert( typeof message == 'string' ) 
@@ -362,76 +360,80 @@ verifySignature( message, signature, publicKey ) {
     
     // signature is invalid only if final point is 0
     if (pt1Plus2.isZero())
-        return new ECDSA.SignatureCheck(false, 'invalid signature : point is 0');
+        return new ECDSASignatureCheck(false, 'invalid signature : point is 0');
 
     // The signature is valid if r=x mod N, invalid otherwise.
     if ( signature.r != pt1Plus2.x )
-        return new ECDSA.SignatureCheck(false, 'signature for message does not match public key');
+        return new ECDSASignatureCheck(false, 'signature for message does not match public key');
 
     // OK
-    return new ECDSA.SignatureCheck(true,"OK");
+    return new ECDSASignatureCheck(true,"OK");
 }
 
-// ------ types -----
-    // represent a private key for ECDSA
-    static PrivateKey = class { 
-        constructor( bigint ) {
-            console.assert( typeof bigint == 'bigint' )
-            this.value = bigint;
-        }
-        isPrivateKey() {return true;}
-        toBuffer() {
-            return bigEndianBufferFromBigInt256(this.value) 
-        }
-        // export private key to WIF format
-        //@See https://en.bitcoin.it/wiki/Wallet_import_format        
-        toStringBase58() {
-            return base58CheckEncode(  this.toBuffer() + '\x01', PREFIX_PRIVATEKEY)
-        }
-    };
-    // represent a public key for ECDSA
-    static PublicKey = class { 
-        constructor( point ) {
-            console.assert( typeof point == 'object' )           
-            console.assert(  point.x )       
-            console.assert(  point.y )               
-            this.point = point;          
-        }
-        isPublicKey() { return true; }
-        // for sample purposes
-        toString() {
-            return hex(this.point.x)+","+hex(this.point.y)
-        }
-        fromString(s) {
-            var tabVal = s.split(",")
-            this.point = new ECPoint(0,0);
-            this.point.x = new BigInt("0x" + tabVal[0])
-            this.point.y = new BigInt("0x" + tabVal[0])
-        }
-        // convert to a 33 byte buffer (02+x or 03+x)
-        toBuffer() {
-            return this.point.toBuffer();
-        }
-        isZero() {
-            return this.point.isZero();
-        }
-    };
-    // represents a signature for ECDSA
-    static Signature = class { 
-        constructor( r, s ) {
-            console.assert( typeof r == 'bigint' )
-            console.assert( typeof s == 'bigint' )
-            this.r = r
-            this.s = s
-        }
-    };
-    // represents a result from the ECDSA verifySignature()
-    static SignatureCheck = class { 
-       constructor( ok, message ) {
-            this.ok      = ok
-            this.message = message
-       }
-     
-   }//PublicKey
-
 };//class ECDSA
+
+// ------ types -----
+
+ // represent a private key for ECDSA
+class ECDSAPrivateKey { 
+    constructor( bigint ) {
+        console.assert( typeof bigint == 'bigint' )
+        this.value = bigint;
+    }
+    isPrivateKey() {return true;}
+    toBuffer() {
+        return bigEndianBufferFromBigInt256(this.value) 
+    }
+    // export private key to WIF format
+    //@See https://en.bitcoin.it/wiki/Wallet_import_format        
+    toStringBase58() {
+        return base58CheckEncode(  this.toBuffer() + '\x01', PREFIX_PRIVATEKEY)
+    }
+};//ECDSAPrivateKey
+
+// represent a public key for ECDSA
+class ECDSAPublicKey { 
+    constructor( point ) {
+        console.assert( typeof point == 'object' )           
+        console.assert(  point.x )       
+        console.assert(  point.y )               
+        this.point = point;          
+    }
+    isPublicKey() { return true; }
+    // for sample purposes
+    toString() {
+        return hex(this.point.x)+","+hex(this.point.y)
+    }
+    fromString(s) {
+        var tabVal = s.split(",")
+        this.point = new ECPoint(0,0);
+        this.point.x = new BigInt("0x" + tabVal[0])
+        this.point.y = new BigInt("0x" + tabVal[0])
+    }
+    // convert to a 33 byte buffer (02+x or 03+x)
+    toBuffer() {
+        return this.point.toBuffer();
+    }
+    isZero() {
+        return this.point.isZero();
+    }
+};//ECDSAPublicKey
+
+// represents a signature for ECDSA
+class ECDSASignature { 
+    constructor( r, s ) {
+        console.assert( typeof r == 'bigint' )
+        console.assert( typeof s == 'bigint' )
+        this.r = r
+        this.s = s
+    }
+};//ECDSASignature
+// represents a result from the ECDSA verifySignature()
+class ECDSASignatureCheck { 
+    constructor( ok, message ) {
+        this.ok      = ok
+        this.message = message
+    }
+    
+}//ECDSASignatureCheck
+

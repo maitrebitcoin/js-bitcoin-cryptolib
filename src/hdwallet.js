@@ -451,7 +451,7 @@ _getPrivateKeyFromPathR( derivationPath ) {
             // 33 bytes: the public key or private key data (serP(K) for public keys, 0x00 || ser256(k) for private keys)
             if (this.private) {
                 var  privkeyVal = bigInt256FromBigEndianBuffer( buffer.substring(46,78) )
-                this.privateKey = new ECDSA.PrivateKey( privkeyVal )
+                this.privateKey = new ECDSAPrivateKey( privkeyVal )
             }
             else {
                 var pubKeyBuf   =                               buffer.substring(45,78) 
