@@ -12,7 +12,7 @@
 
  
 //  signature header for extended pub key 
-const SignatureHeader = {
+var SignatureHeader = {
     PrivateKey_legacy   : 0x0488ADE4,  // ex :"xpriv..."
     PublicKey_legacy    : 0x0488B21E,
     PrivateKey_segwit   : 0x049d7878,  // ex :"ypriv..." 
@@ -21,7 +21,7 @@ const SignatureHeader = {
     PublicKey_sgNative  : 0x04b24746     
  }
  // known derivation path
- const DerivationPath = {
+ var DerivationPath = {
     MASTERKEY       : "m",
     LEGACY_BIP44    : "m/44'/0'/0'",
     SEWITG_BIP49    : "m/49'/0'/0'",
