@@ -26,10 +26,9 @@ function getRandomBigInt256() {
     return BigInt(bighex);
 }
 
-const DERHeader = {
-    HEAD_INT    : "\x02",
-    HEAD_STRUCT : "\x30"
-};
+const DERHeader_INT    = "\x02";
+const DERHeader_STRUCT = "\x30";
+
 
 // Main class
 // ecdsa with secp256k1 parameters
@@ -258,7 +257,7 @@ bufferFromSignature( signature ) {
         if ( buffer.charAt(0) > 0x7F )
             buffer ="\x00" + buffer
         var bufLen = String.fromCharCode( buffer.length )
-        var res = DERHeader.HEAD_INT + bufLen + buffer
+        var res = DERHeader_INT + bufLen + buffer
         return res
     }
 
@@ -266,7 +265,7 @@ bufferFromSignature( signature ) {
     var bufferRS = _DerEncodeBigInt( signature.r )
     bufferRS    += _DerEncodeBigInt( signature.s )   
     // encode struct R + S
-    return    DERHeader.HEAD_STRUCT                   
+    return    DERHeader_STRUCT                   
             + String.fromCharCode(bufferRS.length) // one byte to encode the length of the following data  
             + bufferRS
 }
@@ -284,7 +283,7 @@ signatureFromBuffer( bufferDER ) {
     // DER decoding for a big integer
     function _DerDecodeBigInt( buffer, pos ) {   
         // check header
-        if (buffer.substr(pos,1) != DERHeader.HEAD_INT ) 
+        if (buffer.substr(pos,1) != DERHeader_INT ) 
             throw {error:"invalid DER BigInt buffer",  pos:pos, buffer:hex(buffer) }
         var lenR = buffer.charCodeAt(pos+1)
         if (lenR!=0x20 && lenR!=0x21) 
@@ -303,7 +302,7 @@ signatureFromBuffer( bufferDER ) {
     }
     const DER_HEADER_STRUCT = "\x30"; // header byte indicating compound structure
     // check buffer
-    if (bufferDER.substr(0,1) != DERHeader.HEAD_STRUCT ) 
+    if (bufferDER.substr(0,1) != DERHeader_STRUCT ) 
         throw {error:"invalid DER buffer", pos:0, buffer:hex(bufferDER) }
     var len = bufferDER.charCodeAt(1)
     if (len<60)
