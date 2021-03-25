@@ -48,7 +48,7 @@ constructor( seed, walletType ) {
 /**
  *  get the master key
  * @public
- * @returns {HdWallet.ExtendedKey} the master key (private key)
+ * @returns {HdWalletExtendedKey} the master key (private key)
  */
 getMasterKey() {
     // avail in cache ?
@@ -61,7 +61,7 @@ getMasterKey() {
     var IR = hash512.substring(32,64) 
     // init the extended private key :  key, chainCode
     var key =  bigInt256FromBigEndianBuffer( IL )
-    var masterKey = new HdWallet.ExtendedKey();
+    var masterKey = new HdWalletExtendedKey();
     masterKey.initAsPrivate( key, IR, undefined, this.ecdsa, this.walletType  );
     masterKey.depth       = 0;
     masterKey.childNumber = 0;
@@ -73,7 +73,7 @@ getMasterKey() {
  *  get the extended private key for a derivation path
  * @public
  * @param   {string}  derivationPath the derivation path. ex: "m/0'/1"
- * @returns {HdWallet.ExtendedKey}   the extended private key 
+ * @returns {HdWalletExtendedKey}   the extended private key 
  * @throws  {struct} if <derivationPath> is invalid
  */
 getExtendedPrivateKeyFromPath( derivationPath ) {
@@ -91,7 +91,7 @@ getExtendedPrivateKeyFromPath( derivationPath ) {
  *  get a extended public key for a derivation path
  * @public
  * @param   {string}  derivationPath the derivation path. ex: "m/0'/1"
- * @returns {HdWallet.ExtendedKey}   the extended private key 
+ * @returns {HdWalletExtendedKey}   the extended private key 
  * @throws  {struct} if <derivationPath> is invalid
  */
 getExtendedPubliceKeyFromPath( derivationPath ) {
@@ -140,13 +140,13 @@ getPrivateKeyFromPath( derivationPath, index ) {
 /**
  * create a new extended key (public or private) from the base 58 string format
  * @param  {string} strBase58  ex "xprv9u5vS4oCRV5L6Jy7K1..."
- * @return {HdWallet.ExtendedKey} a public or private extended key
+ * @return {HdWalletExtendedKey} a public or private extended key
  * @throws {struct} if <derivationPath> is invalid
  */
 getExtendedKeyFromStringBase58( strBase58 )
 {
     // create a new key
-    var extendeKey = new HdWallet.ExtendedKey() 
+    var extendeKey = new HdWalletExtendedKey() 
     // init from string
     var res = extendeKey.initFromStringBase58(strBase58)
     return extendeKey;
@@ -155,9 +155,9 @@ getExtendedKeyFromStringBase58( strBase58 )
 /**
  *   internal Child key derivation (CKD) functions for rprivate keys
  * @protected
- * @param  {HdWallet.ExtendedKey} extendedKey parent key
+ * @param  {HdWalletExtendedKey} extendedKey parent key
  * @param  {integer} i key index (childNumber)
- * @return {HdWallet.ExtendedKey} child key
+ * @return {HdWalletExtendedKey} child key
  * @throws  {struct} if the operation is not possible
  */
 _ckdPrivatr( extendedKey, i ) {
@@ -201,7 +201,7 @@ _ckdPrivatr( extendedKey, i ) {
    var IR = hash512.substring(32, 64) 
    var childPrivateKey =  this.ecdsa.gField.add( IL, extendedKey.privateKey.value )
 
-   var res = new HdWallet.ExtendedKey()
+   var res = new HdWalletExtendedKey()
    res.initAsPrivate( childPrivateKey, IR, extendedKey, this.ecdsa, this.walletType );
    res.childNumber = i
    return res;
@@ -259,7 +259,7 @@ _ckdPrivatr( extendedKey, i ) {
  *  recursive internal function
  * @protected
  * @param   {string}  derivationPath  the derivation path. ex: "0'/1"
- * @returns {HdWallet.ExtendedKey}   the extended private key 
+ * @returns {HdWalletExtendedKey}   the extended private key 
  */
 _getPrivateKeyFromPathR( derivationPath ) {
     // if derivationPath is the master key
@@ -281,10 +281,12 @@ _getPrivateKeyFromPathR( derivationPath ) {
     console.assert(extChildKey.childNumber == index);
     return extChildKey;
 }
+}; // class HdWallet
 
 // ------ types -----
-    // represent a extended key for a HdWallet
-    static ExtendedKey = class { 
+
+// represent a extended key for a HdWallet
+class HdWalletExtendedKey  { 
         /**
          * basic constructeur. to be completed with a call to initAsPrivate() or initFromStringBase58()
          * @public
@@ -295,7 +297,7 @@ _getPrivateKeyFromPathR( derivationPath ) {
          *  init as a private key
          *  @param {bigInt} key        256 bits ecdsa private key
          *  @param {buffer} chainCode  256 bits chain code
-         *  @param {HdWallet.ExtendedKey} parentKey, optionnal (for mastker key only)
+         *  @param {HdWalletExtendedKey} parentKey, optionnal (for mastker key only)
          *  @param {ECDSA} ecdsa                     an instance of the ECDSA class to calculate keys. required.
          */
         initAsPrivate( key, chainCode, parentKey, ecdsa, walletType) {
@@ -341,7 +343,7 @@ _getPrivateKeyFromPathR( derivationPath ) {
         /**
          * returns the extended public key if we are a private key
          * @param  {ECDSA} ecdsa  an instance of the ECDSA class to calculate keys. 
-         * @return {HdWallet.ExtendedKey} the corresponding public extended key 
+         * @return {HdWalletExtendedKey} the corresponding public extended key 
         */
         getExtendedPublicKey(ecdsa) {
             console.assert( ecdsa, "ecdsa must be present" )
@@ -349,7 +351,7 @@ _getPrivateKeyFromPathR( derivationPath ) {
             // calculate  cdsa public key
             var publicKey  = ecdsa.publicKeyFromPrivateKey( this.privateKey )
             // create an extended key
-            var resKey = new HdWallet.ExtendedKey();
+            var resKey = new HdWalletExtendedKey();
             resKey.initAsPublicKey(  publicKey,  this.chainCode,  this.walletType );
             resKey.parentFingerprint = this.parentFingerprint 
             resKey.depth             = this.depth
@@ -483,4 +485,3 @@ _getPrivateKeyFromPathR( derivationPath ) {
     };// static ExtendedKey = class {
 
 
-}; // class HdWallet
