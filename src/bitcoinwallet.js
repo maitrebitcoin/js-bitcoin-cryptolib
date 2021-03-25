@@ -10,7 +10,7 @@
  */
 
 // supported  wallet types
-const WalletType = {
+var WalletType = {
     // hd wallet
     LEGACY :        "legacy-bip44", // ex : 1HQ9NyviEu5ZZPWz2nCV7NijzAUib9nV4K
     SEGWIT :        "segwit-bip49", // ex : 3EDd9HCf4jY63XJz61PYf1SM9gGzQ3eHjD
