@@ -143,7 +143,7 @@ getPrivateKeyFromPath( derivationPath, index ) {
  * @return {HdWallet.ExtendedKey} a public or private extended key
  * @throws {struct} if <derivationPath> is invalid
  */
-static getExtendedKeyFromStringBase58( strBase58 )
+getExtendedKeyFromStringBase58( strBase58 )
 {
     // create a new key
     var extendeKey = new HdWallet.ExtendedKey() 

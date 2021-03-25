@@ -498,7 +498,8 @@ function autotest_bip32( fonError ) {
     {
         var errFound;
         try {
-            var res=  HdWallet.getExtendedKeyFromStringBase58(string58)
+            var hdWalletTemp = new HdWallet()
+            var res=  hdWalletTemp.getExtendedKeyFromStringBase58(string58)
         } catch (err) {
             errFound = err;
         }
