@@ -1,4 +1,4 @@
-
+.test const struct on IOS
 .more samples 
   .last word from 12 / 24
   .recover account from menominc phrase
