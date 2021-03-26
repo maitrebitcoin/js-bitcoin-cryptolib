@@ -5,6 +5,7 @@
     --text2:              #3f2207;
     --BtnText:            #ffffff;
     --Background:         #f0f0f0;
+    --BtnBackground:      #76B3FA;
 
 } 
 /* style for public adress */
@@ -39,13 +40,18 @@
   font-size: 3.5vw;
 }
 button {
-    background: #76B3FA;
+    font-size: 3.5vw;
+    background: var(--BtnBackground);
     border-radius: 1.0vw;
     border-width: 0;
     color : var(--BtnText);
     outline: none;
+    padding-top:   1.0vw; 
+    padding-bottom:1.0vw; 
     padding-left:  3.0vw; 
     padding-right: 3.0vw;
+    margin: 0.2vw;
+    
 }
 button:hover {
     background: #98aec7;

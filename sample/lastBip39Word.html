@@ -1,54 +1,153 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title> 
-        Sample - get last mnemonic word
-    </title>    
+    <title>  Sample - get last mnemonic word </title>    
+    <link rel="stylesheet" href="style.css">
     <style>
-        textarea {
-            width: 300px;
-            height: 150px;
+        .secretInput {
+            font-family:monospace;            
+            font-size: 4vw;
+            width:     90%;
+            height:    19.5vw;         
+            margin:    0.2vw;
+        }
+        .lastword {
+            background:   #8be7bc;
+            color :       black;
         }
     </style>
 </head>
 <body>
     <p>Enter 11, 14, 17, 20 or 23 words :</p>
-    <br><textarea id="word"  ></textarea><br><br>
+    <br><textarea id="word" class="secretInput" ></textarea> 
+    <button onclick="GenerateRandomWords(11)"> genererate 11 at random </button>
+    <button onclick="GenerateRandomWords(23)"> genererate 23 at random </button>
+    <br><br>
 
-    <button onclick="GetWords()"> <h2> get valid words </h2> </button>
+    <button onclick="GetWords()"> get last valid word </button>
+   
     <hr>
     <p id="result" hidden=true>
     </p>
 
+    <!----------------------------- final account  -------------------------------->
+    <p id="secret" hidden=true>   
+    </p>    
+    <p id="public" hidden=true>
+        <span id="publicAdress"></span><br><br>
+        <button onclick="onCopy()">copy</button>    
+    </p>
     <!----------------------------- javscript code -------------------------------->
     
     <script src='../src/js-bitcoin-lib.js'></script> 
     <script>
-    
-    function GetWords(type) {
-    
-        //get words
-        var words  = document.getElementById("word").value 
-        // get possible words
-        var tabWord;
-        try {
-            var tabWord = getAllValidLastWord( words );
 
-        }
-        catch (err) {
-            document.getElementById("result").innerHTML = err.error;    
-            document.getElementById("result").hidden    = false                      
-            return;
-        }
-        var htmlWords = ""
-        tabWord.forEach( word => htmlWords+= word + "<br>\n" );
-        
-        // result OK
-        document.getElementById("result").innerHTML = htmlWords;
-        document.getElementById("result").hidden    = false                
+function GetWords() {
+
+    //get words
+    var words  = document.getElementById("word").value 
+    // get possible words
+    var tabWord;
+    try {
+        var tabWord = getAllValidLastWord( words );
+
     }
+    catch (err) {
+        document.getElementById("result").innerHTML = err.error;    
+        document.getElementById("result").hidden    = false                      
+        return;
+    }
+    var htmlWords = ""
+    const quote = "'"
+    tabWord.forEach( word => htmlWords+= `<button class="lastword" onclick="addWord(${quote}${word}${quote})"> ${word} </button>\n` );
+    
+    // result OK
+    document.getElementById("result").innerHTML = htmlWords;
+    document.getElementById("result").hidden    = false                
+}
+
+function addWord( lastword ) {
+    document.getElementById("result").hidden    = true  
+    //get words
+    var words  = document.getElementById("word").value 
+    // final phrease    
+    var phrase = words + " "  + lastword
+    createBtcAccountSegwit( phrase )
+
+}
+
+function GenerateRandomWords(nbWord) {
+    // get 11 random values
+    var randArray = new Uint32Array(nbWord);
+    window.crypto.getRandomValues(randArray);
+    // generate a phrase
+    var phrase=""
+    for (var i=0;i<nbWord;i++) { 
+        // force index into [0-2047] range
+        var index = randArray[i] % 2048;
+        // word a randomt. ex "abandon"
+        var wordI = getBip39WordFromIndice(index);
+        if (phrase!="") phrase += " "
+        phrase += wordI
+    }
+    // show result
+    document.getElementById("word").value = phrase
+    // last word no longer valid
+    document.getElementById("result").hidden    = true  
+}
+
+async function createBtcAccountSegwit(phrase) {
+
+    // create a new wallet 
+    var myWallet   = new BitcoinWallet(  WalletType.SEGWIT_NATIVE  );
+    // generate a random buffer
+    var randomBuffer = myWallet.getRandomBuffer(128)
+    // calc seed
+    var seed         = seedFromPhrase(phrase)
+    // use the seed a the base for all adresses calculations
+    myWallet.initFromSeed(seed)
+    // get the 1st public adress. 
+    var pubAdress0   =  myWallet.getPublicAddress(0)
+   
+
+    var prettyPhrase = "<table align='center'><tr>"
+    var tabWord = phrase.split(' ')
+    for (var i=0;i<tabWord.length;i++) {
+        var rc = (i>0 && i%2==0)  
+        if (rc) prettyPhrase += "</tr><tr>"          
+        prettyPhrase += "<td id='numword'>&nbsp" + (i+1)+ "&nbsp</td>"   
+        prettyPhrase += "<td>" + tabWord[i] + "</td>"
+        prettyPhrase += "<td>&nbsp&nbsp</td>"
+ 
+    }
+    prettyPhrase+='</tr></table>'
+
+    // show result
+    document.getElementById("publicAdress").innerHTML = pubAdress0 ; 
+    document.getElementById("public").hidden    = false   
+    document.getElementById("secret").innerHTML = prettyPhrase ;    
+    document.getElementById("secret").hidden    = false   
+
+    document.getElementById("publicAdress").scrollIntoView()
+}
+
+function onCopy() {
+    var publicAdress =  document.getElementById("publicAdress").innerHTML
+    // can we write into the clipboard ?
+    navigator.permissions.query({name: "clipboard-write"}).then(result => {
+        if (result.state == "granted" || result.state == "prompt") {
+            navigator.clipboard.writeText(publicAdress)
+            alert("public adress :\n\n" + publicAdress + "\n\nsucessfully copied to the clipboard"  )
+        }
+        else {
+            alert("acces to the clipboard denied\n"  + result.state  )
+        }
+    });
+
+
+}    
     
     </script>
     
-    </body>
-    </html>
+</body>
+</html>

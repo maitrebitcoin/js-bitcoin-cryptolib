@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<button onclick="onClicCreate()" id="btnCreate">  <h2> Create native segwit bitcoin account </h2> </button>
+<button onclick="onClicCreate()" id="btnCreate"> Create native segwit bitcoin account </button>
 <p><p>
 <hr>
 public address :
@@ -32,7 +32,7 @@ async function onClicCreate() {
     document.getElementById("btnCreate").hidden = false
 }
 
-async function createBtcAccountSegwit(type) {
+async function createBtcAccountSegwit() {
 
     // create a new wallet 
     var myWallet   = new BitcoinWallet(  WalletType.SEGWIT_NATIVE  );
