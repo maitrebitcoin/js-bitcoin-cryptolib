@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>  Sample - recorver account </title>    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <p>Enter 12, 15, 18, 21 or 24 words :</p>
+    <br><textarea id="word" class="secretInput" ></textarea> 
+    <button onclick="GenerateRandomWords()"> genererate 12 at random </button>
+    <br><br>
+
+    <button onclick="recoverAccount()"> Recover public adresses </button>
+
+    <!----------------------------- final account  -------------------------------->
+    <p id="public" hidden=true>
+        <span id="publicAdress"></span><br><br>
+        <button onclick="onCopy('publicAdress')">copy</button>    
+    </p>
+    <p id="error" hidden=true>
+        <span id="publicAdress"></span><br><br>
+    </p>    
+
+    <!----------------------------- javscript code -------------------------------->
+    
+<script src='../src/js-bitcoin-lib.js'></script> 
+<script>
+
+function GenerateRandomWords() {
+
+    // generate a random new wallet
+    var myWallet     = new BitcoinWallet(  WalletType.SEGWIT_NATIVE  );  
+    myWallet.initFromRandom(12)
+    // get the mnemonic phrase
+    var phrase       = myWallet.phrase  
+    document.getElementById("word").value  = phrase
+}
+
+async function recoverAccount() {
+
+    document.getElementById("public").hidden   = true   
+    document.getElementById("error").hidden    = true   
+
+    //get phrase
+    var phrase  = document.getElementById("word").value 
+    // calc seed
+    try {
+        var seed         = seedFromPhrase(phrase)
+    }
+    catch (_error) {
+        // error
+        document.getElementById("error").innerHTML = "<p>" + _error.error  + "</p>" ; 
+        document.getElementById("error").hidden    = false   
+        return;
+    }
+
+
+    // create a new wallet 
+    var myWallet   = new BitcoinWallet(  WalletType.SEGWIT_NATIVE  );
+    // use the seed a the base for all adresses calculations
+    myWallet.initFromSeed(seed)
+    // get the 1st public adress. 
+    var pubAdress0   =  myWallet.getPublicAddress(0)
+   
+
+    var prettyPhrase = "<table align='center'><tr>"
+    var tabWord = phrase.split(' ')
+    for (var i=0;i<tabWord.length;i++) {
+        var rc = (i>0 && i%2==0)  
+        if (rc) prettyPhrase += "</tr><tr>"          
+        prettyPhrase += "<td id='numword'>&nbsp" + (i+1)+ "&nbsp</td>"   
+        prettyPhrase += "<td>" + tabWord[i] + "</td>"
+        prettyPhrase += "<td>&nbsp&nbsp</td>"
+ 
+    }
+    prettyPhrase+='</tr></table>'
+
+    // show result
+    document.getElementById("publicAdress").innerHTML = pubAdress0 ; 
+    document.getElementById("public").hidden    = false   
+
+}
+
+function onCopy( elementId ) {
+    var data =  document.getElementById( elementId ).innerHTML
+    // can we write into the clipboard ?
+    navigator.permissions.query({name: "clipboard-write"}).then(result => {
+        if (result.state == "granted" || result.state == "prompt") {
+            navigator.clipboard.writeText(data)
+            alert("public adress :\n\n" + data + "\n\nsucessfully copied to the clipboard"  )
+        }
+        else {
+            alert("acces to the clipboard denied\n"  + result.state  )
+        }
+    });
+
+}    
+    
+</script>
+   
+</body>
+</html>

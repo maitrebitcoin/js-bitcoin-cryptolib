@@ -1,5 +1,8 @@
+.error as Error class
+.samples : common JS in separate files
+.samplee : debug Copy in IOS
 .more samples 
-  .recover account from menominc phrase
+  .recover account from menominc phrase : more adresses
   .adresses from extPub or extPriv key
 .check all comments format
 .generate a doc

@@ -50,7 +50,7 @@ function checkPhrase( mnemonicPhrase, ignoreCrc  )
         case 21: nbBitCrc=7;console.assert(nbBitDataAndCrc-nbBitCrc == 224); break;        
         case 24: nbBitCrc=8;console.assert(nbBitDataAndCrc-nbBitCrc == 256); break;  
         default:
-            throw {error:"Invalid number of words.", nbWord:nbWord }
+            throw {error:"Invalid number of words.\n Valid values are 12,15,18,21 or 24 words", nbWord:nbWord }
     }
     var nbBitData = nbBitDataAndCrc-nbBitCrc;
     var nbByteData = nbBitData/8;
@@ -58,18 +58,19 @@ function checkPhrase( mnemonicPhrase, ignoreCrc  )
     tabIndex = []
     var numWord = 0;
     tabWord.forEach( word => {
+       
         // thow an error if the index
         var index = 0;
         try {
-            index = _getBip39IndiceFromWord( word )
+          index = _getBip39IndiceFromWord( word )
         }
         catch (err) {
-            err.error   = 'Invalid word n°${index} : <$word>.' 
+            err.error   = `Invalid word ${numWord+1} : ${word}.` 
             err.numWord = index
             throw err;
         }
         tabIndex.push( index );
-        numWord++;
+        numWord++; 
     })
     // convert to buffer
     var buffer=""
@@ -89,7 +90,7 @@ function checkPhrase( mnemonicPhrase, ignoreCrc  )
     if (crcCalc!=crcData) {
         if (ignoreCrc)
             return false;
-        throw {error:"Invalid crc.", crcCalc:crcCalc, crcData:crcData }
+        throw {error:"Invalid phrase : some words are incorrect or misplaced.", crcCalc:crcCalc, crcData:crcData }
     }
 
     // Check OK

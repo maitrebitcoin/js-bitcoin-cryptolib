@@ -34,6 +34,11 @@
   margin-left: 3vw;
   margin-right: 3vw;
 }        
+#error {
+  font-family:monospace;  
+  font-size: 3.5vw;   
+  color : red;
+}
 #numword {
   color:#383737;     
   text-align: center;
@@ -62,3 +67,15 @@ button:active {
 
 }            
 body { background-color: var(--Background); }
+
+.secretInput {
+  font-family:monospace;            
+  font-size: 4vw;
+  width:     90%;
+  height:    19.5vw;         
+  margin:    0.2vw;
+}
+.lastword {
+  background:   #8be7bc;
+  color :       black;
+}

@@ -100,8 +100,6 @@ async function createBtcAccountSegwit(phrase) {
 
     // create a new wallet 
     var myWallet   = new BitcoinWallet(  WalletType.SEGWIT_NATIVE  );
-    // generate a random buffer
-    var randomBuffer = myWallet.getRandomBuffer(128)
     // calc seed
     var seed         = seedFromPhrase(phrase)
     // use the seed a the base for all adresses calculations
