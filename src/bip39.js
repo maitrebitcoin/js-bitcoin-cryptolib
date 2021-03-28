@@ -33,7 +33,7 @@ function seedFromPhrase(  mnemonicPhrase,  password ) {
  * @param {string} mnemonicPhrase  UTF-8 NFKD phrase. ex : "pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
  * @param {boolean} ignoreCrc  if true, the fuction does not raise execption on crc errors
  * @return {boolean} true if <mnemonicPhrase> is valid. false if crc test fails and <ignoreCrc> is true
- * @throws {struct} if <mnemonicPhrase> is invalid
+ * @throws {Error} if <mnemonicPhrase> is invalid
  */
 function checkPhrase( mnemonicPhrase, ignoreCrc  )
 {
@@ -50,7 +50,7 @@ function checkPhrase( mnemonicPhrase, ignoreCrc  )
         case 21: nbBitCrc=7;console.assert(nbBitDataAndCrc-nbBitCrc == 224); break;        
         case 24: nbBitCrc=8;console.assert(nbBitDataAndCrc-nbBitCrc == 256); break;  
         default:
-            throw {error:"Invalid number of words.\n Valid values are 12,15,18,21 or 24 words", nbWord:nbWord }
+            throw _BuildError( LibErrors.Invalid_mnemonic_phrase_size, { mnemonicPhrase:mnemonicPhrase, nbWord:nbWord} ) 
     }
     var nbBitData = nbBitDataAndCrc-nbBitCrc;
     var nbByteData = nbBitData/8;
@@ -65,7 +65,8 @@ function checkPhrase( mnemonicPhrase, ignoreCrc  )
           index = _getBip39IndiceFromWord( word )
         }
         catch (err) {
-            err.error   = `Invalid word ${numWord+1} : ${word}.` 
+            // improve error message
+            err.message = `Invalid word ${numWord+1} : ${word}.` 
             err.numWord = index
             throw err;
         }
@@ -90,7 +91,7 @@ function checkPhrase( mnemonicPhrase, ignoreCrc  )
     if (crcCalc!=crcData) {
         if (ignoreCrc)
             return false;
-        throw {error:"Invalid phrase : some words are incorrect or misplaced.", crcCalc:crcCalc, crcData:crcData }
+        throw _BuildError( LibErrors.Invalid_mnemonic_phrase_size, {crcCalc:crcCalc, crcData:crcData })
     }
 
     // Check OK
@@ -115,8 +116,7 @@ function checkPhrase( mnemonicPhrase, ignoreCrc  )
 /**
  * get a list of all valid words to end a bip39 compatible phrase.
  * @param {string} incompletePhrase  phrase minus 1 word. ex : "pistol thunder want public animal educate laundry all churn federal slab behind media front"
- * @return {array of string} all valid  word. ex : 
- * @throws {struct} if <randomBffer> is invalid
+ * @return {array of string} all valid  word.
  */
 function getAllValidLastWord( incompletePhrase ) {
     // test if the beginning is correct
@@ -140,7 +140,7 @@ function getAllValidLastWord( incompletePhrase ) {
  * convert a random buffer into a bip39 compatible phrase.
  * @param {string} randomBffer 128, 160,192,224 or 256 byte buffer
  * @return {string} mnemonic phrase. ex : "pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
- * @throws {struct} if <randomBffer> is invalid
+ * @throws {Error} if <randomBffer> is invalid
  */
 function bip39phraseFromRandomBuffer( randomBffer ) {
     var nbBit = randomBffer.length*8
@@ -155,7 +155,7 @@ function bip39phraseFromRandomBuffer( randomBffer ) {
         case 224:    nbBit += 7;break;
         case 256:    nbBit += 8;break;
         default: {
-             throw {error:"invalid buffer size",size:nbBit}
+             throw _BuildError( LibErrors.Invalid_buffer_size,  {size:nbBit})
         }
     }
     // padding
@@ -295,7 +295,7 @@ function getBip39WordFromIndice( index ) {
  * get a word index from its value 
  * @param {string} word an english word. ex : "reward"
  * @return {int} index. start at 0
- * @throws {struct} if <word> is invalid
+ * @throws {Error} if <word> is invalid
  */
 var wordToInt=[]; // global hash table
 function _getBip39IndiceFromWord( word ) {
@@ -307,7 +307,7 @@ function _getBip39IndiceFromWord( word ) {
     // get index
     var index = wordToInt[word];
     if (index === undefined)  {
-        throw {error:"invalid word",word:word };
+         throw _BuildError( LibErrors.Invalid_mnemonic_phrase_size, { word:word } );
     }
     return index;
 }

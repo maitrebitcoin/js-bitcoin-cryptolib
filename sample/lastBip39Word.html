@@ -53,7 +53,7 @@ function GetWords() {
 
     }
     catch (err) {
-        document.getElementById("result").innerHTML = err.error;    
+        document.getElementById("result").innerHTML = err.message;    
         document.getElementById("result").hidden    = false                      
         return;
     }

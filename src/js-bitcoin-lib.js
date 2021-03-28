@@ -26,6 +26,7 @@ function include_js( jsfile ) {
 }
 
 // include all needeed js files in the lib
+include_js('errors.js');
 include_js('gfield.js');
 include_js('ellipticurve.js');
 include_js('ecdsa.js');

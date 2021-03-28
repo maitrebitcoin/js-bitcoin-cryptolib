@@ -121,7 +121,7 @@ const PREFIX_PRIVATEKEY =     "\x80"  //  ex : 5Hwgr3u458GLafKBgxtssHSPqJnYoGrSz
  *
  * @param   {string} base58encoded ex : "xprv9s21ZrQH143K.."
  * @returns {string}               ex : "0488ade4000000000000000000fe0abe524e..."
- * @throws  {struct} if <base58encoded> is invalid
+ * @throws  {Error} if <base58encoded> is invalid
  */
 function base58Decode( base58encoded ) {
     if (base58encoded=="") return "";
@@ -138,7 +138,7 @@ function base58Decode( base58encoded ) {
         var n = sBASE58_CHARSET.indexOf(cI);
         // error if invalid char
         if (n==-1) {
-            throw { error:"invalid base 58 char ", char:cI, pos:n};
+            throw _BuildError(LibErrors.Invalid_base58_char, { char:cI, pos:n, str:base58encoded})
         }
         // calc résult
         numBuf  = numBuf * _58 + BigInt(n)
@@ -158,7 +158,7 @@ function base58Decode( base58encoded ) {
  *
  * @param   {string} base58encoded   ex : "xprv9s21ZrQH143K.."
  * @returns {string} decoded buffer. ex : "0488ade4000000000000000000fe0abe524e..."
- * @throws  {struct} if <base58encoded> is invalid
+ * @throws  {Error} if <base58encoded> is invalid
  */
 function base58CheckDecode(base58encoded) {
     // decode to raw buffer
@@ -166,14 +166,14 @@ function base58CheckDecode(base58encoded) {
     // check buffer validity
     var nLen = bufferAndCrc.length
     if (nLen<=3)
-        throw { error:"bad legnth, must be greater than 3", legnth:nLen, source:base58encoded }
+        throw _BuildError( LibErrors.Invalid_base58_length, {legnth:nLen, source:base58encoded })
     var buffer = bufferAndCrc.substring(0,nLen-4)
     // get crc
     var crc = bufferAndCrc.substring(nLen-4,nLen)
     // calculate crc
     var calcCrc    = sha256(sha256( buffer )).substr(0,4)
     if (calcCrc != crc) 
-        throw { error:"bad crc", calculatedCrc:hex(crc), expectedCrc:hex(calcCrc) } 
+        throw _BuildError( LibErrors.Invalid_base58_crc, {  calculatedCrc:hex(crc), expectedCrc:hex(calcCrc) })
     // sucess
     return buffer
 }
@@ -237,7 +237,7 @@ const BECH32_CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
  * @returns {struct.prefix}  prefix wihtout the "1" separator. ex : "bc"
  * @returns {struct.version} version version number. from 0 to 31
  * @returns {struct.buffer}  data
- * @throws  {struct.error} if <bench32string> is invalid
+ * @throws  {Error} if <bench32string> is invalid
  * 
  * reference :
  * @see https://en.bitcoin.it/wiki/BIP_0173
@@ -247,7 +247,7 @@ function bech32Decode( bench32string  ) {
     // extract prefix
     var posSeparator = bench32string.search('1')
     if (posSeparator<=0) 
-        throw {error:"Invalid bench32 string : separator not found", string:bench32string}
+        throw _BuildError( LibErrors.Invalid_bech32_separator, {string:bench32string})
     // "bc1qw508d6.." => "bc"
     result.prefix = bench32string.substr(0,posSeparator)
     // "bc1qw508d6.." => "w508d6.."
@@ -257,12 +257,12 @@ function bech32Decode( bench32string  ) {
     for (const charI of bech32data)  { 
         var valueI = BECH32_CHARSET.search(charI);
         if (valueI==-1)
-            throw {error:"Invalid bench32 string : bad char", char:charI}
+            throw  _BuildError( LibErrors.Invalid_bech32_char, {char:charI,string:bench32string})
         tab5BitValues.push( valueI )
     } 
     // must hase at least 6 elements : +1 version, +6 checksum
     if (tab5BitValues.length<7)
-        throw {error:"Invalid bench32 string : no enougth data", string:bench32string}
+        throw _BuildError( LibErrors.Invalid_bech32_len, {string:bench32string})
     // the 1st int is the version number
     result.version = tab5BitValues[0];
     // calc checksum = array if 6 * 5bits integers
@@ -272,7 +272,7 @@ function bech32Decode( bench32string  ) {
     // check 
     for (var i=0;i<6;i++) {
         if (tabChecksum[i] != tabCalcChecksum[i])
-            throw {error:"Invalid bench32 string : bad checksum", string:bench32string}
+            throw _BuildError( LibErrors.Invalid_bech32_crc, {string:bench32string})
     }
     // calc data
     var resBuffer=""

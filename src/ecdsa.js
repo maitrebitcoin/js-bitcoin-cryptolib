@@ -87,7 +87,7 @@ privateKeyFromBuffer( buffer ) {
  *  import a private key from base58 encoded string (WIF)
  * @param   {string} stringBase58  string in WIF format. ex "5HueCGU8rMjxEXxiPuD5BDk...""
  * @returns {ECDSAPrivateKey} the imported private key
- * @throws {struct} if <stringBase58> is invalid
+ * @throws {Error} if <stringBase58> is invalid
  */
 privateKeyFromStringBase58( stringBase58 ) {
     console.assert( typeof stringBase58 == 'string' ) 
@@ -96,11 +96,11 @@ privateKeyFromStringBase58( stringBase58 ) {
     var buf = base58CheckDecode(stringBase58);
     // check buffer vality
     if (buf.length!=34)
-        throw {error:"invalid key length. should be 34", length:buf.length }
+        throw _BuildError( LibErrors.Invalid_privkey_len, {length:buf.length, buffer:hex(buffer) })
     if (buf[0] != PREFIX_PRIVATEKEY)
-        throw {error:"invalid key header. should be 05", header:hex(buf[0]) }    
+        throw  _BuildError( LibErrors.Invalid_privkey_header,{header:hex(buf[0]) })    
     if (buf[33] != '\x01')
-        throw {error:"invalid key format. la byte should be 01", lastbyte:hex(buf[33]) }    
+        throw BuildError( LibErrors.Invalid_privkey_format, {lastbyte:hex(buf[33])})  
     // convert to bigint
     var bufferBigInt = buf.substr(1,32)
     var number = bigInt256FromBigEndianBuffer( bufferBigInt )
@@ -122,16 +122,16 @@ publicKeyFromPrivateKey( privateKey ) {
  * get the public key from a serialised bufffer. 
  * @param  {string} buffer 33 bytes buffer. ex : "0200359924c406998e91d4063fe078c32825e6ac4dce0395666ed54315afa3312d"
  * @returns {ECDSAPublicKey}
- * @throws {struct} if <buffer> is invalid
+ * @throws {Error} if <buffer> is invalid
  */
 publicKeyFromBuffer( buffer ) {
     if ( buffer.length != 33) {
-        throw {error:"buffer must be 33 bytes long.", buffer:hex(buffer) }
+        throw _BuildError( LibErrors.Invalid_pubkey_format,  {length:buf.length, buffer:hex(buffer) })
     }
     // the 1st byte si 0X02 or 0x03 depending of the parity of y
     // 0x02 for even / x03 for odd 
     if ( buffer[0] != '\x02' && buffer[0] != '\x03'  ) {
-        throw {error:"invalid buffer must start with 02 or 03.", buffer:hex(buffer) }
+        throw _BuildError( LibErrors.Invalid_pubkey_header, {buffer:hex(buffer) })
     }    
     var yIsEven = buffer[0] == '\x02'
     // get the x part
@@ -239,14 +239,14 @@ signMessage( message, privateKey, option ) {
 
 /**
  * convert a signature to a DER encoded buffer
- * @param {ECDSA.Signature} signature 
+ * @param {ECDSASignature} signature 
  * @return {string} DER encoded buffer. ex  :"3042021E...."
- * @throws {struct} if <signature> is invalid
+ * @throws {Error} if <signature> is invalid
  * @see https://bitcoin.stackexchange.com/questions/92680/what-are-the-der-signature-and-sec-format#:~:text=The%20Distinguished%20Encoding%20Rules%20(DER,numbers%20(r%2Cs)%20.
  */
 bufferFromSignature( signature ) {
-    if (!signature.r) throw {error:"invalid signature : r is missing"}
-    if (!signature.s) throw {error:"invalid signature : s is missing"}
+    if (!signature.r) throw _BuildError( LibErrors.Invalid_parameter_type, "r is missing" )
+    if (!signature.s) throw _BuildError( LibErrors.Invalid_parameter_type, "s is missing" )
 
     // DER encoding for a big integer
     function _DerEncodeBigInt( val ) {
@@ -274,7 +274,7 @@ bufferFromSignature( signature ) {
  * get the signature from a serialised bufffer. 
  * @param {string} buffer 
  * @return {ECDSASignature} 
- * @throws {struct} if <buffer> is invalid
+ * @throws {Error} if <buffer> is invalid
  * @TODO -- buffer in DER format :
  * @see https://bitcoin.stackexchange.com/questions/92680/what-are-the-der-signature-and-sec-format#:~:text=The%20Distinguished%20Encoding%20Rules%20(DER,numbers%20(r%2Cs)%20.
  */
@@ -284,16 +284,16 @@ signatureFromBuffer( bufferDER ) {
     function _DerDecodeBigInt( buffer, pos ) {   
         // check header
         if (buffer.substr(pos,1) != DERHeader_INT ) 
-            throw {error:"invalid DER BigInt buffer",  pos:pos, buffer:hex(buffer) }
+            throw _BuildError( LibErrors.Invalid_signature_buffer,  {detail:"DER header 1",  pos:pos, buffer:hex(buffer) })
         var lenR = buffer.charCodeAt(pos+1)
         if (lenR!=0x20 && lenR!=0x21) 
-            throw {error:"invalid DER buffer",  pos:1, buffer:hex(buffer) }
+            throw _BuildError( LibErrors.Invalid_signature_buffer,  {detail:"DER header 2",  pos:pos+1, buffer:hex(buffer) })
         var lenR = buffer.charCodeAt(pos+2)
         if (lenR==0x21) {
             // skip "00"
             pos++
             if (buffer.charCodeAt(pos+3) != 0 ) 
-                 throw {error:"invalid DER BigInt buffer. 0 expected",  pos:3, buffer:hex(buffer)}
+                 throw _BuildError( LibErrors.Invalid_signature_buffer,  {detail:"DER header. 0 expected",  pos:3, buffer:hex(buffer)})
         }
         var buffer256Bits = buffer.substr(pos+2)        
         // decode 256 bits
@@ -303,10 +303,10 @@ signatureFromBuffer( bufferDER ) {
     const DER_HEADER_STRUCT = "\x30"; // header byte indicating compound structure
     // check buffer
     if (bufferDER.substr(0,1) != DERHeader_STRUCT ) 
-        throw {error:"invalid DER buffer", pos:0, buffer:hex(bufferDER) }
+        throw  _BuildError( LibErrors.Invalid_signature_buffer, {detail:"DER header not struct", pos:0, buffer:hex(bufferDER) })
     var len = bufferDER.charCodeAt(1)
     if (len<60)
-        throw {error:"invalid DER buffer", pos:1, buffer:hex(bufferDER) }
+        throw  _BuildError( LibErrors.Invalid_signature_buffer, {detail:"DER buffer too small", pos:1, buffer:hex(bufferDER) })
     // decode R and S
     var decodeR = _DerDecodeBigInt( bufferDER, 2 )
     var decodeS = _DerDecodeBigInt( bufferDER, decodeR.newpos )

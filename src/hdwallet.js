@@ -74,7 +74,7 @@ getMasterKey() {
  * @public
  * @param   {string}  derivationPath the derivation path. ex: "m/0'/1"
  * @returns {HdWalletExtendedKey}   the extended private key 
- * @throws  {struct} if <derivationPath> is invalid
+ * @throws  {Error} if <derivationPath> is invalid
  */
 getExtendedPrivateKeyFromPath( derivationPath ) {
     // available in cache ?
@@ -92,7 +92,7 @@ getExtendedPrivateKeyFromPath( derivationPath ) {
  * @public
  * @param   {string}  derivationPath the derivation path. ex: "m/0'/1"
  * @returns {HdWalletExtendedKey}   the extended private key 
- * @throws  {struct} if <derivationPath> is invalid
+ * @throws  {Error} if <derivationPath> is invalid
  */
 getExtendedPubliceKeyFromPath( derivationPath ) {
     // avail in cache ?
@@ -112,7 +112,7 @@ getExtendedPubliceKeyFromPath( derivationPath ) {
  * @param   {string}  derivationPath the derivation path. ex: "m/44'/0'/0'/0"
  * @param   {int}     index          index of the child key. 0 is the first accout
  * @returns {ECDSA.PublicLKey} the extended private key 
- * @throws  {struct} if <derivationPath> is invalid
+ * @throws  {Error} if <derivationPath> is invalid
  */
 getPublicKeyFromPath( derivationPath, index ) {
     // get the extendede public key
@@ -127,7 +127,7 @@ getPublicKeyFromPath( derivationPath, index ) {
  * @param   {string}  derivationPath the derivation path. ex: "m/44'/0'/0'/0"
  * @param   {int}     index          index of the child key. 0 is the first accout
  * @returns {ECDSA.PublicLKey} the extended private key 
- * @throws  {struct}           if <derivationPath> is invalid
+ * @throws  {Error}           if <derivationPath> is invalid
  */
 getPrivateKeyFromPath( derivationPath, index ) {
     // get the extendede public key
@@ -141,7 +141,7 @@ getPrivateKeyFromPath( derivationPath, index ) {
  * create a new extended key (public or private) from the base 58 string format
  * @param  {string} strBase58  ex "xprv9u5vS4oCRV5L6Jy7K1..."
  * @return {HdWalletExtendedKey} a public or private extended key
- * @throws {struct} if <derivationPath> is invalid
+ * @throws {Error} if <derivationPath> is invalid
  */
 getExtendedKeyFromStringBase58( strBase58 )
 {
@@ -158,7 +158,7 @@ getExtendedKeyFromStringBase58( strBase58 )
  * @param  {HdWalletExtendedKey} extendedKey parent key
  * @param  {integer} i key index (childNumber)
  * @return {HdWalletExtendedKey} child key
- * @throws  {struct} if the operation is not possible
+ * @throws {Error} if the operation is not possible
  */
 _ckdPrivatr( extendedKey, i ) {
     console.assert( extendedKey.isExtendedKey() )
@@ -169,7 +169,7 @@ _ckdPrivatr( extendedKey, i ) {
     if (bHardenedKey) {
        // the extended key mut be a private key
        if (!extendedKey.isPrivateKey()) {
-           throw {error:"hardened derivation of a public key is not possible."}
+           throw _BuildError(LibErrors.Impossible_pubkey_derivation )
        }
        var key = extendedKey.privateKey.value
        // hardened child
@@ -212,12 +212,12 @@ _ckdPrivatr( extendedKey, i ) {
  * @protected
  * @param   {string}  derivationPath  the derivation path. ex: "0'/1/2"
  * @returns {struct}  ex : { leftPath='0'/1',index:2,hardened:false  }
- * @throws  {struct} if <derivationPath> is invalid
+ * @throws  {Error} if <derivationPath> is invalid
  */
  _parseDerivationPath( derivationPath ) {
     // must start with "m/"
     if (derivationPath.substr(0,2) != "m/") {
-        throw {error:"invalid derivation path format. must start with 'm/'",derivationPath:derivationPath};
+        throw _BuildError( LibErrors.Invalid_derivation_path, {detail :"must start with 'm/'", derivationPath:derivationPath})
     }        
     // ex : "0'/1/2"  => "0'/1/" and "1"
     var nPos = derivationPath.lastIndexOf("/")
@@ -240,13 +240,13 @@ _ckdPrivatr( extendedKey, i ) {
 
     // test for invalid format
     if (index<=0 && rightPath!='0') {
-        throw {error:"invalid derivation path format.", derivationPath:derivationPath }
+        throw _BuildError( LibErrors.Invalid_derivation_path, {detail :"index < 0", derivationPath:derivationPath })
     }
     if (rightPath=="") {
-        throw {error:"invalid derivation path format.", derivationPath:derivationPath }
+        throw _BuildError( LibErrors.Invalid_derivation_path, {detail :"rightPath is empty",derivationPath:derivationPath })
     }    
     if (leftPath=="") {
-        throw {error:"invalid derivation path format.", derivationPath:derivationPath }
+        throw _BuildError( LibErrors.Invalid_derivation_path, {detail :"leftPath is empty", derivationPath:derivationPath })
     }        
     // success
     return { leftPath:leftPath,
@@ -402,16 +402,16 @@ class HdWalletExtendedKey  {
         }
         /** 
         * init from a base58 encoding
-        * @param   {sting} str58 a base58 endoded string 
-        * @throws  {struct} if <str58> is invalid
+        * @param   {string} str58 a base58 endoded string 
+        * @throws  {Error} if <str58> is invalid
         */
         initFromStringBase58( str58 ) {
-            // decocode string to buffer. throw execption if <str58> is invalid
+            // decode string to buffer. throw Error if <str58> is invalid
             var buffer =  base58CheckDecode(str58)
-            // must be 78 bytes
+            // check decoded buffer length
             if (buffer.length!=78) 
-                throw {error:"invalid buffer length, must be 78", length:buffer.length }; // failed
-            // 4 byte: version bytes
+                throw _BuildError( LibErrors.Invalid_extkey_buffer_len,  {length:buffer.length }); // failed
+            // get 1st 4 byte => version bytes
             var version    = int32FromBigEndianBuffer( buffer.substring(0,4) )
             switch (version) {
                 case SignatureHeader.PrivateKey_legacy:
@@ -439,7 +439,7 @@ class HdWalletExtendedKey  {
                     this.walletType  =  WalletType.SEGWIT_NATIVE 
                     break;                                
                 default:
-                    throw  {error:"unknown version header", version:hex(version) }; 
+                    throw _BuildError( LibErrors.Invalid_extkey_buffer_header, { version:hex(version) }) 
             }
             console.assert( this._getVersionHeader() == version )
             // 1 byte: depth: 

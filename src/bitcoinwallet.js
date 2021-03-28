@@ -76,11 +76,11 @@ initFromSeed(seed ) {
  *  get the extend master key as a string
  * @public
  * @returns {string} the master key. ex "xprv9s21ZrQH143K2H2..."
- * @throws  {struct} if the wallet is non initialised
+ * @throws  {Error} if the wallet is non initialised
  */
 getMasterKey() {
     if (!this.HdWallet) 
-        throw {error:"wallet not initalized."}
+        throw _BuildError( LibErrors.Wallet_not_initialized )
     return this.HdWallet.getMasterKey().toStringBase58()
 }
 /**
@@ -89,11 +89,11 @@ getMasterKey() {
  * @param   {int}    [index=0]      index of the child key. 0 is the first accout
  * @param   {bool}   [change=false] is the adress for change ?
  * @returns {string} the bitcoin address. ex : "bc1qn085dr40dcrhejgve4sky.." 
- * @throws  {struct} if the wallet is non initialised, or invalid
+ * @throws  {Error} if the wallet is non initialised, or invalid
  */
 getPublicAddress( index, change ) {
     if (!this.HdWallet) 
-        throw {error:"wallet not initalized."}    
+        throw _BuildError( LibErrors.Wallet_not_initialized )
     // calculates derivation path
     var derivationPath = this.mainDerivationPath 
     // change or main receveiving ?
@@ -111,7 +111,7 @@ getPublicAddress( index, change ) {
         case WalletType.SEGWIT        : return this.getSegwitPublicAdressFromPath(      derivationPath)
         case WalletType.LEGACY        : return this.getLegacyPublicAdressFromPath(      derivationPath)              
         default:            
-            throw {error:"invalid wallet type",walletType:walletType}     
+            throw _BuildError( LibErrors.Invalid_wallet_type, {walletType:walletType})
     }
 }
 
@@ -121,7 +121,7 @@ getPublicAddress( index, change ) {
  * @public
  * @param   {string}  derivationPath the derivation path. ex: "m/84'/0'/0'/0/0"
  * @returns {string}  bech 32 address. ex : "bc1qn085dr40dcrhejgve4sky.."      
-  * @throws  {struct} if <derivationPath> is invalid
+  * @throws  {Error} if <derivationPath> is invalid
  * @see https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki
  */
 getSegwitNativePublicAdressFromPath( derivationPath ) {
@@ -143,7 +143,7 @@ getSegwitNativePublicAdressFromPath( derivationPath ) {
  * @public
  * @param  {string}  derivationPath the derivation path. ex: "m/49'/0'/0'/0/0"
  * @returns {string} address. ex : "3EktnHQD7RiAE6uzMj2ZifT9YgRrkSgzQX"      
- * @throws  {struct} if <derivationPath> is invalid
+ * @throws  {Error} if <derivationPath> is invalid
  */
 getSegwitPublicAdressFromPath( derivationPath ) {
     // get the extended public key
@@ -167,7 +167,7 @@ getSegwitPublicAdressFromPath( derivationPath ) {
  * @public
  * @param   {string}  derivationPath the derivation path. ex: "m/44'/0'/0'/0/0"
  * @returns {stringy} P2PKH address = legacy format. ex : "1E3B4m6BSw7v2A7TiA2YxDTXBZjFEpBmPN"    
- * @throws  {struct}  if <derivationPath> is invalid  
+ * @throws  {Error}  if <derivationPath> is invalid  
  */
 getLegacyPublicAdressFromPath( derivationPath, index ) {
     // get the extended public key
@@ -206,7 +206,7 @@ getRandomBuffer( nbBit ) {
         case WalletType.SEGWIT:        return DerivationPath.SEWITG_BIP49    
         case WalletType.SEGWIT_NATIVE: return DerivationPath.SW_NATIVE_BIP84      
         default:
-            throw {error:"invalid wallet type",walletType:walletType}         
+            throw _BuildError( LibErrors.Invalid_wallet_type, {walletType:walletType})
     }
 }
 

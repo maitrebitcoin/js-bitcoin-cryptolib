@@ -50,7 +50,7 @@ async function recoverAccount() {
     }
     catch (_error) {
         // error
-        document.getElementById("error").innerHTML = "<p>" + _error.error  + "</p>" ; 
+        document.getElementById("error").innerHTML = "<p>" + _error.message  + "</p>" ; 
         document.getElementById("error").hidden    = false   
         return;
     }

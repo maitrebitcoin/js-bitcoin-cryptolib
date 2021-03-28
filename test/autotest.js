@@ -469,7 +469,7 @@ function autotest_bip32( fonError ) {
         try {
            res   = bip32.getExtendedPrivateKeyFromPath(deivationPath)
         } catch( err ) {
-            FAILED( fonError, seedHex, res58, expected, deivationPath + '\n' +res.error )
+            FAILED( fonError, seedHex, res58, expected, deivationPath + '\n' + err.message )
         }
         var res58 = res.toStringBase58()
         // is it the expected result ?
@@ -481,7 +481,7 @@ function autotest_bip32( fonError ) {
         if (!expectedPub) return; // OK
         try { res   = bip32.getExtendedPubliceKeyFromPath(deivationPath) }
         catch( err ) {
-             FAILED( fonError, seedHex, res58, expected, deivationPath + '\n' +err.error )
+             FAILED( fonError, seedHex, res58, expected, deivationPath + '\n' + err.message )
         }
         var res58pub = res.toStringBase58()
         // is it the expected result ?
@@ -493,12 +493,13 @@ function autotest_bip32( fonError ) {
         // OK
     }    
 
-    // check tha the value raise an error
+    // check that the value <string58> raise an error
     function _test_error( string58  ) 
     {
         var errFound;
         try {
-            var hdWalletTemp = new HdWallet()
+            var seed  = bufferFromHex("00".repeat(32))
+            var hdWalletTemp = new HdWallet(seed,  WalletType.SEGWIT_NATIVE)
             var res=  hdWalletTemp.getExtendedKeyFromStringBase58(string58)
         } catch (err) {
             errFound = err;
@@ -506,6 +507,9 @@ function autotest_bip32( fonError ) {
        if (!errFound) {
             FAILED( fonError, string58, res, "ERROR expected" )
        }
+       if (!errFound.id) {
+            FAILED( fonError, string58, res, "BAD ERROR : " + errFound .message )
+        }       
 
     }
     var phrase ="pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
