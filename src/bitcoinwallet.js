@@ -33,10 +33,24 @@ constructor(  walletType ) {
 /** 
  *  create a new wallet from the system random generator ( window.crypto.getRandomValues )
  * @public
+ * @param {number}     nbWord     number of words. 12 to 24.
  */
-initFromRandom() {
+initFromRandom(nbWord) {
+    // calculate the number of bits form the number of words
+    if (!nbWord) nbWord= 12;
+    var nbBitEntropy = 128;
+    switch (nbWord) {
+        case 12: nbBitEntropy = 128; break;
+        case 15: nbBitEntropy = 160; break;
+        case 18: nbBitEntropy = 192; break;
+        case 21: nbBitEntropy = 224; break;        
+        case 24: nbBitEntropy = 256; break;  
+        default:
+            throw {error:"Invalid number of words.\n Valid values are 12,15,18,21 or 24 words", nbWord:nbWord }
+    }
+
     // generate a random buffer
-    var randomBuffer = this.getRandomBuffer(128)
+    var randomBuffer = this.getRandomBuffer(nbBitEntropy)
     // calculate the mnemonic phrase from this buffer
     // ex : "pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
     this.phrase      = bip39phraseFromRandomBuffer(randomBuffer)

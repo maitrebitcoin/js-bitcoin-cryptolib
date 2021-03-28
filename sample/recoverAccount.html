@@ -7,7 +7,8 @@
 <body>
     <p>Enter 12, 15, 18, 21 or 24 words :</p>
     <br><textarea id="word" class="secretInput" ></textarea> 
-    <button onclick="GenerateRandomWords()"> genererate 12 at random </button>
+    <button onclick="GenerateRandomWords(12)"> genererate 12 at random </button>
+    <button onclick="GenerateRandomWords(15)"> genererate 15 at random </button>
     <br><br>
 
     <button onclick="recoverAccount()"> Recover public adresses </button>
@@ -26,11 +27,11 @@
 <script src='../src/js-bitcoin-lib.js'></script> 
 <script>
 
-function GenerateRandomWords() {
+function GenerateRandomWords(nbWord) {
 
     // generate a random new wallet
     var myWallet     = new BitcoinWallet(  WalletType.SEGWIT_NATIVE  );  
-    myWallet.initFromRandom(12)
+    myWallet.initFromRandom(nbWord)
     // get the mnemonic phrase
     var phrase       = myWallet.phrase  
     document.getElementById("word").value  = phrase
