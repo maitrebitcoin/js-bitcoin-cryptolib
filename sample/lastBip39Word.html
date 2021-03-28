@@ -35,14 +35,21 @@
     </p>    
     <p id="public" hidden=true>
         <span id="publicAdress"></span><br><br>
-        <button onclick="onCopy()">copy</button>    
+        <button onclick="onCopy('publicAdress')">copy</button>     
     </p>
+    <p id="error" hidden=true></p>    
+
     <!----------------------------- javscript code -------------------------------->
     
-    <script src='../src/js-bitcoin-lib.js'></script> 
-    <script>
+<script src='../src/js-bitcoin-lib.js'></script> 
+<script src='sample-utils.js'></script>     
+<script>
 
 function GetWords() {
+    document.getElementById("result").hidden = true        
+    document.getElementById("secret").hidden = true
+    document.getElementById("public").hidden = true 
+    document.getElementById("error").hidden = true     
 
     //get words
     var words  = document.getElementById("word").value 
@@ -50,11 +57,9 @@ function GetWords() {
     var tabWord;
     try {
         var tabWord = getAllValidLastWord( words );
-
     }
-    catch (err) {
-        document.getElementById("result").innerHTML = err.message;    
-        document.getElementById("result").hidden    = false                      
+    catch (error) {
+        showError(error)
         return;
     }
     var htmlWords = ""
@@ -128,24 +133,7 @@ async function createBtcAccountSegwit(phrase) {
 
     document.getElementById("publicAdress").scrollIntoView()
 }
-
-function onCopy() {
-    var publicAdress =  document.getElementById("publicAdress").innerHTML
-    // can we write into the clipboard ?
-    navigator.permissions.query({name: "clipboard-write"}).then(result => {
-        if (result.state == "granted" || result.state == "prompt") {
-            navigator.clipboard.writeText(publicAdress)
-            alert("public adress :\n\n" + publicAdress + "\n\nsucessfully copied to the clipboard"  )
-        }
-        else {
-            alert("acces to the clipboard denied\n"  + result.state  )
-        }
-    });
-
-
-}    
-    
-    </script>
-    
+     
+</script>
 </body>
 </html>

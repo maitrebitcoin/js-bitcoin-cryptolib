@@ -18,13 +18,12 @@
         <span id="publicAdress"></span><br><br>
         <button onclick="onCopy('publicAdress')">copy</button>    
     </p>
-    <p id="error" hidden=true>
-        <span id="publicAdress"></span><br><br>
-    </p>    
+    <p id="error" hidden=true></p>    
 
     <!----------------------------- javscript code -------------------------------->
     
 <script src='../src/js-bitcoin-lib.js'></script> 
+<script src='sample-utils.js'></script> 
 <script>
 
 function GenerateRandomWords(nbWord) {
@@ -48,13 +47,10 @@ async function recoverAccount() {
     try {
         var seed         = seedFromPhrase(phrase)
     }
-    catch (_error) {
-        // error
-        document.getElementById("error").innerHTML = "<p>" + _error.message  + "</p>" ; 
-        document.getElementById("error").hidden    = false   
+    catch (error) {
+        showError(error)
         return;
     }
-
 
     // create a new wallet 
     var myWallet   = new BitcoinWallet(  WalletType.SEGWIT_NATIVE  );
@@ -63,7 +59,6 @@ async function recoverAccount() {
     // get the 1st public adress. 
     var pubAdress0   =  myWallet.getPublicAddress(0)
    
-
     var prettyPhrase = "<table align='center'><tr>"
     var tabWord = phrase.split(' ')
     for (var i=0;i<tabWord.length;i++) {
@@ -81,21 +76,6 @@ async function recoverAccount() {
     document.getElementById("public").hidden    = false   
 
 }
-
-function onCopy( elementId ) {
-    var data =  document.getElementById( elementId ).innerHTML
-    // can we write into the clipboard ?
-    navigator.permissions.query({name: "clipboard-write"}).then(result => {
-        if (result.state == "granted" || result.state == "prompt") {
-            navigator.clipboard.writeText(data)
-            alert("public adress :\n\n" + data + "\n\nsucessfully copied to the clipboard"  )
-        }
-        else {
-            alert("acces to the clipboard denied\n"  + result.state  )
-        }
-    });
-
-}    
     
 </script>
    
