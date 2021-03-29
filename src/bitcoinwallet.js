@@ -126,6 +126,17 @@ getExtendedPublicKey() {
     var extPrivKey   = this.HdWallet.getExtendedPublicKeyFromPath( this.mainDerivationPath )
     return extPrivKey.toStringBase58()
 }
+/**
+ * get the extended private key fo the account. ex : "zprvAd4VotcSeiGM.." 
+ * 
+ * @returns {string} the bitcoin extended public key in base 58 format. 
+ * @throws  {Error}  if the wallet is non initialised, or invalid
+ */
+getExtendedPrivateKey() {
+    // get extended private and public key                                   
+    var extPrivKey   = this.HdWallet.getExtendedPrivateKeyFromPath( this.mainDerivationPath )
+    return extPrivKey.toStringBase58()
+}
 
 /**
  *  get a sewigt native adress 

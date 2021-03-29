@@ -13,13 +13,20 @@ public address :
     <span id="publicAdress"></span>
     <br>
     <br>
-    <button onclick="getMoreAdresses(5)">more adresses</button>    
-    <button onclick="showExtPubKey()"> show exp pub key  </button>    
-    <button onclick="onCopy('publicAdress')"> copy </button>    
+    <span class="btnZone">
+        <button onclick="getMoreAdresses(5)">more adresses</button>    
+        <button onclick="showExtPubKey()"> show ext pub key  </button>    
+        <button onclick="onCopy('publicAdress')"> copy </button>    
+    </span>
 </p>
 <hr>
 secret phrase :
 <p id="secret" hidden=true>
+    <span id="secretwords"></span>
+    <br>
+    <span class="btnZone">
+        <button onclick="showExtPrivateKey()"> show exp private key  </button> 
+    </span>
 </p>
 
 <!----------------------------- javscript code -------------------------------->
@@ -68,7 +75,7 @@ async function createBtcAccountSegwit() {
     // show result
     document.getElementById("publicAdress").innerHTML = pubAdress0 ; 
     document.getElementById("public").hidden    = false   
-    document.getElementById("secret").innerHTML = prettyPhrase ;    
+    document.getElementById("secretwords").innerHTML = prettyPhrase ;    
     document.getElementById("secret").hidden    = false   
 }
 
@@ -77,8 +84,17 @@ function showExtPubKey() {
     var extPubKey58 =  gWallet.getExtendedPublicKey()
     // show advanced results
     var avResult = ""   
-    avResult += "<p class='extpubkey'>" + extPubKey58 + "</p>"
+    avResult += "<p class='extendedkey'>" + extPubKey58 + "</p>"
     document.getElementById("publicAdress").innerHTML += avResult    
+    
+}
+function showExtPrivateKey() {
+    // get extended public key in string base 58 format
+    var extPrivKey58 =  gWallet.getExtendedPrivateKey()
+    // show advanced results
+    var avResult = ""   
+    avResult += "<p class='extendedkey'>" + extPrivKey58 + "</p>"
+    document.getElementById("secretwords").innerHTML += avResult    
     
 }
 function getMoreAdresses(nbAdresse) {

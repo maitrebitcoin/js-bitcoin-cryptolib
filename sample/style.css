@@ -79,8 +79,9 @@ body { background-color: var(--Background); }
   background:   #8be7bc;
   color :       black;
 }
-.extpubkey {
-  font-size: 1.2vw;
-  font-family:arial;
-  color :      blue;
+.extendedkey {
+  overflow-wrap: break-word;
+}
+.btnZone {
+  text-align: center;
 }
