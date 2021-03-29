@@ -8,7 +8,6 @@
     <p>Enter 12, 15, 18, 21 or 24 words :</p>
     <br><textarea id="word" class="secretInput" ></textarea> 
     <button onclick="GenerateRandomWords(12)"> genererate 12 at random </button>
-    <button onclick="GenerateRandomWords(15)"> genererate 15 at random </button>
     <br><br>
 
     <button onclick="recoverAccount()"> Recover public adresses </button>
@@ -16,6 +15,7 @@
     <!----------------------------- final account  -------------------------------->
     <p id="public" hidden=true>
         <span id="publicAdress"></span><br><br>
+        <button onclick="getMoreAdresses(5)">more adresses</button>    
         <button onclick="onCopy('publicAdress')">copy</button>    
     </p>
     <p id="error" hidden=true></p>    
@@ -36,6 +36,8 @@ function GenerateRandomWords(nbWord) {
     document.getElementById("word").value  = phrase
 }
 
+var gNumAccount = 0;
+var gWallet     = undefined;
 async function recoverAccount() {
 
     document.getElementById("public").hidden   = true   
@@ -53,28 +55,30 @@ async function recoverAccount() {
     }
 
     // create a new wallet 
-    var myWallet   = new BitcoinWallet(  WalletType.SEGWIT_NATIVE  );
+    gWallet   = new BitcoinWallet(  WalletType.SEGWIT_NATIVE  );
     // use the seed a the base for all adresses calculations
-    myWallet.initFromSeed(seed)
+    gWallet.initFromSeed(seed)
     // get the 1st public adress. 
-    var pubAdress0   =  myWallet.getPublicAddress(0)
-   
-    var prettyPhrase = "<table align='center'><tr>"
-    var tabWord = phrase.split(' ')
-    for (var i=0;i<tabWord.length;i++) {
-        var rc = (i>0 && i%2==0)  
-        if (rc) prettyPhrase += "</tr><tr>"          
-        prettyPhrase += "<td id='numword'>&nbsp" + (i+1)+ "&nbsp</td>"   
-        prettyPhrase += "<td>" + tabWord[i] + "</td>"
-        prettyPhrase += "<td>&nbsp&nbsp</td>"
- 
-    }
-    prettyPhrase+='</tr></table>'
+    gNumAccount = 0;
+    var pubAdress0   =  gWallet.getPublicAddress(gNumAccount)
 
     // show result
     document.getElementById("publicAdress").innerHTML = pubAdress0 ; 
     document.getElementById("public").hidden    = false   
 
+}
+async function getMoreAdresses(nbAdresse) {
+
+    for (var i=0;i<nbAdresse;i++) {
+
+        // get the next public adress. 
+        gNumAccount++;
+        var pubAdressN   =  gWallet.getPublicAddress(gNumAccount)
+
+        // show result
+        document.getElementById("publicAdress").innerHTML += "<br>" + pubAdressN ; 
+        document.getElementById("public").hidden    = false   
+    }
 }
     
 </script>

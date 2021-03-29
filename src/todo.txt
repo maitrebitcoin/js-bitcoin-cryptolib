@@ -1,6 +1,5 @@
-.samplee : debug Copy in IOS
+.sample : debug Copy in IOS
 .more samples 
-  .recover account from menominc phrase : more adresses
   .adresses from extPub or extPriv key
 .check all comments format
 .generate a doc
