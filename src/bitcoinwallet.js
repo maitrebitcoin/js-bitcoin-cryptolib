@@ -84,12 +84,13 @@ getMasterKey() {
     return this.HdWallet.getMasterKey().toStringBase58()
 }
 /**
- *  get a public bitcoin address
+ *  get a public bitcoin address. ex : "bc1qn085dr40dcrhejgve4sky.." 
+ * 
  * @public
  * @param   {int}    [index=0]      index of the child key. 0 is the first accout
  * @param   {bool}   [change=false] is the adress for change ?
  * @returns {string} the bitcoin address. ex : "bc1qn085dr40dcrhejgve4sky.." 
- * @throws  {Error} if the wallet is non initialised, or invalid
+ * @throws  {Error}  if the wallet is non initialised, or invalid
  */
 getPublicAddress( index, change ) {
     if (!this.HdWallet) 
@@ -114,6 +115,17 @@ getPublicAddress( index, change ) {
             throw _BuildError( LibErrors.Invalid_wallet_type, {walletType:walletType})
     }
 }
+/**
+ * get the extended public key fo the account. ex : "zpub6sAxdNfDsummUgnQ7y.." 
+ * 
+ * @returns {string} the bitcoin extended public key in base 58 format. 
+ * @throws  {Error}  if the wallet is non initialised, or invalid
+ */
+getExtendedPublicKey() {
+    // get extended private and public key                                   
+    var extPrivKey   = this.HdWallet.getExtendedPublicKeyFromPath( this.mainDerivationPath )
+    return extPrivKey.toStringBase58()
+}
 
 /**
  *  get a sewigt native adress 
@@ -126,7 +138,7 @@ getPublicAddress( index, change ) {
  */
 getSegwitNativePublicAdressFromPath( derivationPath ) {
     // get the extendede public key
-    var extPublicKey = this.HdWallet.getExtendedPubliceKeyFromPath(derivationPath);
+    var extPublicKey = this.HdWallet.getExtendedPublicKeyFromPath(derivationPath);
     console.assert( extPublicKey.publicKey )
     // serialised public key to raw buffer
     var publicKeySerialized = extPublicKey.publicKey.toBuffer();
@@ -147,7 +159,7 @@ getSegwitNativePublicAdressFromPath( derivationPath ) {
  */
 getSegwitPublicAdressFromPath( derivationPath ) {
     // get the extended public key
-    var extPublicKey = this.HdWallet.getExtendedPubliceKeyFromPath(derivationPath );
+    var extPublicKey = this.HdWallet.getExtendedPublicKeyFromPath(derivationPath );
     console.assert( extPublicKey.publicKey )
     // serialised public key to raw buffer
     var publicKeySerialized = extPublicKey.publicKey.toBuffer();
@@ -171,7 +183,7 @@ getSegwitPublicAdressFromPath( derivationPath ) {
  */
 getLegacyPublicAdressFromPath( derivationPath, index ) {
     // get the extended public key
-    var extPublicKey = this.HdWallet.getExtendedPubliceKeyFromPath(derivationPath );
+    var extPublicKey = this.HdWallet.getExtendedPublicKeyFromPath(derivationPath );
     console.assert( extPublicKey.publicKey )
     // serialised public key to raw buffer
     var publicKeySerialized = extPublicKey.publicKey.toBuffer();

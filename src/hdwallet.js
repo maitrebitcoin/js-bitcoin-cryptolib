@@ -94,7 +94,7 @@ getExtendedPrivateKeyFromPath( derivationPath ) {
  * @returns {HdWalletExtendedKey}   the extended private key 
  * @throws  {Error} if <derivationPath> is invalid
  */
-getExtendedPubliceKeyFromPath( derivationPath ) {
+getExtendedPublicKeyFromPath( derivationPath ) {
     // avail in cache ?
     if (this.extPublicKey_cache[derivationPath] )
         return this.extPublicKey_cache[derivationPath];    
@@ -116,7 +116,7 @@ getExtendedPubliceKeyFromPath( derivationPath ) {
  */
 getPublicKeyFromPath( derivationPath, index ) {
     // get the extendede public key
-    var extPublicKey = this.getExtendedPubliceKeyFromPath(derivationPath + "/" + index );
+    var extPublicKey = this.getExtendedPublicKeyFromPath(derivationPath + "/" + index );
     // get the public key
     console.assert( extPublicKey.publicKey )
     return extPublicKey.publicKey;

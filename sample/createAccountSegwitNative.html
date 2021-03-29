@@ -13,7 +13,9 @@ public address :
     <span id="publicAdress"></span>
     <br>
     <br>
-    <button onclick="onCopy()"><h2>copy</h2>  </button>    
+    <button onclick="getMoreAdresses(5)">more adresses</button>    
+    <button onclick="showExtPubKey()"> show exp pub key  </button>    
+    <button onclick="onCopy('publicAdress')"> copy </button>    
 </p>
 <hr>
 secret phrase :
@@ -23,6 +25,7 @@ secret phrase :
 <!----------------------------- javscript code -------------------------------->
 
 <script src='../src/js-bitcoin-lib.js'></script> 
+<script src='sample-utils.js'></script>  
 <script>
 
 
@@ -32,20 +35,22 @@ async function onClicCreate() {
     document.getElementById("btnCreate").hidden = false
 }
 
+var gNumAccount = 0;
+var gWallet     = undefined;
 async function createBtcAccountSegwit() {
 
     // create a new wallet 
-    var myWallet   = new BitcoinWallet(  WalletType.SEGWIT_NATIVE  );
+    gWallet   = new BitcoinWallet(  WalletType.SEGWIT_NATIVE  );
     // generate a random buffer
-    var randomBuffer = myWallet.getRandomBuffer(128)
+    var randomBuffer = gWallet.getRandomBuffer(128)
     // calculate the mnemonic phrase from this buffer
     // ex : "pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
     var phrase       = bip39phraseFromRandomBuffer(randomBuffer)
     var seed         = seedFromPhrase(phrase)
     // use the seed a the base for all adresses calculations
-    myWallet.initFromSeed(seed)
+    gWallet.initFromSeed(seed)
     // get the 1st public adress. 
-    var pubAdress0   =  myWallet.getPublicAddress(0)
+    var pubAdress0   =  gWallet.getPublicAddress(0)
     
 
     var prettyPhrase = "<table align='center'><tr>"
@@ -67,20 +72,27 @@ async function createBtcAccountSegwit() {
     document.getElementById("secret").hidden    = false   
 }
 
-function onCopy() {
-    var publicAdress =  document.getElementById("publicAdress").innerHTML
-    // can we write into the clipboard ?
-    navigator.permissions.query({name: "clipboard-write"}).then(result => {
-        if (result.state == "granted" || result.state == "prompt") {
-            navigator.clipboard.writeText(publicAdress)
-            alert("public adress :\n\n" + publicAdress + "\n\nsucessfully copied to the clipboard"  )
-        }
-        else {
-            alert("acces to the clipboard denied\n"  + result.state  )
-        }
-    });
+function showExtPubKey() {
+    // get extended public key in string base 58 format
+    var extPubKey58 =  gWallet.getExtendedPublicKey()
+    // show advanced results
+    var avResult = ""   
+    avResult += "<p class='extpubkey'>" + extPubKey58 + "</p>"
+    document.getElementById("publicAdress").innerHTML += avResult    
+    
+}
+function getMoreAdresses(nbAdresse) {
 
+    for (var i=0;i<nbAdresse;i++) {
 
+        // get the next public adress. 
+        gNumAccount++;
+        var pubAdressN   =  gWallet.getPublicAddress(gNumAccount)
+
+        // show result
+        document.getElementById("publicAdress").innerHTML += "<br>" + pubAdressN ; 
+        document.getElementById("public").hidden    = false   
+    }
 }
 
 </script>

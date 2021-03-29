@@ -479,7 +479,7 @@ function autotest_bip32( fonError ) {
             FAILED( fonError, seedHex, res58, expected, deivationPath )
         }
         if (!expectedPub) return; // OK
-        try { res   = bip32.getExtendedPubliceKeyFromPath(deivationPath) }
+        try { res   = bip32.getExtendedPublicKeyFromPath(deivationPath) }
         catch( err ) {
              FAILED( fonError, seedHex, res58, expected, deivationPath + '\n' + err.message )
         }
@@ -564,7 +564,7 @@ function autotest_bip49( fonError ) {
             // error
             FAILED( fonError, seedHex, extPrivateStr, expectedExtPrivate )
         }
-        var extPublic  = bip32Wallet.getExtendedPubliceKeyFromPath(derivationPath)
+        var extPublic  = bip32Wallet.getExtendedPublicKeyFromPath(derivationPath)
         var extPublicStr = extPublic.toStringBase58();
         if (extPublicStr != expectedExtPub) {
             // error
@@ -627,7 +627,7 @@ function autotest_bip84( fonError ) {
             // error
             FAILED( fonError, mnemonic, extPrivateStr, expectedExtPrivate0 )
         }
-        var extPublic  = bip32Wallet.getExtendedPubliceKeyFromPath(derivationPath)
+        var extPublic  = bip32Wallet.getExtendedPublicKeyFromPath(derivationPath)
         var extPublicStr = extPublic.toStringBase58();
         if (extPublicStr != expectedExtPub0) {
             // error

@@ -1,3 +1,4 @@
+.derivation if we only have pubkey
 .sample : debug Copy in IOS
 .more samples 
   .adresses from extPub or extPriv key
@@ -7,6 +8,6 @@
 .psbt generation. bip 174
 .psbt signing
 .use lib with WD lib to double-check
-.derivation if we only have pubkey
+
 
 .QR code generation in sample
