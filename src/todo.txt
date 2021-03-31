@@ -1,7 +1,4 @@
-.derivation if we only have pubkey
 .sample : debug Copy in IOS
-.more samples 
-  .adresses from extPub or extPriv key
 .check all comments format
 .generate a doc
 .node.js integration / sample

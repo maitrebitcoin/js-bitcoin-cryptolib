@@ -34,7 +34,8 @@ const LibErrors = {
     Impossible_pubkey_derivation    : 21,
     Invalid_derivation_path         : 22,
     Invalid_extkey_buffer_len       : 23,
-    Invalid_extkey_buffer_header    : 24
+    Invalid_extkey_buffer_header    : 24,
+    MasterKey_notAvail              : 25
 }
 // errors detail
 var TabInfoErrors = [
@@ -61,7 +62,9 @@ var TabInfoErrors = [
     { id:LibErrors.Impossible_pubkey_derivation, message:"Hardened derivation of a public key is not possible" },
     { id:LibErrors.Invalid_derivation_path,      message:"invalid derivation path format" },
     { id:LibErrors.Invalid_extkey_buffer_len,    message:"Invalid extended key buffer length (must be 78 byte long)" },
-    { id:LibErrors.Invalid_extkey_buffer_header, message:"Invalid extended key buffer : unknown version header" }
+    { id:LibErrors.Invalid_extkey_initwallet,    message:"Invalid extended key for wallet restoration" },
+    { id:LibErrors.MasterKey_notAvail,           message:"Cannot calculate key. Seed is required but unknown (only a extended key is known)." }
+    
 ]
 
 /**

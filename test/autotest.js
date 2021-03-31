@@ -17,9 +17,9 @@
  * 
 */
 function autotest_all(fonError, fonStepOK, fonEnd ){
-    var tabTestName  = new Array( 'encodeDecode', 'bech32', 
+    var tabTestName  = new Array( "encodeDecode", "bech32", 
                                   "ripemd160", "sha512", "sha256", "hmac_sha512", 
-                                  "bip39", "pbkdf2_hmac512", "ecdsa","bip32","bip49","bip84" )
+                                  "bip39", "pbkdf2_hmac512", "ecdsa","bip32","bip49","bip84", "import_extkey" )
     
     var numTest = 0;
 
@@ -444,7 +444,8 @@ function autotest_bip32( fonError ) {
     {
         // calculate rood
         var seed  = bufferFromHex(seedHex)
-        var bip32 = new HdWallet( seed, WalletType.LEGACY );
+        var bip32 = new HdWallet();
+        bip32.initFromSeed( seed, WalletType.LEGACY );
         var res   = bip32.getMasterKey();
         var res58 = res.toStringBase58()
 
@@ -464,7 +465,8 @@ function autotest_bip32( fonError ) {
     {
         // calculate rood
         var seed  = bufferFromHex(seedHex)
-        var bip32 = new HdWallet( seed, WalletType.LEGACY );
+        var bip32 = new HdWallet()
+        bip32.initFromSeed( seed, WalletType.LEGACY );
         var res;
         try {
            res   = bip32.getExtendedPrivateKeyFromPath(deivationPath)
@@ -498,8 +500,8 @@ function autotest_bip32( fonError ) {
     {
         var errFound;
         try {
-            var seed  = bufferFromHex("00".repeat(32))
-            var hdWalletTemp = new HdWallet(seed,  WalletType.SEGWIT_NATIVE)
+            //var seed  = bufferFromHex("00".repeat(32))
+            var hdWalletTemp = new HdWallet()//seed,  WalletType.SEGWIT_NATIVE)
             var res=  hdWalletTemp.getExtendedKeyFromStringBase58(string58)
         } catch (err) {
             errFound = err;
@@ -512,6 +514,8 @@ function autotest_bip32( fonError ) {
         }       
 
     }
+    
+
     var phrase ="pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
     var seed = "6e85439607050fad311b71238aacdd27d3095329201baa367c43e93869621de213f2c75dac958ecc1a87d55a94baf02e223de1d686c276882c112e841b01a8df";       
 
@@ -681,6 +685,33 @@ function autotest_bip84( fonError ) {
           "KxJyAXFHCfj38gvQLsPPUibW6kTzGDUVmXdbFQSdEH1JxpDk86id",
           "0255868ee72b99229153dd1ca1e357a4ef03fa9419f8895cf4e272b2f7d1a837e2",
           "bc1q2rw2yugvcux0dn5jk3a9l85up3z6tcdqjqq3ch")          
+}
+
+/**
+ * test the creation of a wallet from an extended key
+ * @param {function } fonError called if one of the test fails
+ */
+function autotest_import_extkey( fonError ) {
+    function _test( extKeyBase58,  expectedBech32Adress0  ) 
+    {
+        // create a new wallet
+        var wallet = new BitcoinWallet();
+        // init wallet from extended key
+        wallet.initFromExtendedKey(extKeyBase58)
+        // get the 1st public adress. 
+        var pubAdress0   =  wallet.getPublicAddress(0)
+        // is it the expected result ?
+        if (pubAdress0 != expectedBech32Adress0) {
+            // error
+            FAILED( fonError, extKeyBase58, pubAdress0, expectedBech32Adress0 )
+        }
+    }
+
+    // ext key generated from:
+    // "empower	kit	radio quantum increase deal	news judge vessel unhappy access they"
+    _test("zpub6rGRBLHG6UGxZuucWd6M7u8bkfFZe4fByT4i8RPKqJHYGb2Hxz2uJqAZEDgt1pptw2KNJxp1wpDpdhEYBwzQqNjunbVZEDyHZCFCTAjJyNt","bc1qh8zqsl28fenk7j5q6cpg4nv5n8xkm3vhsw7pxt")
+    _test("zprvAdH4mpkNG6ifMRq9QbZLkmBsCdR5EbwLcE97L2yiGxkZPnh9RSiem2r5NyKzq3XP4XCjiuCA6utM8aTLtLXAQUGpPp5xxzRbvtAnrwtvWCm","bc1qh8zqsl28fenk7j5q6cpg4nv5n8xkm3vhsw7pxt")
+
 }
 
 

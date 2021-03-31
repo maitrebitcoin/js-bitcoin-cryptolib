@@ -100,7 +100,7 @@ function test1() {
     // Start...
     document.getElementById("resultat").innerHTML += "<font color='gray'>Running...</font>";
     
-    autotest_bip39( onTestFail  )
+    autotest_import_extkey( onTestFail  )
     // test PASSED OK
     document.getElementById("resultat").innerHTML += "<p><font color='green'>PASSED OK</font>";
 
@@ -111,41 +111,14 @@ function debug() {
 //    checkPhrase("situate before sell found usage useful caution banner stem autumn decrease melt")
 //test1();
 
-    var _11word = "situate before sell found usage useful caution banner stem autumn decrease" 
-    var tabWord = getAllValidLastWord( _11word );
-    tabWord.forEach( word => console.log(word) );
- 
-
-    var ecdsa = new ECDSA();
-    // create key pair
-    var privateKey = ecdsa.newPrivateKey();
-    var pubKey     = ecdsa.publicKeyFromPrivateKey(privateKey);
-    // show keys
-    var sDump =     "private key :<p>" + privateKey.toStringBase58()
-               + "<p>public  key :<p>" + pubKey.toString()
+    var wallet1 = new BitcoinWallet();
+    wallet1.initFromExtendedKey("zpub6qXg6YneJhyqge9xfEgavLXVzqbrMtDBUnzDhJUxyKub51NgrS9UCUL3BEfkB7brGu1SigowcF5JtkJt2UKZ3dmWcqsYT3WmSbGJdVETtiU")
 
 
-    var sWIF =     privateKey.toStringBase58()            
-    console.log( sWIF )                
-    var privateKeyImported = ecdsa.privateKeyFromStringBase58(sWIF)
-    console.log( privateKeyImported.toStringBase58() )         
-
-    var message = "my message to be signed"
-
-    // generate signature
-    var signature = ecdsa.signMessage( message, privateKey, "rfc6979" )
-
-    var DER = ecdsa.bufferFromSignature( signature );
-    console.trace(hex(DER)) 
-    var signature2 = ecdsa.signatureFromBuffer( DER );
-    console.trace(hex(signature.r)) 
-    console.trace(hex(signature.s)) 
-    console.trace(hex(signature2.r)) 
-    console.trace(hex(signature2.s)) 
+    var addr1 = wallet1.getPublicAddress(0)
 
     // check signature
-    var res = ecdsa.verifySignature(message, signature, pubKey )
-    sDump += "<hr>test signature : " + res.message
+    var sDump = "<hr> adddr 0 : " + addr1
 
     document.getElementById("resultat").innerHTML = sDump;
 }

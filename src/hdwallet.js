@@ -36,21 +36,66 @@ class HdWallet {
  * @param {string} seed 128 to 512 bits buffer  
  * @param {WalletType}  walletType WalletType.LEGACY, WalletType.SEGWIT or WalletType.SEGWIT_NATIVE
  */
-constructor( seed, walletType ) {
-    console.assert( seed.length >= 16 && seed.length <= 64 ,"seed must be between 128 and 512 bits")
-    this.seed       = seed
-    this.walletType = walletType
+constructor() {
+    this.seed       = undefined;
+    this.walletType = undefined
     this.ecdsa      = new ECDSA();
     // cache of extented private and public keys. 
     this.extPrivateKey_cache = [] 
     this.extPublicKey_cache  = [] 
 }
+/** 
+ *  init HdWallet from a seed 
+ * @public
+ * @param {string} seed 128 to 512 bits buffer  
+ * @param {WalletType}  walletType WalletType.LEGACY, WalletType.SEGWIT or WalletType.SEGWIT_NATIVE
+ */
+initFromSeed( seed, walletType ) {
+    console.assert( seed.length >= 16 && seed.length <= 64 ,"seed must be between 128 and 512 bits")
+    this.seed       = seed
+    this.walletType = walletType
+
+}
+/** 
+ *  init HdWallet from a extended private or public key. ex : "zpub6sAxdNfDsummUgnQ7y.." 
+ * @public
+ * @param {string} extKeyString58  extended public or private key in base 58 format. ex : "zpub6sAxdNfDsummUgnQ7y.." 
+ * @throws {Error} if <extKeyString58> is invalid
+ */
+initFromExtendedKey( extKeyString58 ) {
+    // decode  the string
+    var extendedKey  =  this.getExtendedKeyFromStringBase58(extKeyString58)
+    if (!extendedKey.isPrivateKey())
+        this.readonly = true; // cannot send any fund
+    this.walletType = extendedKey.walletType;        
+//@TODO
+    // check key
+    if (extendedKey.depth != 3)
+        throw _BuildError(LibErrors.Invalid_extkey_initwallet,{depth:extendedKey.depth});
+    if (extendedKey.childNumber != 0x80000000)
+        throw _BuildError(LibErrors.Invalid_extkey_initwallet,{childNumber:extendedKey.childNumber});
+    if (extendedKey.walletType != WalletType.SEGWIT_NATIVE)
+        throw _BuildError(LibErrors.Invalid_extkey_initwallet,"only segwit native is supported");        
+    // calc derivation path
+    var derivationPath = DerivationPath.SW_NATIVE_BIP84
+    // add to cache
+    if (extendedKey.isPrivateKey())
+        this.extPrivateKey_cache[derivationPath] = extendedKey
+    else
+        this.extPublicKey_cache[derivationPath] = extendedKey
+}
+
 /**
  *  get the master key
  * @public
  * @returns {HdWalletExtendedKey} the master key (private key)
  */
 getMasterKey() {
+    // if not avail a all = we  have been init from an extended key
+    if (!this.seed)
+        throw _BuildError( LibErrors.MasterKey_notAvail )
+
+
     // avail in cache ?
     if (this.extPrivateKey_cache[DerivationPath.MASTERKEY] )
         return this.extPrivateKey_cache[DerivationPath.MASTERKEY];
@@ -97,8 +142,18 @@ getExtendedPrivateKeyFromPath( derivationPath ) {
 getExtendedPublicKeyFromPath( derivationPath ) {
     // avail in cache ?
     if (this.extPublicKey_cache[derivationPath] )
-        return this.extPublicKey_cache[derivationPath];    
-    // get the extendede private key
+        return this.extPublicKey_cache[derivationPath];   
+    // no private key avail ?
+    if (this.readonly) {
+        // call internal recursive method
+        var extPrivateKey = this._getPublicKeyFromPathR(  derivationPath );
+        // add to cache
+        this.extPrivateKey_cache[derivationPath] = extPrivateKey;
+        // success
+        return extPrivateKey
+    }
+
+    // get the extended private key
     var extPrivateKey = this.getExtendedPrivateKeyFromPath(derivationPath);
     // get the public key
     var  extPublicKey = extPrivateKey.getExtendedPublicKey(this.ecdsa);
@@ -165,6 +220,7 @@ _ckdPrivatr( extendedKey, i ) {
 
     var bHardenedKey = (i & 0x80000000) != 0; // or i > 0x80000000
     var data;
+    var ecPoint // an Point on the ecdsa elliptic curve
   
     if (bHardenedKey) {
        // the extended key mut be a private key
@@ -178,9 +234,8 @@ _ckdPrivatr( extendedKey, i ) {
     }
     else { 
        // normal chid         
-       var ecPoint // an Point on the ecdsa elliptic curve
+
        if (!extendedKey.isPrivateKey()) {
-           // t
            ecPoint  = extendedKey.publicKey.point;
        }
        else
@@ -199,11 +254,25 @@ _ckdPrivatr( extendedKey, i ) {
    // child key = parse256(IL) + kpar (mod n).
    var IL = bigInt256FromBigEndianBuffer( hash512.substring(0,32) )
    var IR = hash512.substring(32, 64) 
-   var childPrivateKey =  this.ecdsa.gField.add( IL, extendedKey.privateKey.value )
+
 
    var res = new HdWalletExtendedKey()
-   res.initAsPrivate( childPrivateKey, IR, extendedKey, this.ecdsa, this.walletType );
    res.childNumber = i
+
+   if (!extendedKey.isPrivateKey()) {
+        // The returned child key Ki is point(parse256(IL)) + Kpar.
+        var ecPointIL    =  this.ecdsa.ec.pointGeneratorScalarMult( IL );
+        var ecChildPoint =  this.ecdsa.ec.pointAdd( ecPointIL, extendedKey.publicKey.point );
+        // returns a public key
+        var pubKeyRes = new ECDSAPublicKey(ecChildPoint);
+        res.initAsPublicKey( pubKeyRes, IR, this.walletType );
+   }
+   else {
+       // return a private key
+       var childPrivateKey =  this.ecdsa.gField.add( IL, extendedKey.privateKey.value )
+       res.initAsPrivate( childPrivateKey, IR, extendedKey, this.ecdsa, this.walletType );
+   }
+
    return res;
 }
 
@@ -281,6 +350,34 @@ _getPrivateKeyFromPathR( derivationPath ) {
     console.assert(extChildKey.childNumber == index);
     return extChildKey;
 }
+/**
+ *  get a private key for a derivation path + parent R. 
+ *  recursive internal function
+ * @protected
+ * @param   {string}  derivationPath  the derivation path. ex: "0'/1"
+ * @returns {HdWalletExtendedKey}   the extended private key 
+ */
+_getPublicKeyFromPathR( derivationPath ) {
+    // if derivationPath is the master key
+    if (derivationPath==DerivationPath.MASTERKEY) 
+        throw _BuildError( LibErrors.MasterKey_notAvail );
+    // parse derivationPath
+    var parsedPath = this._parseDerivationPath(derivationPath)
+
+    // recursive call to get the parent key
+    var extParentKey = this.getExtendedPublicKeyFromPath( parsedPath.leftPath )
+
+    // calc effective key index
+    var index     = parsedPath.index;
+    if (parsedPath.hardened)
+        index = 0x80000000 + index;
+    // calc derived key
+    var extChildKey = this._ckdPrivatr(extParentKey, index)
+    extChildKey.depth = extParentKey.depth+1;
+    console.assert(extChildKey.childNumber == index);
+    return extChildKey;
+}
+
 }; // class HdWallet
 
 // ------ types -----
@@ -447,7 +544,7 @@ class HdWalletExtendedKey  {
             // 4 bytes: the fingerprint of the parent's key (0x00000000 if master key)
             this.parentFingerprint = int32FromBigEndianBuffer( buffer.substring(5,9) )
             // 4 bytes: child number. This is ser32(i) for i in xi = xpar/i, with xi the key being serialized. (0x00000000 if master key)
-            this.childNumber = int32FromBigEndianBuffer( buffer.substring(9,13) )
+            this.childNumber = int32FromBigEndianBuffer( buffer.substring(9,13) ) >>> 0
             // 32 bytes: the chain code    
             this.chainCode       =                       buffer.substring(13,45) 
             // 33 bytes: the public key or private key data (serP(K) for public keys, 0x00 || ser256(k) for private keys)

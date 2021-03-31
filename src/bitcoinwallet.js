@@ -69,9 +69,24 @@ initFromSeed(seed ) {
     console.assert( seed.length >= 16 && seed.length <= 64 ,"seed must be between 128 and 512 bits")
  
     // init a hd wallet
-    this.HdWallet = new HdWallet(seed, this.walletType )
-
+    this.HdWallet = new HdWallet()
+    this.HdWallet.initFromSeed (seed, this.walletType )
 }
+/** 
+ *  init the wallet from an extended key/  ex : "zpub6sAxdNfDsummUgnQ7y.." 
+ * @public
+ * @param {string}     extKey58   extended public or private key in base 58 format. ex : "zpub6sAxdNfDsummUgnQ7y.." 
+ * @throws {Error}
+ */
+initFromExtendedKey( extKey58 ) {
+     
+    // init a hd wallet
+    this.HdWallet = new HdWallet()
+    this.HdWallet.initFromExtendedKey( extKey58 )
+  
+}
+
+
 /**
  *  get the extend master key as a string
  * @public

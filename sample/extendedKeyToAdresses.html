@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>  Sample - extended keys to adresses </title>    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <p>Enter a public or private extended key :</p>
+    <p>ex : "zpub6rGRBLHG6UGxZuucWd6M7u8bkfFZe4fByT4i8RPKqJHYGb2Hxz2uJqAZEDgt1pptw2KNJxp1wpDpdhEYBwzQqNjunbVZEDyHZCFCTAjJyNt"</p>
+    <br><textarea id="extkey" class="secretInput" ></textarea> 
+    <br><br>
+
+    <button onclick="toAdresses()"> get public adresses </button>
+
+    <!----------------------------- final account  -------------------------------->
+    <p id="public" hidden=true>
+        <span id="publicAdress"></span><br><br>
+        <button onclick="getMoreAdresses(5)">more adresses</button>    
+        <button onclick="onCopy('publicAdress')">copy</button>    
+    </p>
+    <p id="error" hidden=true></p>    
+
+    <!----------------------------- javscript code -------------------------------->
+    
+<script src='../src/js-bitcoin-lib.js'></script> 
+<script src='sample-utils.js'></script> 
+<script>
+
+var gNumAccount = 0;
+var gWallet     = undefined;
+async function toAdresses() {
+
+    document.getElementById("public").hidden   = true   
+    document.getElementById("error").hidden    = true   
+
+    // create a new wallet
+    gWallet = new BitcoinWallet();
+  
+    //get base 58 encoded key
+    var extKeyBase58  = document.getElementById("extkey").value 
+    // calc seed
+    try {
+        // init wallet from extended key
+        gWallet.initFromExtendedKey(extKeyBase58)
+    }
+    catch (error) {
+        showError(error)
+        return;
+    }
+
+    // get the 1st public adress. 
+    gNumAccount = 0;
+    var pubAdress0   =  gWallet.getPublicAddress(gNumAccount)
+
+    // show result
+    document.getElementById("publicAdress").innerHTML = pubAdress0 ; 
+    document.getElementById("public").hidden    = false   
+
+}
+async function getMoreAdresses(nbAdresse) {
+
+    for (var i=0;i<nbAdresse;i++) {
+
+        // get the next public adress. 
+        gNumAccount++;
+        var pubAdressN   =  gWallet.getPublicAddress(gNumAccount)
+
+        // show result
+        document.getElementById("publicAdress").innerHTML += "<br>" + pubAdressN ; 
+        document.getElementById("public").hidden    = false   
+    }
+}
+    
+</script>
+   
+</body>
+</html>
