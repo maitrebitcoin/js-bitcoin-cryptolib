@@ -708,9 +708,37 @@ function autotest_import_extkey( fonError ) {
     }
 
     // ext key generated from:
-    // "empower	kit	radio quantum increase deal	news judge vessel unhappy access they"
-    _test("zpub6rGRBLHG6UGxZuucWd6M7u8bkfFZe4fByT4i8RPKqJHYGb2Hxz2uJqAZEDgt1pptw2KNJxp1wpDpdhEYBwzQqNjunbVZEDyHZCFCTAjJyNt","bc1qh8zqsl28fenk7j5q6cpg4nv5n8xkm3vhsw7pxt")
-    _test("zprvAdH4mpkNG6ifMRq9QbZLkmBsCdR5EbwLcE97L2yiGxkZPnh9RSiem2r5NyKzq3XP4XCjiuCA6utM8aTLtLXAQUGpPp5xxzRbvtAnrwtvWCm","bc1qh8zqsl28fenk7j5q6cpg4nv5n8xkm3vhsw7pxt")
+   // ripple medal loan salute skirt runway sound dilemma hammer stick general private
+   
+   //BIP 44
+   _test("xpub6CiDoUiGwrmbiZ6sdEsfDEB5seFDwRYquQhmpPZ2zCp1RxECesUSc3UcgqbQDKv6nN1qX9RoogfLHgHWB2y9VRS2AhB7USfLf5zPYMnM5tD","17U8NFCRzFfD1au18ZgRTmZMVLdAfeQrcJ")
+   _test("xprv9yisPyBP7VDJW52QXDLer6EMKcQjXxpzYBnB219RRsH2Z9u47LAC4FA8qZnQk5WRTuDpHMsvHSTpHC4rf1UFeHafXAg1rWW7ddDMnGm1UTf","17U8NFCRzFfD1au18ZgRTmZMVLdAfeQrcJ")
+   _test("xpub6E8XQHRq8mVAo7EstB1s2qPFhxzG4ooao6vQcZrfogvFgfA3nj6HZ3ZXKMXySD8THuM4nNsU1Tzj7PSUCd9TboKfx1AetDzFS1C1CR6QqB5","17U8NFCRzFfD1au18ZgRTmZMVLdAfeQrcJ")
+   _test("xprvA19AzmtwJPvsadAQn9UrfhSX9w9mfM5jRszopBT4FMPGorpuFBn31FF3U3Wq4GtRxFp1CVszin9Rw5qNnJprvyV5694oiDQovk6ZML5nFxJ","17U8NFCRzFfD1au18ZgRTmZMVLdAfeQrcJ") 
+   // m/84'/0'/0'/0
+   _test("zpub6shdhCJyT5fhSCVdoCNFW1bNQn6jfEMn7hts4H43kx1nYRWA188eEUMLUYMmb8pmQe2SjoKWondBYeDMViYntURtTSHAab98rJPLevcBDQc","bc1qz48d8xlzmqhp9z4vsvh5kcx0nf43qevngrwhde")
+   _test("zprvAeiHHgn5ci7QDiRAhAqF8sedrkGFFmdvkUyGFteSCcUofdB1TapPgg2rdFtTrirbCgYwWkb1MrN6upphmrgPQomQeHT7GugFJqYn8voU6Db","bc1qz48d8xlzmqhp9z4vsvh5kcx0nf43qevngrwhde")
+   // m/84'/0'/0'
+   _test("zprvAeiHHgn5ci7QDiRAhAqF8sedrkGFFmdvkUyGFteSCcUofdB1TapPgg2rdFtTrirbCgYwWkb1MrN6upphmrgPQomQeHT7GugFJqYn8voU6Db","bc1qz48d8xlzmqhp9z4vsvh5kcx0nf43qevngrwhde")
+   _test("zprvAd4dA9PYk9tVgBivxDDVu4pppyMagRsKe1tJksQBRdYYYQHaVBvSiiAK3cQYaJ8vjXkRasMsxUZP5xoq5GAmY6w66wZpwiG6jCCiwGQenNp","bc1qz48d8xlzmqhp9z4vsvh5kcx0nf43qevngrwhde") 
+   //BIP 49
+   _test("ypub6Y5g83hnfr5oeqhV2jRpp7E4orhYZv6EdxrKU69S8hquAgZS9sZfbBLjQFaRsg9UAXZLBMP545HjyRFTfBKpV76Jt8onXEAQ28DwGaeYoVh","3Jvy85G84tjDMdPRqx1xjiuFJn4M8pE2gm")
+   _test("yprvAK6KiYAtqUXWSMd1vhtpSyHLFps4ATNPGjvifhjpaNJvHtEHcLFR3P2FYzdKANLzigam3VjKru6N2drRaSsUh6qEDsFwtKUsGhYCzHhwhFZ","3Jvy85G84tjDMdPRqx1xjiuFJn4M8pE2gm")
+   _test("ypub6YRacZENsSLYe2nbbuhz6V1CkPU34k8akwdLFpXzKGBz1HGwsUL6FtqUSMPfjDyQ9fk34Vmc3Yv2hfQvtebkbUbjmy1JxTtfbw44NxgWZNC","3Jvy85G84tjDMdPRqx1xjiuFJn4M8pE2gm")
+   _test("yprvAKSED3hV34nFRYi8VtAyjM4UCMdYfHQjPihjTS8Nkvf18UwoKw1qi6Wzb7iV8hhvZAi6brhhsokbMDptuFEJ9h7u3W4s5j7TPEdncrgirqa","3Jvy85G84tjDMdPRqx1xjiuFJn4M8pE2gm")
+   //BIP 84
+   //"m/84'/0'/0'"
+   _test("zprvAd4dA9PYk9tVgBivxDDVu4pppyMagRsKe1tJksQBRdYYYQHaVBvSiiAK3cQYaJ8vjXkRasMsxUZP5xoq5GAmY6w66wZpwiG6jCCiwGQenNp","bc1qz48d8xlzmqhp9z4vsvh5kcx0nf43qevngrwhde")
+   _test("zpub6r3yZevSaXSntfoQ4EkWGCmZP1C55tbB1EouZFonyy5XRCcj2jEhGWUntuJZHQb4xoxjyJyT5qoqpEE7UYycvx33idxjaqrCKusps3J1S6K","bc1qz48d8xlzmqhp9z4vsvh5kcx0nf43qevngrwhde")
+   //"m/84'/0'/0'/0"
+   _test("zprvAeiHHgn5ci7QDiRAhAqF8sedrkGFFmdvkUyGFteSCcUofdB1TapPgg2rdFtTrirbCgYwWkb1MrN6upphmrgPQomQeHT7GugFJqYn8voU6Db","bc1qz48d8xlzmqhp9z4vsvh5kcx0nf43qevngrwhde")
+   _test("zpub6shdhCJyT5fhSCVdoCNFW1bNQn6jfEMn7hts4H43kx1nYRWA188eEUMLUYMmb8pmQe2SjoKWondBYeDMViYntURtTSHAab98rJPLevcBDQc","bc1qz48d8xlzmqhp9z4vsvh5kcx0nf43qevngrwhde")
+ 
+   //BIP 84 with other values
+   // "empower	kit	radio quantum increase deal	news judge vessel unhappy access they"
+   _test("zpub6rGRBLHG6UGxZuucWd6M7u8bkfFZe4fByT4i8RPKqJHYGb2Hxz2uJqAZEDgt1pptw2KNJxp1wpDpdhEYBwzQqNjunbVZEDyHZCFCTAjJyNt","bc1qh8zqsl28fenk7j5q6cpg4nv5n8xkm3vhsw7pxt")
+   _test("zprvAdH4mpkNG6ifMRq9QbZLkmBsCdR5EbwLcE97L2yiGxkZPnh9RSiem2r5NyKzq3XP4XCjiuCA6utM8aTLtLXAQUGpPp5xxzRbvtAnrwtvWCm","bc1qh8zqsl28fenk7j5q6cpg4nv5n8xkm3vhsw7pxt")
+  
 
 }
 

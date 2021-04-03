@@ -68,16 +68,37 @@ initFromExtendedKey( extKeyString58 ) {
     if (!extendedKey.isPrivateKey())
         this.readonly = true; // cannot send any fund
     this.walletType = extendedKey.walletType;        
-//@TODO
-    // check key
-    if (extendedKey.depth != 3)
-        throw _BuildError(LibErrors.Invalid_extkey_initwallet,{depth:extendedKey.depth});
-    if (extendedKey.childNumber != 0x80000000)
-        throw _BuildError(LibErrors.Invalid_extkey_initwallet,{childNumber:extendedKey.childNumber});
-    if (extendedKey.walletType != WalletType.SEGWIT_NATIVE)
-        throw _BuildError(LibErrors.Invalid_extkey_initwallet,"only segwit native is supported");        
-    // calc derivation path
-    var derivationPath = DerivationPath.SW_NATIVE_BIP84
+          
+
+    var derivationPath = undefined;
+    // check wallet type and find derivation path 
+    switch (extendedKey.walletType)
+    {
+        case WalletType.LEGACY:             
+            if (extendedKey.depth == 3 && extendedKey.childNumber == 0x80000000)
+                derivationPath = DerivationPath.LEGACY_BIP44;           
+            if (extendedKey.depth == 4 && extendedKey.childNumber == 0)
+                derivationPath = DerivationPath.LEGACY_BIP44 +"/0";            
+           break;
+        case WalletType.SEGWIT:      
+            if (extendedKey.depth == 3 && extendedKey.childNumber == 0x80000000)
+                derivationPath = DerivationPath.SEWITG_BIP49;
+            if (extendedKey.depth == 4 && extendedKey.childNumber == 0)
+                derivationPath = DerivationPath.SEWITG_BIP49 +"/0";                
+           break;           
+        case WalletType.SEGWIT_NATIVE:         
+            if (extendedKey.depth == 3 && extendedKey.childNumber == 0x80000000)
+                derivationPath = DerivationPath.SW_NATIVE_BIP84; // "m/84'/0'/0'""
+            if (extendedKey.depth == 4 && extendedKey.childNumber == 0)
+                derivationPath = DerivationPath.SW_NATIVE_BIP84 + "/0"; // "m/84'/0'/0'/0"
+           break;           
+        default:
+            throw _BuildError(LibErrors.Invalid_extkey_initwallet,{detai:"walletType non supported",walletType:extendedKey.walletType});        
+    }
+    // if no derivation path was found : error
+    if (!derivationPath)
+        throw _BuildError(LibErrors.Invalid_extkey_initwallet,{depth:extendedKey.depth,childNumber:extendedKey.childNumber });
+
     // add to cache
     if (extendedKey.isPrivateKey())
         this.extPrivateKey_cache[derivationPath] = extendedKey

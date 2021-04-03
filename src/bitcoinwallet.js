@@ -83,7 +83,10 @@ initFromExtendedKey( extKey58 ) {
     // init a hd wallet
     this.HdWallet = new HdWallet()
     this.HdWallet.initFromExtendedKey( extKey58 )
-  
+    // copy walley type
+    this.walletType = this.HdWallet.walletType
+    // re-init derivation path to main account. ex : "m/84'/0'/0'"
+    this.mainDerivationPath = this._derivationPathFromType( this.walletType )        
 }
 /**
  *  get the extend master key as a string
@@ -102,10 +105,11 @@ getMasterKey() {
  * @public
  * @param  {number}  [index=0]      index of the child key. 0 is the first accout
  * @param  {boolean} [change=false] is the adress for change ?
+ * @param  {boolean} [hardened=false] is the adress "hardened" (cannot be calculated from extented private key)
  * @returns {string} the bitcoin address. ex : "bc1qn085dr40dcrhejgve4sky.." 
  * @throws  {Error}  if the wallet is non initialised, or invalid
  */
-getPublicAddress( index, change ) {
+getPublicAddress( index, change, hardened ) {
     if (!this.HdWallet) 
         throw _BuildError( LibErrors.Wallet_not_initialized )
     // calculates derivation path
@@ -115,9 +119,13 @@ getPublicAddress( index, change ) {
         derivationPath+= '/1'
     else
         derivationPath+= '/0'
-    // index
-    if (!index) index = 0
+    // index :
+    if (!index) 
+        index = 0
     derivationPath += "/" + index
+    // if we want hardened adresses
+    if (hardened)
+        derivationPath += "'" // add ' a the add of the path
 
     // calculates account
     switch (this.walletType) {

@@ -1,4 +1,3 @@
-.initFromExtendedKey support for more format
 .sample : debug Copy in IOS
 .generate a doc
 .node.js integration / sample
