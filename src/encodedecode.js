@@ -27,10 +27,11 @@ function hex( x ){
             // retrn undefined
   }
 }
-
-
-// convert a number (int) to hexadecimal string.
-// ex: "79BE667E""
+/**
+ *  convert a number (int) to hexadecimal string. ex: "79BE667E""
+ * @param   {number} num the value to convert
+ * @returns {string} ex : "79BE667E"
+ */
 function hex_number( num ){
     console.assert( typeof  num == 'number' )
     if (num == 0) return '0';
@@ -56,9 +57,11 @@ function hex_number( num ){
     console.assert( hexResult != '');
     return hexResult
 }
-
-// convert a BigIntbig to hexadecimal string.
-// ex: "79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798""
+/**
+ *  convert a BigIntbig to hexadecimal string.
+ * @param   {number} bigIntNumber the value to convert
+ * @returns {string} ex : "79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798"
+ */
 function hex_BigInt( bigIntNumber ){
     console.assert( typeof  bigIntNumber == 'bigint' )
     if (bigIntNumber == 0) return '0';
@@ -81,9 +84,11 @@ function hex_BigInt( bigIntNumber ){
     console.assert( hexResult != '');
     return hexResult
 }
-
-// convert a buffer to hexadecimal string.
-// ex: "79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798""
+/**
+ * convert a buffer to hexadecimal string.
+ * @param   {string} str the value to convert
+ * @returns {string} ex : "79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798"
+ */
 function hex_buffer(str) {
     var hex = '';
     for(var i=0; i<str.length; i++) {
@@ -96,12 +101,14 @@ function hex_buffer(str) {
     console.assert( hex.length == str.length*2 )
     return hex;
 }
-
-// convert an hex string to buffer
-// ex: "79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798"
-function bufferFromHex( str ) {
+/**
+ * convert an hex string to buffer 
+ * @param   {string} hexaStr the hexadeciaml string ex : "79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798"
+ * @returns {string} binary buffer
+ */
+function bufferFromHex( hexaStr ) {
     var buffer = ""
-    str.match(/[\da-f]{2}/gi).map(function (h) {
+    hexaStr.match(/[\da-f]{2}/gi).map(function (h) {
         buffer += String.fromCharCode( parseInt(h, 16) )
     })
 
@@ -343,8 +350,8 @@ function bech32Encode( prefix, version, buffer  ) {
     /**
         get 5 bits from a binray buffer at pos <nBit>
      *  @param {string} buf binary buffer
-     *  @param {int} nBit bit number in the vuffer
-     *  @return{int} a 5 bits integers 
+     *  @param {number} nBit bit number in the vuffer
+     *  @return{number} a 5 bits integers 
      */
     function _get5Bit( buf, numBit ) {
         var val16Bit = int16FromBigEndianBuffer(buf, numBit/8 )
@@ -442,7 +449,7 @@ function bigEndianBufferFromBigInt256(x) {
 * convert a buffer into int assuming the buffer is in big endian format
 * = most significant byte first
 * @param {string} buf
-* @param {int}    pos 1st char to convert in buf. 0 if non set
+* @param {number} pos 1st char to convert in buf. 0 if non set
 */
 function int32FromBigEndianBuffer( buf, pos ) {
     if (!pos) pos= 0;
@@ -456,7 +463,7 @@ function int32FromBigEndianBuffer( buf, pos ) {
 * convert a buffer into 32 bit int assuming the buffer is in liitle endian format
 * = least significant byte first (intel for ex.)
 * @param {string} buf
-* @param {int}    pos 1st char to convert in buf. 0 if non set
+* @param {number} pos 1st char to convert in buf. 0 if non set
 */
 function int32FromLittleEndianBuffer( buf, pos ) {
     if (!pos) pos= 0;
@@ -470,7 +477,7 @@ function int32FromLittleEndianBuffer( buf, pos ) {
 * convert a buffer into 16 bits int assuming the buffer is in little endian format
 * = least significant byte first (intel for ex.)
 * @param {string} buf
-* @param {int}    pos 1st char to convert in buf. 0 if not set
+* @param {number} pos 1st char to convert in buf. 0 if not set
 */
 function int16FromLittleEndianBuffer( buf, pos ) {
     if (!pos) pos= 0;
@@ -481,8 +488,8 @@ function int16FromLittleEndianBuffer( buf, pos ) {
 /**
 * convert a buffer into 16 bits int assuming the buffer is in big endian format
 *
-* @param {string} buf
-* @param {int}    pos 1st char to convert in buf. 0 if not set
+* @param {string} buf binary buffer
+* @param {number}    pos 1st char to convert in buf. 0 if not set
 */
 function int16FromBigEndianBuffer( buf, pos ) {
     if (!pos) pos= 0;
@@ -492,7 +499,9 @@ function int16FromBigEndianBuffer( buf, pos ) {
 }
 
 /**
- *  convert a int into a big endian buffer of 4 bytes representing a 32 bits int.
+ * convert a int into a big endian buffer of 4 bytes representing a 32 bits int.
+ * @param {number} x 32 bits integer
+ * @return {string} 4 bytes buffer
  */
 function bigEndianBufferFromInt32(x) {
     var buf =  String.fromCharCode((x>>24) & 0xFF)
@@ -504,6 +513,8 @@ function bigEndianBufferFromInt32(x) {
 /**
  *  convert a int into a little endian buffer of 4 bytes representing a 32 bits int.
  * = least significant byte first (intel for ex.)
+ * @param {number} x 32 bits integer
+ * @return {string} 4 bytes buffer
  */
 function littleEndianBufferFromInt32(x) {
    var buf =  String.fromCharCode (x      & 0xFF)

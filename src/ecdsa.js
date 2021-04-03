@@ -11,8 +11,13 @@
  ******************************************************
  */
 
-
-// generate cryto secure 256 bits random number
+/**
+ * generate cryto secure 256 bits random number
+ * internal used
+ * - private key creation
+ * - for ecdsa signature, if rfc6979 is not used
+ * @returns {BigInt} a random 256 bits integer
+ */
 function getRandomBigInt256() {
     // 256 bits = 8 * 32bits
     var randArray = new Uint32Array(8);
@@ -29,7 +34,6 @@ function getRandomBigInt256() {
 const DERHeader_INT    = "\x02";
 const DERHeader_STRUCT = "\x30";
 
-
 // Main class
 // ecdsa with secp256k1 parameters
 // ex usage :
@@ -41,8 +45,10 @@ const DERHeader_STRUCT = "\x30";
 
 class ECDSA { 
 
-// constructor
-constructor(  ) {
+/**
+ *  ECDSA constructor
+ */
+constructor() {
     // ellipical curve
     this.ec = new EllipticCurveSecp256k1();
     // curve order
@@ -51,7 +57,7 @@ constructor(  ) {
 }
 
 /**
- *  generate a new private key from random generator : window.crypto.getRandomValues()
+ * generate a new private key from random generator : window.crypto.getRandomValues()
  * @returns {ECDSAPrivateKey}
  */
 newPrivateKey(  ) {
@@ -62,7 +68,7 @@ newPrivateKey(  ) {
     return privateKey
 }
 /**
- *  generate a private key from a BigInt.
+ * generate a private key from a BigInt.
  * @param   {bigInt} number  ex : 66622949934292052565325515457306921084360285924745542237609076927686267856258n
  * @returns {ECDSAPrivateKey}
  */
@@ -72,8 +78,8 @@ privateKeyFromBigInt( number ) {
     return privateKey
 }
 /**
- *  generate a private key from a buffer
- * @param   {string} buffer   256 bits big endian format
+ * generate a private key from a buffer
+ * @param  {string} buffer   256 bits big endian format
  * @returns {ECDSAPrivateKey}
  */
 privateKeyFromBuffer( buffer ) {
@@ -84,10 +90,10 @@ privateKeyFromBuffer( buffer ) {
     return privateKey
 }
 /**
- *  import a private key from base58 encoded string (WIF)
- * @param   {string} stringBase58  string in WIF format. ex "5HueCGU8rMjxEXxiPuD5BDk...""
+ * import a private key from base58 encoded string (WIF)
+ * @param  {string} stringBase58  string in WIF format. ex "5HueCGU8rMjxEXxiPuD5BDk...""
  * @returns {ECDSAPrivateKey} the imported private key
- * @throws {Error} if <stringBase58> is invalid
+ * @throws  {Error} if <stringBase58> is invalid
  */
 privateKeyFromStringBase58( stringBase58 ) {
     console.assert( typeof stringBase58 == 'string' ) 
@@ -107,7 +113,6 @@ privateKeyFromStringBase58( stringBase58 ) {
     var privateKey = new ECDSAPrivateKey( number );
     return privateKey
 }
-
 /**
  * get the public key associated to a private key
  * @param  {ECDSAPrivateKey} privateKey
@@ -122,7 +127,7 @@ publicKeyFromPrivateKey( privateKey ) {
  * get the public key from a serialised bufffer. 
  * @param  {string} buffer 33 bytes buffer. ex : "0200359924c406998e91d4063fe078c32825e6ac4dce0395666ed54315afa3312d"
  * @returns {ECDSAPublicKey}
- * @throws {Error} if <buffer> is invalid
+ * @throws  {Error} if <buffer> is invalid
  */
 publicKeyFromBuffer( buffer ) {
     if ( buffer.length != 33) {
@@ -146,15 +151,14 @@ publicKeyFromBuffer( buffer ) {
     var publicKey = new ECDSAPublicKey(point);
     return publicKey;
 }
-
 /** 
-/*  construct  a deterministic value k for signing.
-/*  HMAC-derived from h + privKey (see RFC 6979)
-* @see https://tools.ietf.org/html/rfc6979
-* @protected
-* @param {string} message
-* @param {ECDSAPrivateKey} privateKey
-**/
+ * construct  a deterministic value k for signing.
+ * HMAC-derived from h + privKey (see RFC 6979)
+ * @see https://tools.ietf.org/html/rfc6979
+ * @protected
+ * @param {string} message
+ * @param {ECDSAPrivateKey} privateKey
+ **/
 _rfc6979( privateKey, message ) {
     console.assert( privateKey.isPrivateKey() )
     console.assert( typeof message == 'string' ) 
@@ -189,13 +193,12 @@ _rfc6979( privateKey, message ) {
     var k =  bigInt256FromBigEndianBuffer(T)
     return k
 }
-
 /**
- * sign a message
- * 
- * @param {string} message
- * @param {ECDSAPrivateKey} privateKey
- * @param {string,optionnal} "" or "rfc6979" : https://tools.ietf.org/html/rfc6979
+ * sign a message with the private key
+ *  
+ * @param {string}           message  message to sign
+ * @param {ECDSAPrivateKey}  privateKey private key for signature
+ * @param {string,optionnal} option "" or "rfc6979" : https://tools.ietf.org/html/rfc6979
  * @returns {ECDSASignature}
  */
 signMessage( message, privateKey, option ) {
@@ -433,6 +436,5 @@ class ECDSASignatureCheck {
         this.ok      = ok
         this.message = message
     }
-    
 }//ECDSASignatureCheck
 

@@ -19,7 +19,7 @@ constructor(x,y) {
 }
 /**
  *  check if the point is equal to <pointB>
- *  @return {bool}
+ *  @return {boolean}
  */
 equal( pointB )  {
     return    this.x == pointB.x 
@@ -27,7 +27,7 @@ equal( pointB )  {
 }
 /**
  * check if a points is (0,0)
- *  @return {bool}
+ *  @return {boolean}
  */
 isZero( pointB )  {
     return    this.x == 0
@@ -73,16 +73,24 @@ constructor() {
     console.assert( this.pointOnCurve(this.G) );  
 }
 
-// check if a point is on the curve
-//  y^{2}=x^{3}+ax+b
-pointOnCurve( pointA )  {
-    var Y2 =  this.field.square( pointA.y );
-    var X3 =  this.field.cube(   pointA.x );
-    // simplication furmula a == 0
+/** 
+ * check if a point is on the curve
+ *  y^{2}=x^{3}+ax+b
+ * @param {ECPoint} point
+ * @return {boolean} true if a point is on the curve
+ */
+pointOnCurve( point )  {
+    // calculates X^2 and Y^3
+    var Y2 =  this.field.square( point.y );
+    var X3 =  this.field.cube(   point.x );
+    // simplication formula if a == 0
     return Y2 ==  this.field.add(X3,  this.b );
 }
-
-// 1 Point doubling
+/** 
+ *  Point doubling 
+ * @param {ECPoint} pointA a point on the curve
+ * @return {ECPoint} 2 * pointA
+ */
 pointDouble( pointA )  {
     // formulas can be found here: 
     // https://en.wikipedia.org/wiki/Elliptic_curve_point_multiplication
@@ -109,8 +117,12 @@ pointDouble( pointA )  {
     console.assert( this.pointOnCurve(pointRes) );
     return pointRes;
 }
-
-// 2 Point Addition
+/** 
+ * 2 Point Addition
+ * @param {ECPoint} pointA a point on the curve
+ * @param {ECPoint} pointB a point on the curve, can be equal to pointA
+ * @return {ECPoint} pointA + pointB
+ */
 pointAdd( pointA, pointB )  {
     // A + 0 = A
     if (pointB.isZero()) return pointA;
@@ -142,9 +154,12 @@ pointAdd( pointA, pointB )  {
     console.assert( this.pointOnCurve(pointRes) );    
     return pointRes;    
 }
-
-// Multiplication of a point by a big integer
-// aka scalar multiplication
+/** 
+ *  Multiplication of a point by a big integer (scalar multiplication)
+ * @param {ECPoint} point a point on the curve
+ * @param {BigInt} number 256 bits integer
+ * @return {ECPoint} number * point
+ */
 pointScalarMult( point, number ) {
     var pointResult = new ECPoint(0,0) 
 
@@ -166,7 +181,11 @@ pointScalarMult( point, number ) {
      console.assert( this.pointOnCurve(pointResult) || pointResult.isZero() );   
      return pointResult;
 }
-// Multiplication of the generator point by a big integer
+/** 
+ *  Multiplication of the generator point by a big integer (scalar multiplication)
+ * @param {BigInt} number 256 bits integer
+ * @return {ECPoint} number * generator point
+ */
 pointGeneratorScalarMult(  number ) {
  
      return this.pointScalarMult( this.G, number ) ;
@@ -195,6 +214,5 @@ calculateYFromX( x, resultIsEven) {
     else
         return y2
 }
-
 
 }// class EllipticCurveSecp256k1

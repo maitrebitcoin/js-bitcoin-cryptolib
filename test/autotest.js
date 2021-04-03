@@ -25,7 +25,7 @@ function autotest_all(fonError, fonStepOK, fonEnd ){
 
     /**
      * run  test
-     * @param {int} numTest 
+     * @param {number} numTest 
      * @async
      */     
     function _runOneTestAync(numTest) {

@@ -184,12 +184,12 @@ function bip39phraseFromRandomBuffer( randomBffer ) {
 
 /**
  * 
- * key derivation functions 
+ * PBKDF2 key derivation functions 
  * @see https://en.wikipedia.org/wiki/PBKDF2
  * @param {function} hashFunction * 
  * @param {string} password 
  * @param {string} salt 
- * @param {int} iteration 
+ * @param {number} iteration 
  * @return {string} 512 bits buffer
  * 
  */
@@ -285,7 +285,7 @@ var WordList_english = [
 
 /**
  * get a word in the list from index. 
- * @param {int} index  word number
+ * @param {number} index  word number
  * @return {string} an english word. ex : "reward"
  */
 function getBip39WordFromIndice( index ) {
@@ -294,7 +294,7 @@ function getBip39WordFromIndice( index ) {
 /**
  * get a word index from its value 
  * @param {string} word an english word. ex : "reward"
- * @return {int} index. start at 0
+ * @return {number} index. start at 0
  * @throws {Error} if <word> is invalid
  */
 var wordToInt=[]; // global hash table

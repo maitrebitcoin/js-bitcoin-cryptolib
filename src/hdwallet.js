@@ -84,7 +84,6 @@ initFromExtendedKey( extKeyString58 ) {
     else
         this.extPublicKey_cache[derivationPath] = extendedKey
 }
-
 /**
  *  get the master key
  * @public
@@ -165,8 +164,8 @@ getExtendedPublicKeyFromPath( derivationPath ) {
  *  get a public key for a derivation path + index
  * @public
  * @param   {string}  derivationPath the derivation path. ex: "m/44'/0'/0'/0"
- * @param   {int}     index          index of the child key. 0 is the first accout
- * @returns {ECDSA.PublicLKey} the extended private key 
+ * @param   {number}     index          index of the child key. 0 is the first accout
+ * @returns {ECDSAPublicLKey} the extended private key 
  * @throws  {Error} if <derivationPath> is invalid
  */
 getPublicKeyFromPath( derivationPath, index ) {
@@ -180,8 +179,8 @@ getPublicKeyFromPath( derivationPath, index ) {
  *  get a private key for a derivation path + index
  * @public
  * @param   {string}  derivationPath the derivation path. ex: "m/44'/0'/0'/0"
- * @param   {int}     index          index of the child key. 0 is the first accout
- * @returns {ECDSA.PublicLKey} the extended private key 
+ * @param   {number}     index          index of the child key. 0 is the first accout
+ * @returns {ECDSAPublicLKey} the extended private key 
  * @throws  {Error}           if <derivationPath> is invalid
  */
 getPrivateKeyFromPath( derivationPath, index ) {
@@ -211,7 +210,7 @@ getExtendedKeyFromStringBase58( strBase58 )
  *   internal Child key derivation (CKD) functions for rprivate keys
  * @protected
  * @param  {HdWalletExtendedKey} extendedKey parent key
- * @param  {integer} i key index (childNumber)
+ * @param  {number} i key index (childNumber)
  * @return {HdWalletExtendedKey} child key
  * @throws {Error} if the operation is not possible
  */
@@ -277,7 +276,7 @@ _ckdPrivatr( extendedKey, i ) {
 }
 
 /**
- * parse a derivation path
+ * internal function to parse a derivation path
  * @protected
  * @param   {string}  derivationPath  the derivation path. ex: "0'/1/2"
  * @returns {struct}  ex : { leftPath='0'/1',index:2,hardened:false  }
@@ -384,201 +383,201 @@ _getPublicKeyFromPathR( derivationPath ) {
 
 // represent a extended key for a HdWallet
 class HdWalletExtendedKey  { 
-        /**
-         * basic constructeur. to be completed with a call to initAsPrivate() or initFromStringBase58()
-         * @public
-         */
-        constructor() {
+    /**
+     * basic constructeur. to be completed with a call to initAsPrivate() or initFromStringBase58()
+     * @public
+     */
+    constructor() {
+    }
+    /**
+     *  init as a private key
+     *  @param {bigInt} key        256 bits ecdsa private key
+     *  @param {buffer} chainCode  256 bits chain code
+     *  @param {HdWalletExtendedKey} parentKey, optionnal (for mastker key only)
+     *  @param {ECDSA} ecdsa                     an instance of the ECDSA class to calculate keys. required.
+     */
+    initAsPrivate( key, chainCode, parentKey, ecdsa, walletType) {
+        console.assert( typeof key == 'bigint' )
+        console.assert( typeof chainCode == 'string' )
+        console.assert( chainCode.length == 32,"chainCode must be 256 bits")     
+        console.assert( ecdsa )     
+        console.assert( walletType )    
+
+        this.private    = true;
+        this.privateKey = ecdsa.privateKeyFromBigInt( key );
+        this.chainCode  = chainCode;        
+        this.walletType = walletType
+        if (parentKey) {
+            console.assert( parentKey.private, "parent of a private key must be a private key")          
+            // calculate key identifier : 32 first bit of hash( publickey )       
+            var publicKey           = ecdsa.publicKeyFromPrivateKey( parentKey.privateKey )
+            var publicKeySerialized = publicKey.toBuffer();
+            var keyId               = ripemd160( sha256( publicKeySerialized ) ) // same hash as bitcoin public adress
+            // the first 32 bits of the identifier 
+            this.parentFingerprint = int32FromBigEndianBuffer( keyId.substr(0,4) )
         }
-        /**
-         *  init as a private key
-         *  @param {bigInt} key        256 bits ecdsa private key
-         *  @param {buffer} chainCode  256 bits chain code
-         *  @param {HdWalletExtendedKey} parentKey, optionnal (for mastker key only)
-         *  @param {ECDSA} ecdsa                     an instance of the ECDSA class to calculate keys. required.
-         */
-        initAsPrivate( key, chainCode, parentKey, ecdsa, walletType) {
-            console.assert( typeof key == 'bigint' )
-            console.assert( typeof chainCode == 'string' )
-            console.assert( chainCode.length == 32,"chainCode must be 256 bits")     
-            console.assert( ecdsa )     
-            console.assert( walletType )    
- 
-            this.private    = true;
-            this.privateKey = ecdsa.privateKeyFromBigInt( key );
-            this.chainCode  = chainCode;        
-            this.walletType = walletType
-            if (parentKey) {
-                console.assert( parentKey.private, "parent of a private key must be a private key")          
-                // calculate key identifier : 32 first bit of hash( publickey )       
-                var publicKey           = ecdsa.publicKeyFromPrivateKey( parentKey.privateKey )
-                var publicKeySerialized = publicKey.toBuffer();
-                var keyId               = ripemd160( sha256( publicKeySerialized ) ) // same hash as bitcoin public adress
-                // the first 32 bits of the identifier 
-                this.parentFingerprint = int32FromBigEndianBuffer( keyId.substr(0,4) )
-            }
-            else {
-                this.parentFingerprint = 0 // master key
-            }
+        else {
+            this.parentFingerprint = 0 // master key
         }
-        /**
-         *  init as a public key
-         *  @param {CEDSA.PublicKey} key        ecdsa public key
-         *  @param {buffer}          chainCode  256 bits chain code
-         */        
-        initAsPublicKey( key, chainCode, walletType ) {
-            console.assert( key.isPublicKey() )
-            console.assert( typeof chainCode == 'string' )
-            console.assert( chainCode.length == 32,"chainCode must be 256 bits")     
-            console.assert( walletType ) 
-  
-            this.private   = false;
-            this.publicKey = key;
-            this.chainCode = chainCode;   
-            this.walletType = walletType     
+    }
+    /**
+     *  init as a public key
+     *  @param {CEDSA.PublicKey} key        ecdsa public key
+     *  @param {buffer}          chainCode  256 bits chain code
+     */        
+    initAsPublicKey( key, chainCode, walletType ) {
+        console.assert( key.isPublicKey() )
+        console.assert( typeof chainCode == 'string' )
+        console.assert( chainCode.length == 32,"chainCode must be 256 bits")     
+        console.assert( walletType ) 
+
+        this.private   = false;
+        this.publicKey = key;
+        this.chainCode = chainCode;   
+        this.walletType = walletType     
+    }
+    /**
+     * returns the extended public key if we are a private key
+     * @param  {ECDSA} ecdsa  an instance of the ECDSA class to calculate keys. 
+     * @return {HdWalletExtendedKey} the corresponding public extended key 
+    */
+    getExtendedPublicKey(ecdsa) {
+        console.assert( ecdsa, "ecdsa must be present" )
+        console.assert( this.isPrivateKey() )
+        // calculate  cdsa public key
+        var publicKey  = ecdsa.publicKeyFromPrivateKey( this.privateKey )
+        // create an extended key
+        var resKey = new HdWalletExtendedKey();
+        resKey.initAsPublicKey(  publicKey,  this.chainCode,  this.walletType );
+        resKey.parentFingerprint = this.parentFingerprint 
+        resKey.depth             = this.depth
+        resKey.childNumber       = this.childNumber
+        return resKey;w
+    }
+    isExtendedKey() {return true;}
+    isPrivateKey() {return this.private;}
+    /** 
+    * convert the extented key to raw buffer (serialisation)
+    * * @returns {buffer} binairy buffer. ex: "0488ade400000000000000000096cfbe121203639....""
+    */
+    toRawBuffer() {
+        //  <this.depth, .parentFingerprint, .childNumber>  bmust be defined a this point
+        console.assert( typeof this.depth == 'number' )      
+        console.assert( typeof this.parentFingerprint == 'number' )      
+        console.assert( typeof this.childNumber == 'number' )      
+        console.assert( this.depth >=  0 )
+        console.assert( this.depth <= 255 )            
+        var buf = '';
+        // 4 byte: version bytes
+        var nVersion = this._getVersionHeader()
+        buf += bigEndianBufferFromInt32(nVersion) // mainnet: 0x0488B21E public, 0x0488ADE4 private
+        // 1 byte: depth: 0x00 for master nodes, 0x01 for level-1 derived keys, ....
+        buf +=  String.fromCharCode(this.depth   )
+        // 4 bytes: the fingerprint of the parent's key (0x00000000 if master key)
+        buf += bigEndianBufferFromInt32(this.parentFingerprint)
+        // 4 bytes: child number. This is ser32(i) for i in xi = xpar/i, with xi the key being serialized. (0x00000000 if master key)
+        buf += bigEndianBufferFromInt32(this.childNumber)
+        // 32 bytes: the chain code
+        buf +=  this.chainCode
+        // 33 bytes: the public key or private key data (serP(K) for public keys, 0x00 || ser256(k) for private keys)
+        if (this.private)
+            buf += "\x00" + bigEndianBufferFromBigInt256( this.privateKey.value )
+        else
+            buf += this.publicKey.toBuffer()
+        console.assert( buf.length == 78)
+        return buf
+    }
+    /** 
+    * convert the extented key to a base58 endoded string
+    * @returns {string} ex: "xprv9s21ZrQH143K3ZSfM..."      
+    */
+    toStringBase58() {
+        // encode buffer with CRC in base 58
+        var buffer =  this.toRawBuffer();
+        return base58CheckEncode( buffer )
+    }
+    /** 
+    * init from a base58 encoding
+    * @param   {string} str58 a base58 endoded string 
+    * @throws  {Error} if <str58> is invalid
+    */
+    initFromStringBase58( str58 ) {
+        // decode string to buffer. throw Error if <str58> is invalid
+        var buffer =  base58CheckDecode(str58)
+        // check decoded buffer length
+        if (buffer.length!=78) 
+            throw _BuildError( LibErrors.Invalid_extkey_buffer_len,  {length:buffer.length }); // failed
+        // get 1st 4 byte => version bytes
+        var version    = int32FromBigEndianBuffer( buffer.substring(0,4) )
+        switch (version) {
+            case SignatureHeader.PrivateKey_legacy:
+                this.private     =  true
+                this.walletType  =  WalletType.LEGACY
+                break;
+            case SignatureHeader.PublicKey_legacy:
+                this.private     =  false
+                this.walletType  =  WalletType.LEGACY
+                break;
+            case SignatureHeader.PrivateKey_segwit:
+                this.private     =  true
+                this.walletType  =  WalletType.SEGWIT 
+                break;
+            case SignatureHeader.PublicKey_segwit:
+                this.private     =  false
+                this.walletType  =  WalletType.SEGWIT 
+                break;        
+            case SignatureHeader.PrivateKey_sgNative:
+                this.private     =  true
+                this.walletType  =  WalletType.SEGWIT_NATIVE 
+                break;                                   
+            case SignatureHeader.PublicKey_sgNative:
+                this.private     =  false
+                this.walletType  =  WalletType.SEGWIT_NATIVE 
+                break;                                
+            default:
+                throw _BuildError( LibErrors.Invalid_extkey_buffer_header, { version:hex(version) }) 
         }
-        /**
-         * returns the extended public key if we are a private key
-         * @param  {ECDSA} ecdsa  an instance of the ECDSA class to calculate keys. 
-         * @return {HdWalletExtendedKey} the corresponding public extended key 
-        */
-        getExtendedPublicKey(ecdsa) {
-            console.assert( ecdsa, "ecdsa must be present" )
-            console.assert( this.isPrivateKey() )
-            // calculate  cdsa public key
-            var publicKey  = ecdsa.publicKeyFromPrivateKey( this.privateKey )
-            // create an extended key
-            var resKey = new HdWalletExtendedKey();
-            resKey.initAsPublicKey(  publicKey,  this.chainCode,  this.walletType );
-            resKey.parentFingerprint = this.parentFingerprint 
-            resKey.depth             = this.depth
-            resKey.childNumber       = this.childNumber
-            return resKey;w
+        console.assert( this._getVersionHeader() == version )
+        // 1 byte: depth: 
+        this.depth      =  buffer.charCodeAt(4)
+        // 4 bytes: the fingerprint of the parent's key (0x00000000 if master key)
+        this.parentFingerprint = int32FromBigEndianBuffer( buffer.substring(5,9) )
+        // 4 bytes: child number. This is ser32(i) for i in xi = xpar/i, with xi the key being serialized. (0x00000000 if master key)
+        this.childNumber = int32FromBigEndianBuffer( buffer.substring(9,13) ) >>> 0
+        // 32 bytes: the chain code    
+        this.chainCode       =                       buffer.substring(13,45) 
+        // 33 bytes: the public key or private key data (serP(K) for public keys, 0x00 || ser256(k) for private keys)
+        if (this.private) {
+            var  privkeyVal = bigInt256FromBigEndianBuffer( buffer.substring(46,78) )
+            this.privateKey = new ECDSAPrivateKey( privkeyVal )
         }
-        isExtendedKey() {return true;}
-        isPrivateKey() {return this.private;}
-        /** 
-        * convert the extented key to raw buffer (serialisation)
-        * * @returns {buffer} binairy buffer. ex: "0488ade400000000000000000096cfbe121203639....""
-        */
-        toRawBuffer() {
-            //  <this.depth, .parentFingerprint, .childNumber>  bmust be defined a this point
-            console.assert( typeof this.depth == 'number' )      
-            console.assert( typeof this.parentFingerprint == 'number' )      
-            console.assert( typeof this.childNumber == 'number' )      
-            console.assert( this.depth >=  0 )
-            console.assert( this.depth <= 255 )            
-            var buf = '';
-            // 4 byte: version bytes
-            var nVersion = this._getVersionHeader()
-            buf += bigEndianBufferFromInt32(nVersion) // mainnet: 0x0488B21E public, 0x0488ADE4 private
-            // 1 byte: depth: 0x00 for master nodes, 0x01 for level-1 derived keys, ....
-            buf +=  String.fromCharCode(this.depth   )
-            // 4 bytes: the fingerprint of the parent's key (0x00000000 if master key)
-            buf += bigEndianBufferFromInt32(this.parentFingerprint)
-            // 4 bytes: child number. This is ser32(i) for i in xi = xpar/i, with xi the key being serialized. (0x00000000 if master key)
-            buf += bigEndianBufferFromInt32(this.childNumber)
-            // 32 bytes: the chain code
-            buf +=  this.chainCode
-            // 33 bytes: the public key or private key data (serP(K) for public keys, 0x00 || ser256(k) for private keys)
-            if (this.private)
-                buf += "\x00" + bigEndianBufferFromBigInt256( this.privateKey.value )
-            else
-                buf += this.publicKey.toBuffer()
-            console.assert( buf.length == 78)
-            return buf
+        else {
+            var pubKeyBuf   =                               buffer.substring(45,78) 
+            var ecdsa = new ECDSA()                  
+            this.publicKey = ecdsa.publicKeyFromBuffer(pubKeyBuf);
         }
-        /** 
-        * convert the extented key to a base58 endoded string
-        * @returns {string} ex: "xprv9s21ZrQH143K3ZSfM..."      
-        */
-        toStringBase58() {
-            // encode buffer with CRC in base 58
-            var buffer =  this.toRawBuffer();
-            return base58CheckEncode( buffer )
-        }
-        /** 
-        * init from a base58 encoding
-        * @param   {string} str58 a base58 endoded string 
-        * @throws  {Error} if <str58> is invalid
-        */
-        initFromStringBase58( str58 ) {
-            // decode string to buffer. throw Error if <str58> is invalid
-            var buffer =  base58CheckDecode(str58)
-            // check decoded buffer length
-            if (buffer.length!=78) 
-                throw _BuildError( LibErrors.Invalid_extkey_buffer_len,  {length:buffer.length }); // failed
-            // get 1st 4 byte => version bytes
-            var version    = int32FromBigEndianBuffer( buffer.substring(0,4) )
-            switch (version) {
-                case SignatureHeader.PrivateKey_legacy:
-                    this.private     =  true
-                    this.walletType  =  WalletType.LEGACY
-                    break;
-                case SignatureHeader.PublicKey_legacy:
-                    this.private     =  false
-                    this.walletType  =  WalletType.LEGACY
-                    break;
-                case SignatureHeader.PrivateKey_segwit:
-                    this.private     =  true
-                    this.walletType  =  WalletType.SEGWIT 
-                    break;
-                case SignatureHeader.PublicKey_segwit:
-                    this.private     =  false
-                    this.walletType  =  WalletType.SEGWIT 
-                    break;        
-                case SignatureHeader.PrivateKey_sgNative:
-                    this.private     =  true
-                    this.walletType  =  WalletType.SEGWIT_NATIVE 
-                    break;                                   
-                case SignatureHeader.PublicKey_sgNative:
-                    this.private     =  false
-                    this.walletType  =  WalletType.SEGWIT_NATIVE 
-                    break;                                
-                default:
-                    throw _BuildError( LibErrors.Invalid_extkey_buffer_header, { version:hex(version) }) 
-            }
-            console.assert( this._getVersionHeader() == version )
-            // 1 byte: depth: 
-            this.depth      =  buffer.charCodeAt(4)
-            // 4 bytes: the fingerprint of the parent's key (0x00000000 if master key)
-            this.parentFingerprint = int32FromBigEndianBuffer( buffer.substring(5,9) )
-            // 4 bytes: child number. This is ser32(i) for i in xi = xpar/i, with xi the key being serialized. (0x00000000 if master key)
-            this.childNumber = int32FromBigEndianBuffer( buffer.substring(9,13) ) >>> 0
-            // 32 bytes: the chain code    
-            this.chainCode       =                       buffer.substring(13,45) 
-            // 33 bytes: the public key or private key data (serP(K) for public keys, 0x00 || ser256(k) for private keys)
-            if (this.private) {
-                var  privkeyVal = bigInt256FromBigEndianBuffer( buffer.substring(46,78) )
-                this.privateKey = new ECDSAPrivateKey( privkeyVal )
-            }
-            else {
-                var pubKeyBuf   =                               buffer.substring(45,78) 
-                var ecdsa = new ECDSA()                  
-                this.publicKey = ecdsa.publicKeyFromBuffer(pubKeyBuf);
-            }
-            // success
-        }
-        /**
-         * get version header
-         * @returns {int} ex : SIGNATURE_PrivateKey_Legacy
-         */
-        _getVersionHeader()  {
-            if  (this.walletType == WalletType.SEGWIT_NATIVE )  {
-                return this.private  ? SignatureHeader.PrivateKey_sgNative  
-                                     : SignatureHeader.PublicKey_sgNative;
-             }            
-            if  (this.walletType == WalletType.SEGWIT )  {
-               return this.private  ? SignatureHeader.PrivateKey_segwit  
-                                    : SignatureHeader.PublicKey_segwit;
-            }
-            if  (this.walletType == WalletType.LEGACY )  {
-                return this.private ? SignatureHeader.PrivateKey_legacy  
-                                    : SignatureHeader.PublicKey_legacy;
+        // success
+    }
+    /**
+     * get version header
+     * @returns {number} ex : SIGNATURE_PrivateKey_Legacy
+     */
+    _getVersionHeader()  {
+        if  (this.walletType == WalletType.SEGWIT_NATIVE )  {
+            return this.private  ? SignatureHeader.PrivateKey_sgNative  
+                                    : SignatureHeader.PublicKey_sgNative;
             }            
-            // if the type of wallet is not set, return legacy values
-            return this.private ? SignatureHeader.PrivateKey_legacy  : SignatureHeader.PublicKey_legacy;
-        }        
-    };// static ExtendedKey = class {
+        if  (this.walletType == WalletType.SEGWIT )  {
+            return this.private  ? SignatureHeader.PrivateKey_segwit  
+                                : SignatureHeader.PublicKey_segwit;
+        }
+        if  (this.walletType == WalletType.LEGACY )  {
+            return this.private ? SignatureHeader.PrivateKey_legacy  
+                                : SignatureHeader.PublicKey_legacy;
+        }            
+        // if the type of wallet is not set, return legacy values
+        return this.private ? SignatureHeader.PrivateKey_legacy  : SignatureHeader.PublicKey_legacy;
+    }        
+};// static ExtendedKey = class {
 
 

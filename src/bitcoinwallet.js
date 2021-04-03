@@ -85,8 +85,6 @@ initFromExtendedKey( extKey58 ) {
     this.HdWallet.initFromExtendedKey( extKey58 )
   
 }
-
-
 /**
  *  get the extend master key as a string
  * @public
@@ -102,8 +100,8 @@ getMasterKey() {
  *  get a public bitcoin address. ex : "bc1qn085dr40dcrhejgve4sky.." 
  * 
  * @public
- * @param   {int}    [index=0]      index of the child key. 0 is the first accout
- * @param   {bool}   [change=false] is the adress for change ?
+ * @param  {number}  [index=0]      index of the child key. 0 is the first accout
+ * @param  {boolean} [change=false] is the adress for change ?
  * @returns {string} the bitcoin address. ex : "bc1qn085dr40dcrhejgve4sky.." 
  * @throws  {Error}  if the wallet is non initialised, or invalid
  */
@@ -152,14 +150,13 @@ getExtendedPrivateKey() {
     var extPrivKey   = this.HdWallet.getExtendedPrivateKeyFromPath( this.mainDerivationPath )
     return extPrivKey.toStringBase58()
 }
-
 /**
  *  get a sewigt native adress 
  *  
  * @public
  * @param   {string}  derivationPath the derivation path. ex: "m/84'/0'/0'/0/0"
  * @returns {string}  bech 32 address. ex : "bc1qn085dr40dcrhejgve4sky.."      
-  * @throws  {Error} if <derivationPath> is invalid
+ * @throws  {Error} if <derivationPath> is invalid
  * @see https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki
  */
 getSegwitNativePublicAdressFromPath( derivationPath ) {
@@ -236,7 +233,7 @@ getRandomBuffer( nbBit ) {
 /**
 /* get the main derivation path from type
  * @returns {string} the mains derivation path.
- * @throws {struct} if the wallet type is invalid
+ * @throws  {struct} if the wallet type is invalid
 */
  _derivationPathFromType( walletType ) {
     switch (walletType) {
@@ -248,7 +245,6 @@ getRandomBuffer( nbBit ) {
     }
 }
 
+}// class BitcoinWallet
 
-
-}
 

@@ -356,7 +356,11 @@ function sha512( buffer ) {
 
 }//function sha256( buffer  )
 
-// XOR each byte of a buffer
+/** XOR each byte of a buffer
+ * @param {string} bufA binary buffer
+ * @param {string} bufB binary buffer, must be of the same size than <bufA>
+ * @return {string} binary buffer : bufA xor bufB
+ */
 function xorBuffer( bufA, bufB ) {
     console.assert( bufA.length == bufB.length )
     var res='';
@@ -371,6 +375,11 @@ function xorBuffer( bufA, bufB ) {
 
 /**
   * HMAC function
+  * @param {string} key 
+  * @param {string} message 
+  * @param {function} hash hash function. proto  hBuffer = hash(bufferSrc).  ex : sha256
+  * @param {number} blocksize The block size of the hash function in byte. ex 64 for sha256
+  * @param {number} outpusize The output size of the hash function in byte. ex 32 for sha256
   * @see https://en.wikipedia.org/wiki/HMAC
   * @see https://tools.ietf.org/html/rfc2104.html
   */
@@ -417,9 +426,6 @@ function hmac_sha256( key, message ) {
     console.assert( hash.length == 32 )    
     return hash
 }
-
-
-
 /**
  * hash a buffer using the ripemd-160 algorithm
  * @see https://en.bitcoin.it/wiki/RIPEMD-160

@@ -1,5 +1,5 @@
+.initFromExtendedKey support for more format
 .sample : debug Copy in IOS
-.check all comments format
 .generate a doc
 .node.js integration / sample
 .psbt generation. bip 174
