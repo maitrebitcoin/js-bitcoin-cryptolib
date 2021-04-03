@@ -49,6 +49,7 @@ function onCopy(elementId) {
     }  
       // Remove the selections 
     window.getSelection().removeAllRanges();
+    document.body.removeChild(elementEdit)
 }
 
 /**
