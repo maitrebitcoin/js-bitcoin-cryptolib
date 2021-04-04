@@ -18,7 +18,7 @@ function onCopy(elementId) {
     // dato to copy into de clipboard
     var data    = element.innerHTML
 
-    // hack for IOS
+    // hack for IOS  : create a temp input control. required for execCommand('copy') to work
     var elementEdit = document.createElement("input")
     elementEdit.contentEditable = true;
     elementEdit.readOnly  = false;
@@ -29,10 +29,7 @@ function onCopy(elementId) {
     // select the element
     range.selectNodeContents(elementEdit);  
     elementEdit.setSelectionRange(0, 999999);
-    
-    var s = window.getSelection();
-    s.removeAllRanges();
-    s.addRange(range);
+
   
     try {  
       //  copy to clipboard
