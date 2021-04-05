@@ -34,15 +34,16 @@ function getRandomBigInt256() {
 const DERHeader_INT    = "\x02";
 const DERHeader_STRUCT = "\x30";
 
-// Main class
-// ecdsa with secp256k1 parameters
-// ex usage :
-//    var priv = ecdsa.newPrivateKey();
-//    var pub  = ecdsa.publicKeyFormPrivateKey(priv);
-//    var signature = ecdsa.signMessage( "my message", priv )
-//    var res       = ecdsa.verifySignature( "my message", signature, pub )
-//    if (!res.ok) alert(res.message)
-
+/** 
+* Main class
+* ecdsa with secp256k1 parameters
+* ex usage :
+*    var priv = ecdsa.newPrivateKey();
+*    var pub  = ecdsa.publicKeyFormPrivateKey(priv);
+*    var signature = ecdsa.signMessage( "my message", priv )
+*    var res       = ecdsa.verifySignature( "my message", signature, pub )
+*    if (!res.ok) alert(res.message)
+*/
 class ECDSA { 
 
 /**
@@ -198,7 +199,7 @@ _rfc6979( privateKey, message ) {
  *  
  * @param {string}           message  message to sign
  * @param {ECDSAPrivateKey}  privateKey private key for signature
- * @param {string,optionnal} option "" or "rfc6979" : https://tools.ietf.org/html/rfc6979
+ * @param {string}           [option] "" or "rfc6979" : https://tools.ietf.org/html/rfc6979
  * @returns {ECDSASignature}
  */
 signMessage( message, privateKey, option ) {

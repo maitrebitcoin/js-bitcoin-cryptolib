@@ -240,6 +240,7 @@ getRandomBuffer( nbBit ) {
 }
 /**
 /* get the main derivation path from type
+ * @private
  * @returns {string} the mains derivation path.
  * @throws  {struct} if the wallet type is invalid
 */

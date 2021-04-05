@@ -11,7 +11,7 @@
 
 /**
  * convert a numbers or a buffer into hexadecimal string.
- * @param   {string,number,bingint} x the value or string/buffer to convert
+ * @param   {string|number|bingint} x the value or string/buffer to convert
  * @returns {string} ex : "79BE667EF9DCBBAC5"
  */
 function hex( x ){

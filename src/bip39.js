@@ -116,7 +116,7 @@ function checkPhrase( mnemonicPhrase, ignoreCrc  )
 /**
  * get a list of all valid words to end a bip39 compatible phrase.
  * @param {string} incompletePhrase  phrase minus 1 word. ex : "pistol thunder want public animal educate laundry all churn federal slab behind media front"
- * @return {array of string} all valid  word.
+ * @return {Array.string} all valid  word.
  */
 function getAllValidLastWord( incompletePhrase ) {
     // test if the beginning is correct
