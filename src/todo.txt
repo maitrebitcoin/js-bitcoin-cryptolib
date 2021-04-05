@@ -1,4 +1,3 @@
-.generate a doc
 .node.js integration / sample
 .psbt generation. bip 174
 .psbt signing
