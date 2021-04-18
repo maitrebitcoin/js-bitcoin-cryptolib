@@ -1,7 +1,6 @@
-.node.js integration / sample
-.psbt generation. bip 174
-.psbt signing
 .use lib with WD lib to double-check
 
+.psbt generation. bip 174
+.psbt signing
 
 .QR code generation in sample
