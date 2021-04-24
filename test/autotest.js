@@ -900,10 +900,19 @@ function autotest_BitcoinWallet( fonError ) {
     }
 
     // test some values 
+    _test_initFromPhrase( "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",  
+                          "bc1qcr8te4kr609gcawutmrza0j4xv80jy8z306fyu" )                          
+    // random from https://iancoleman.io/bip39/
     _test_initFromPhrase( "debate nominee board frost please scale song pepper local shoulder ski sweet",  
                           "bc1qzgcnf20kc96jx0ylftkgjadhle6g06p3r3vh04" )
     _test_initFromPhrase( "veteran okay pattern disagree rose panic bacon gold earth bulb car donate",  
                           "bc1q9snsfkvvpuzggwk7y9yuv03qxcly35esrrn4tf" )
+    _test_initFromPhrase( "canvas layer dress switch brisk drive liberty poverty universe entire scrap wild false turn luggage",  
+                          "bc1qlpmqgx2qaygj6apckp6k99lj7xzgrwx5u4e4fu" )     
+    _test_initFromPhrase( "letter pyramid approve wage urge adult stable before pupil learn pyramid position tree shed inflict swarm know service", 
+                          "bc1qrk9nr456q3dsrdj9qlgjhqcxcjn9lf85ls0tke" )     
+    _test_initFromPhrase( "chat cattle fancy later waste twenty add calm change daughter chicken year zoo dream absorb soul obvious power twin topic stereo vendor bridge ketchup", 
+                          "bc1qhk3vaj7du63mdznaq05y6rnl0jwk9y2dv4flwa" )     
 
     // test that should fail
     _test_err("")
