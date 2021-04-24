@@ -23,14 +23,13 @@ Generate a BIP-49 compatible Bitcoin account.  ex : "3BRTnZiug1MdARwxbSw9KDPfxjD
 ```
     // create a new wallet 
     var myWallet   = new BitcoinWallet(  WalletType.SEGWIT_NATIVE  );
-    // generate a random buffer
-    var randomBuffer = myWallet.getRandomBuffer(128)
-    // calculate the mnemonic phrase from this buffer
+    // generate from random 
+    gWallet.initFromRandom()
+    // get the mnemonic phrase for backup
     // ex : "pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
-    var phrase       = bip39phraseFromRandomBuffer(randomBuffer)
-    var seed         = seedFromPhrase(phrase)
-    // use the seed a the base for all adresses calculations
-    myWallet.initFromSeed(seed)
+    var phrase       = gWallet.phrase
     // get the 1st public adress. 
-    var pubAdress0   =  myWallet.getPublicAddress(0)
+    // ex : "bc1qacpwyw3hl4ley896a2l7alszmanlnu45u24jkl"
+    var pubAdress0   =  gWallet.getPublicAddress(0)
+
 ```
