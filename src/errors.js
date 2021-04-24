@@ -60,7 +60,7 @@ var TabInfoErrors = [
     { id:LibErrors.Invalid_bech32_len,           message:"Invalid bech32 string : too short" },
     { id:LibErrors.Invalid_bech32_crc,           message:"Invalid bech32 string crc (some caracters are incorrect or misplaced)" },
     { id:LibErrors.Impossible_pubkey_derivation, message:"Hardened derivation of a public key is not possible" },
-    { id:LibErrors.Invalid_derivation_path,      message:"invalid derivation path format" },
+    { id:LibErrors.Invalid_derivation_path,      message:"Invalid derivation path format" },
     { id:LibErrors.Invalid_extkey_buffer_len,    message:"Invalid extended key buffer length (must be 78 byte long)" },
     { id:LibErrors.Invalid_extkey_initwallet,    message:"Invalid extended key for wallet restoration" },
     { id:LibErrors.MasterKey_notAvail,           message:"Cannot calculate key. Seed is required but unknown (only a extended key is known)." }
