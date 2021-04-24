@@ -45,19 +45,16 @@ async function recoverAccount() {
 
     //get phrase
     var phrase  = document.getElementById("word").value 
-    // calc seed
+    // create a new wallet 
+    gWallet   = new BitcoinWallet(  WalletType.SEGWIT_NATIVE  );
     try {
-        var seed         = seedFromPhrase(phrase)
+        // try to init from phrase
+        gWallet.initFromMnemonicPhrase(phrase)
     }
     catch (error) {
         showError(error)
         return;
-    }
-
-    // create a new wallet 
-    gWallet   = new BitcoinWallet(  WalletType.SEGWIT_NATIVE  );
-    // use the seed a the base for all adresses calculations
-    gWallet.initFromSeed(seed)
+    }    
     // get the 1st public adress. 
     gNumAccount = 0;
     var pubAdress0   =  gWallet.getPublicAddress(gNumAccount)

@@ -14,7 +14,7 @@
 /**
  *  convert a mnemonic pharase to a buffer that can be used as a seed
  * @param {string} mnemonicPhrase UTF-8 NFKD phrase. ex : "pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
-*  @param {string} password optionnal additional password. 
+ * @param {string} [password] optionnal additional password. 
  * @return {string} 512 bits seed
  */
 function seedFromPhrase(  mnemonicPhrase,  password ) {
@@ -91,7 +91,7 @@ function checkPhrase( mnemonicPhrase, ignoreCrc  )
     if (crcCalc!=crcData) {
         if (ignoreCrc)
             return false;
-        throw _BuildError( LibErrors.Invalid_mnemonic_phrase_size, {crcCalc:crcCalc, crcData:crcData })
+        throw _BuildError( LibErrors.Invalid_mnemonic_phrase_crc, {crcCalc:crcCalc, crcData:crcData })
     }
 
     // Check OK
@@ -307,7 +307,7 @@ function _getBip39IndiceFromWord( word ) {
     // get index
     var index = wordToInt[word];
     if (index === undefined)  {
-         throw _BuildError( LibErrors.Invalid_mnemonic_phrase_size, { word:word } );
+         throw _BuildError( LibErrors.Invalid_mnemonic_phrase_word, { word:word } );
     }
     return index;
 }

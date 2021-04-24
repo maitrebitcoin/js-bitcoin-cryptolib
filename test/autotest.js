@@ -17,9 +17,10 @@
  * 
 */
 function autotest_all(fonError, fonStepOK, fonEnd ){
-    var tabTestName  = new Array( "encodeDecode", "bech32", 
+    var tabTestName  = new Array( "encodeDecode", "bech32",
                                   "ripemd160", "sha512", "sha256", "hmac_sha512", 
-                                  "bip39", "pbkdf2_hmac512", "ecdsa","bip32","bip49","bip84", "import_extkey" )
+                                  "bip39", "pbkdf2_hmac512", "ecdsa","bip32","bip49","bip84", "import_extkey",
+                                  "BitcoinWallet" )
     
     var numTest = 0;
 
@@ -825,4 +826,90 @@ function autotest_encodeDecode( fonError ) {
     _test( bigEndianBufferFromInt32, int32FromBigEndianBuffer,  1,          "00000001", bufferFromHex )
     _test( bigEndianBufferFromInt32, int32FromBigEndianBuffer,  0x7ABBCCDD, "7abbccdd", bufferFromHex )                                                                                       
     _test( bigEndianBufferFromInt32, int32FromBigEndianBuffer,  0x12345678, "12345678", bufferFromHex )
+}
+
+
+// fonError : callback called if the test fails
+function autotest_sha256( fonError ) {
+    // s       : value to hash 
+    // expeded : "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    function _test_( s, expected  ) 
+    {
+        // calculate hash
+        var hash  = sha256( s )
+        // is it the expected result ?
+        var hashAsHexString =  hex(hash);
+        if (hashAsHexString != expected) {
+            // error
+            FAILED( fonError, s, hashAsHexString, expected )
+        }
+
+    }
+
+    // test some values 
+    _test_( "",  
+            "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
+    _test_( "abc", 
+            "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad" )
+    _test_( "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq", 
+            "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1" )
+    _test_( "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu", 
+            "cf5b16a778af8380036ce59e7b0492370b249b11e8f07a51afac45037afee9d1" )
+     _test_( "the times is 10pm", 
+            "ca0c2c84bbbdd964fd76b106be83620eaeaabee5958d597ccecab41afd249605" )          
+    _test_( "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 
+            "9537c5fdf120482f7d58d25e9ed583f52c02b4e304ea814db1633ad565aed7e9" )          
+
+    _test_( "a".repeat(1000000),  // 1 million a
+            "cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0" )
+
+    // SUCESS
+  
+}
+
+// test the BitcoinWallet class 
+function autotest_BitcoinWallet( fonError ) {
+    // phrase       : value to hash 
+    // expectedAddr : "bc1qx30n9vn3nnxgh5lv84j7tm303txqd8xvjwzyuw"
+    function _test_initFromPhrase( phrase, expectedAddr  ) 
+    {
+        wallet   = new BitcoinWallet(  WalletType.SEGWIT_NATIVE  );
+        wallet.initFromMnemonicPhrase(phrase)
+        // get the 1st public adress. 
+        var pubAdress0   =  wallet.getPublicAddress(0)        
+        // is it the expected result ?
+        if (pubAdress0 != expectedAddr) {
+            // error
+            FAILED( fonError, phrase, pubAdress0, expectedAddr )
+        }
+    }
+    // values that should fail
+    function _test_err( phrase  ) 
+    {
+        wallet   = new BitcoinWallet(  WalletType.SEGWIT_NATIVE  );
+        try {
+            wallet.initFromMnemonicPhrase(phrase)
+        }
+        catch (err) {
+            // OK 
+            return
+        }
+        // error
+        FAILED( fonError, phrase, "sucess", "error expected" )
+
+    }
+
+    // test some values 
+    _test_initFromPhrase( "debate nominee board frost please scale song pepper local shoulder ski sweet",  
+                          "bc1qzgcnf20kc96jx0ylftkgjadhle6g06p3r3vh04" )
+    _test_initFromPhrase( "veteran okay pattern disagree rose panic bacon gold earth bulb car donate",  
+                          "bc1q9snsfkvvpuzggwk7y9yuv03qxcly35esrrn4tf" )
+
+    // test that should fail
+    _test_err("")
+    _test_err("b nominee board frost please scale song pepper local shoulder ski sweet")
+    _test_err("nominee nominee nominee board frost please scale song pepper local shoulder ski sweet")
+    _test_err("okay okay pattern disagree rose panic bacon gold earth bulb car donate")
+
+    // SUCESS
 }

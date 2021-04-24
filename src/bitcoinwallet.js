@@ -60,10 +60,27 @@ initFromRandom(nbWord) {
     this.initFromSeed(seed,this.walletType)
 }
 /** 
+ *  init the wallet from a menmonic phase and an optionnal password 
+ * @public
+ * @param {string} phrase    12 to 24 words. ex :"situate before sell found usage useful caution banner stem autumn decrease melt"
+ * @param {string} [password] optionnal additional password. 
+ * @throws {Error} if <mnemonicPhrase> is invalid
+ */
+initFromMnemonicPhrase(phrase,password ) {
+    console.assert(typeof phrase == 'string')
+    // check if the phrase is valid, trow an Error if not
+    checkPhrase(phrase)
+    // convert to seed
+    var seed = seedFromPhrase( phrase, password)
+    console.assert( seed.length >= 16 && seed.length <= 64 ,"seed must be between 128 and 512 bits")
+    // init a hd wallet
+    this.HdWallet = new HdWallet()
+    this.HdWallet.initFromSeed (seed, this.walletType )
+}
+/** 
  *  init the wallet from a seed 
  * @public
  * @param {string}     seed       128 to 512 bits buffer  
- * @param {WalletType} walletType WalletType.LEGACY, WalletType.SEGWIT or WalletType.SEGWIT_NATIVE
  */
 initFromSeed(seed ) {
     console.assert( seed.length >= 16 && seed.length <= 64 ,"seed must be between 128 and 512 bits")
