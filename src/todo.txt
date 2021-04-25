@@ -1,6 +1,7 @@
 .use lib with WD lib to double-check
 
-.psbt generation. bip 174
+.psbt generation.
+
 .psbt signing
 
 .QR code generation in sample

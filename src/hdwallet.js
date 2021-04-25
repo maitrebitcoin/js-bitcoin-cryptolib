@@ -165,12 +165,12 @@ getExtendedPublicKeyFromPath( derivationPath ) {
         return this.extPublicKey_cache[derivationPath];   
     // no private key avail ?
     if (this.readonly) {
-        // call internal recursive method
-        var extPrivateKey = this._getPublicKeyFromPathR(  derivationPath );
+        // call internal recursive method to get a parent extend public key
+        var extPublicKeyRO = this._getPublicKeyFromPathR(  derivationPath );
         // add to cache
-        this.extPrivateKey_cache[derivationPath] = extPrivateKey;
+        this.extPublicKey_cache[derivationPath] = extPublicKeyRO;
         // success
-        return extPrivateKey
+        return extPublicKeyRO
     }
 
     // get the extended private key
@@ -368,6 +368,7 @@ _getPrivateKeyFromPathR( derivationPath ) {
     var extChildKey = this._ckdPrivatr(extParentKey, index)
     extChildKey.depth = extParentKey.depth+1;
     console.assert(extChildKey.childNumber == index);
+    console.assert(extChildKey.isPrivateKey());
     return extChildKey;
 }
 /**

@@ -154,6 +154,41 @@ getPublicAddress( index, change, hardened ) {
     }
 }
 /**
+ *  get the private key for an address in WIF format. ex : "KyZpNDKnfs94vbrwhJneDi77V6jF64PWPF8x5cdJb8ifgg2DUc9d" 
+ * 
+ * @public
+ * @param  {number}  [index=0]      index of the child key. 0 is the first accout
+ * @param  {boolean} [change=false] is the adress for change ?
+ * @param  {boolean} [hardened=false] is the adress "hardened" (cannot be calculated from extented private key)
+ * @returns {string} private key in base 58. ex : "KyZpNDKnfs94vbrwhJneDi77V6jF64PWPF8x5cdJb8ifgg2DUc9d.." 
+ * @throws  {Error}  if the wallet is non initialised, or invalid
+ */
+getPrivateKeyWIF( index, change, hardened ) {
+    if (!this.HdWallet) 
+        throw _BuildError( LibErrors.Wallet_not_initialized )
+    // calculates derivation path
+    var derivationPath = this.mainDerivationPath 
+    // change or main receveiving ?
+    if (change)
+        derivationPath+= '/1'
+    else
+        derivationPath+= '/0'
+    // index :
+    if (!index) 
+        index = 0
+    derivationPath += "/" + index
+    // if we want hardened adresses
+    if (hardened)
+        derivationPath += "'" // add ' a the add of the path
+
+    // get the extended private key
+    var extPrivateKey = this.HdWallet.getExtendedPrivateKeyFromPath(derivationPath);
+    console.assert(extPrivateKey.isPrivateKey())
+    // get private key in base 58  format
+    return  extPrivateKey.privateKey.toStringBase58()
+}
+
+/**
  * get the extended public key fo the account. ex : "zpub6sAxdNfDsummUgnQ7y.." 
  * 
  * @returns {string} the bitcoin extended public key in base 58 format. 

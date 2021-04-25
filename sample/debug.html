@@ -114,13 +114,14 @@ function debug() {
 //test1();
 
     var wallet1 = new BitcoinWallet();
-    wallet1.initFromExtendedKey("zpub6qXg6YneJhyqge9xfEgavLXVzqbrMtDBUnzDhJUxyKub51NgrS9UCUL3BEfkB7brGu1SigowcF5JtkJt2UKZ3dmWcqsYT3WmSbGJdVETtiU")
-
+    //wallet1.initFromExtendedKey("zpub6qXg6YneJhyqge9xfEgavLXVzqbrMtDBUnzDhJUxyKub51NgrS9UCUL3BEfkB7brGu1SigowcF5JtkJt2UKZ3dmWcqsYT3WmSbGJdVETtiU")
+    wallet1.initFromMnemonicPhrase("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about")
 
     var addr1 = wallet1.getPublicAddress(0)
+    var privWIF = wallet1.getPrivateKeyWIF(0)
 
     // check signature
-    var sDump = "<hr> adddr 0 : " + addr1
+    var sDump = "<hr> adddr 0 : " + addr1 + "<hr> private key : " + privWIF
 
     document.getElementById("resultat").innerHTML = sDump;
 }
