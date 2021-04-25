@@ -8,6 +8,12 @@ Does not refer to any external library for security reasons :
 * Can be downloaded and run as is into any browser
 * Does not require network access.
 
+Can be tested online here : 
+* https://maitrebitcoin.com/js-bitcoin-cryptolib/sample/createAccountSegwitNative.html
+* https://maitrebitcoin.com/js-bitcoin-cryptolib/sample/lastBip39Word.html
+* https://maitrebitcoin.com/js-bitcoin-cryptolib/sample/recoverAccount.html
+
+
 Examples :
 
 Sign and verify a message with ECDSA
