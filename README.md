@@ -25,7 +25,7 @@ Sign and verify a message with ECDSA
     if (!res.ok) alert(res.message)
 ```
 
-Generate a BIP-49 compatible Bitcoin account.  ex : "3BRTnZiug1MdARwxbSw9KDPfxjDDW6D1YZ"
+Generate a Bitcoin account.  ex : "bc1qacpwyw3hl4ley896a2l7alszmanlnu45u24jkl"
 ```
     // create a new wallet 
     var myWallet   = new BitcoinWallet(  WalletType.SEGWIT_NATIVE  );
