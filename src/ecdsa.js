@@ -39,7 +39,7 @@ const DERHeader_STRUCT = "\x30";
 * ecdsa with secp256k1 parameters
 * ex usage :
 *    var priv = ecdsa.newPrivateKey();
-*    var pub  = ecdsa.publicKeyFormPrivateKey(priv);
+*    var pub  = ecdsa.publicKeyFromPrivateKey(priv);
 *    var signature = ecdsa.signMessage( "my message", priv )
 *    var res       = ecdsa.verifySignature( "my message", signature, pub )
 *    if (!res.ok) alert(res.message)

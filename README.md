@@ -16,26 +16,27 @@ Can be tested online here :
 
 Examples :
 
-Sign and verify a message with ECDSA
-```
-    var priv      = ecdsa.newPrivateKey();
-    var pub       = ecdsa.publicKeyFormPrivateKey(priv);
-    var signature = ecdsa.signMessage( "my message", priv )
-    var res       = ecdsa.verifySignature( "my message", signature, pub )
-    if (!res.ok) alert(res.message)
-```
 
-Generate a BIP-49 compatible Bitcoin account.  ex : "3BRTnZiug1MdARwxbSw9KDPfxjDDW6D1YZ"
+Generate a Bitcoin account.  ex : "bc1qacpwyw3hl4ley896a2l7alszmanlnu45u24jkl"
 ```
     // create a new wallet 
     var myWallet   = new BitcoinWallet(  WalletType.SEGWIT_NATIVE  );
     // generate from random 
-    gWallet.initFromRandom()
+    myWallet.initFromRandom()
     // get the mnemonic phrase for backup
     // ex : "pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
-    var phrase       = gWallet.phrase
+    var phrase       = myWallet.phrase
     // get the 1st public adress. 
     // ex : "bc1qacpwyw3hl4ley896a2l7alszmanlnu45u24jkl"
-    var pubAdress0   =  gWallet.getPublicAddress(0)
+    var pubAdress0   =  myWallet.getPublicAddress(0)
 
+```
+
+Sign and verify a message with ECDSA
+```
+    var priv      = ecdsa.newPrivateKey();
+    var pub       = ecdsa.publicKeyFromPrivateKey(priv);
+    var signature = ecdsa.signMessage( "my message", priv )
+    var res       = ecdsa.verifySignature( "my message", signature, pub )
+    if (!res.ok) alert(res.message)
 ```
