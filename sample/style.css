@@ -48,7 +48,7 @@
 #numword {
   color:#383737;     
   text-align: center;
-  font-size: 3.5vw;
+
 }
 button {
     font-size: 3.5vw;
@@ -71,7 +71,22 @@ button:hover {
 button:active {
     background: #627488;
 
-}            
+}        
+input {
+  font-size: 3.5vw;
+  border-radius: 1.0vw;
+  border-width: 1;  
+  font-size: 3.5vw;
+  padding-top:   1.0vw; 
+  padding-bottom:1.0vw; 
+  padding-left:  1.0vw; 
+  padding-right: 1.0vw;
+  margin: 0.2vw;  
+}
+::placeholder {
+  color: #999;
+  opacity: 0.5;
+}
 body { background-color: var(--Background); }
 
 .secretInput {
@@ -94,4 +109,27 @@ body { background-color: var(--Background); }
 .line-break {
   height: 30px;
   display: block;
+}
+.flexbox {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center; 
+  padding: 20px;
+}
+.progress-bar {
+  width: 100%;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.progress {
+  width: 0;
+  height: 20px;
+  background-color: #4CAF50;
+  animation: progress 2s linear infinite;
+}
+@keyframes progress {
+  0% { width: 0; }
+  100% { width: 100%; }
 }
