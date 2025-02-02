@@ -47,11 +47,15 @@
     <div class="item">    
         <p id="secret" class="secret" hidden=true>
             <span class="label-zone">
-                Secret recovery phrase <br> DO NOT SHARE 
+                Secret recovery phrase - DO NOT SHARE 
             </span>
             <br><br>
             <span id="secretwords"></span>
-            <br><br>
+            <br>
+            <span class="btnZone">
+                <button onclick="document.getElementById('secretwords').hidden = true">hide</button>    
+                <button onclick="document.getElementById('secretwords').hidden = false">show</button>    
+            </span>            
         </p>
     </div>   
 
@@ -82,7 +86,7 @@
 
 
 async function onClicCreate() {
-    //document.getElementById("btnCreate").disabled  = true
+    document.getElementById("btnCreate").disabled  = true
     document.getElementById("progress").hidden = false
     const data =  await createBtcAccountSegwit_async();
    
@@ -92,7 +96,7 @@ async function createBtcAccountSegwit_async() {
     const response = setTimeout(() => {
         createBtcAccountSegwit();
         document.getElementById("progress").hidden = true
-       // document.getElementById("btnCreate").disabled  = false
+        document.getElementById("btnCreate").disabled  = false
     }, 10); 
     return response
 }
