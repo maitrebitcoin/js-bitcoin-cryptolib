@@ -3,36 +3,12 @@
 <head>
     <title>Sample - Create bitcoin account (native segwit) </title>    
     <link rel="stylesheet" href="style.css">
-    <style>
-        .flexbox {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center; 
-            padding: 20px;
-        }
-        .progress-bar {
-            width: 100%;
-            background-color: #f0f0f0;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-        .progress {
-            width: 0;
-            height: 20px;
-            background-color: #4CAF50;
-            animation: progress 2s linear infinite;
-        }
-        @keyframes progress {
-            0% { width: 0; }
-            100% { width: 100%; }
-        }
-
-    </style>    
 </head>
 <body>
 <div class="flexbox">
     <div class="item">
+        <input type="text" id="password" placeholder="password (optionnal)">
+        <br>
         <button onclick="onClicCreate()" id="btnCreate">
             <br> Create <b>BITCOIN</b> account<br>&nbsp; 
             <span id="progress" hidden=true></p>
@@ -42,6 +18,8 @@
             </span>
             </button>
         </button>
+      
+       
     </div>
 
     <div class="item">    
@@ -105,11 +83,12 @@ async function createBtcAccountSegwit_async() {
 var gNumAccount = 0;
 var gWallet     = undefined;
 async function createBtcAccountSegwit() {
-
+    // get the password
+    var password = document.getElementById("password").innerText
     // create a new wallet 
     gWallet   = new BitcoinWallet(  WalletType.SEGWIT_NATIVE  );
     // generate from random 
-    gWallet.initFromRandom()
+    gWallet.initFromRandom(12,password)
     // get the mnemonic phrase
     // ex : "pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
     var phrase       = gWallet.phrase

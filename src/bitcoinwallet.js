@@ -35,7 +35,7 @@ constructor(  walletType ) {
  * @public
  * @param {number}     nbWord     number of words. 12 to 24.
  */
-initFromRandom(nbWord) {
+initFromRandom(nbWord,password='') {
     // calculate the number of bits form the number of words
     if (!nbWord) nbWord= 12;
     var nbBitEntropy = 128;
@@ -55,7 +55,7 @@ initFromRandom(nbWord) {
     // ex : "pistol thunder want public animal educate laundry all churn federal slab behind media front glow"
     this.phrase      = bip39phraseFromRandomBuffer(randomBuffer)
     // calculate the seed for a bip32 wallet (can be slow)
-    var seed         = seedFromPhrase(this.phrase)
+    var seed         = seedFromPhrase(this.phrase,password)
     // init the wallet from the seed
     this.initFromSeed(seed,this.walletType)
 }
