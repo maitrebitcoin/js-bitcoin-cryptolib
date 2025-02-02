@@ -1,34 +1,79 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Sample - Create native segwit bitcoin account </title>    
+    <title>Sample - Create bitcoin account (native segwit) </title>    
     <link rel="stylesheet" href="style.css">
+    <style>
+        .flexbox {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center; 
+            padding: 20px;
+        }
+        .progress-bar {
+            width: 100%;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .progress {
+            width: 0;
+            height: 20px;
+            background-color: #4CAF50;
+            animation: progress 2s linear infinite;
+        }
+        @keyframes progress {
+            0% { width: 0; }
+            100% { width: 100%; }
+        }
+
+    </style>    
 </head>
 <body>
-<button onclick="onClicCreate()" id="btnCreate"> Create native segwit bitcoin account </button>
-<p><p>
-<hr>
-public address :
- <p id="public" hidden=true>
-    <span id="publicAdress"></span>
-    <br>
-    <br>
-    <span class="btnZone">
-        <button onclick="getMoreAdresses(5)">more adresses</button>    
-        <button onclick="showExtPubKey()"> show ext pub key  </button>    
-        <button onclick="onCopy('publicAdress')"> copy </button>    
-    </span>
-</p>
-<hr>
-secret phrase :
-<p id="secret" hidden=true>
-    <span id="secretwords"></span>
-    <br>
-    <span class="btnZone">
-        <button onclick="showExtPrivateKey()"> show exp private key  </button> 
-    </span>
-</p>
+<div class="flexbox">
+    <div class="item">
+        <button onclick="onClicCreate()" id="btnCreate">
+            <br> Create <b>BITCOIN</b> account<br>&nbsp; 
+            <span id="progress" hidden=true></p>
+                <div class="progress-bar" >
+                    <div class="progress">...</div>
+                </div>
+            </span>
+            </button>
+        </button>
+    </div>
 
+    <div class="item">    
+        <p id="secret" class="secret" hidden=true>
+            <span class="label-zone">
+                Secret recovery phrase <br> DO NOT SHARE 
+            </span>
+            <br><br>
+            <span id="secretwords"></span>
+            <br><br>
+        </p>
+    </div>   
+
+    <div class="item">  
+        <p id="public" class="style-public-adress"  hidden=true>
+            <span class="label-zone">
+                public address
+            </span>
+            <br><br>
+            <span id="publicAdress" ></span>
+            <br><br>
+            <span class="btnZone">
+                <button onclick="getMoreAdresses(5)">more adresses</button>    
+                <button onclick="showExtPubKey()"> show ext pub key  </button>    
+                <button onclick="onCopy('publicAdress')"> copy </button>    
+            </span>
+
+        </p>
+    </div>
+  
+
+</div>    
 <!----------------------------- javscript code -------------------------------->
 
 <script src='../src/js-bitcoin-lib.js'></script> 
@@ -37,10 +82,21 @@ secret phrase :
 
 
 async function onClicCreate() {
-    document.getElementById("btnCreate").hidden = true
-    await createBtcAccountSegwit();
-    document.getElementById("btnCreate").hidden = false
+    //document.getElementById("btnCreate").disabled  = true
+    document.getElementById("progress").hidden = false
+    const data =  await createBtcAccountSegwit_async();
+   
 }
+
+async function createBtcAccountSegwit_async() {
+    const response = setTimeout(() => {
+        createBtcAccountSegwit();
+        document.getElementById("progress").hidden = true
+       // document.getElementById("btnCreate").disabled  = false
+    }, 10); 
+    return response
+}
+
 
 var gNumAccount = 0;
 var gWallet     = undefined;
@@ -75,6 +131,7 @@ async function createBtcAccountSegwit() {
     document.getElementById("public").hidden    = false   
     document.getElementById("secretwords").innerHTML = prettyPhrase ;    
     document.getElementById("secret").hidden    = false   
+
 }
 
 function showExtPubKey() {

@@ -1,7 +1,7 @@
 /**
  ****************************************************** 
  * @file    sample-utils.js
- * @file    common functions= for the samples
+ * @file    common functions for the samples
  * @author  pad@maitrebitcoin.com
  * @module  js-bitcoin-criptolib
  * 
