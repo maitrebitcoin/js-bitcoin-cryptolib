@@ -39,15 +39,17 @@
 
     <div class="item">  
         <p id="public" class="style-public-adress"  hidden=true>
-            <span class="label-zone">
+            <span id='public-label' class="label-zone">
                 public address
             </span>
             <br><br>
             <span id="publicAdress" ></span>
             <br><br>
-            <span class="btnZone">
+            <span id='public-button' class="btnZone">
+                <button onclick="photoMode()">photo mode</button>    
+                
                 <button onclick="getMoreAdresses(5)">more adresses</button>    
-                <button onclick="showExtPubKey()"> show ext pub key  </button>    
+                <button onclick="showExtPubKey()"> ext pub key  </button>    
                 <button onclick="onCopy('publicAdress')"> copy </button>    
             </span>
 
@@ -62,6 +64,11 @@
 <script src='sample-utils.js'></script>  
 <script>
 
+function photoMode() {
+    document.getElementById("public-label").hidden = true;
+    //document.getElementById("public-button").hidden = true;
+    document.getElementById("publicAdress").innerHTML = "<br><br><br>" +  document.getElementById("publicAdress").innerHTML + "<br><br><br><br>" 
+}
 
 async function onClicCreate() {
     document.getElementById("btnCreate").disabled  = true
